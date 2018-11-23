@@ -1,0 +1,8 @@
+.stack-work/
+*.sw[pon]
+*.prof
+*.prof.html
+pairing.cabal
+*~
+*.hi
+*.o
