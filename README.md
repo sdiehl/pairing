@@ -93,3 +93,22 @@ The groups' definitions are:
  * G<sub>1</sub> := E(F<sub>q</sub>), with equation y<sup>2</sup> = x<sup>3</sup> + 3
  * G<sub>2</sub> := E'(F<sub>q<sup>2</sup></sub>), with equation y<sup>2</sup> = x<sup>3</sup> + 3 / (9 + u)
  * G<sub>T</sub> := μ<sub>r</sub>, i.e. the `r`-th roots of unity subgroup of the multiplicative group of F<sub>q<sup>12</sup></sub>
+
+License
+-------
+
+```
+Copyright 2018-2019 Adjoint Inc
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
