@@ -3,6 +3,7 @@
 </p>
 
 [![CircleCI](https://circleci.com/gh/adjoint-io/pairing.svg?style=svg&circle-token=ac95d02ba07e02b88585397f91cfe92a8c833343)](https://circleci.com/gh/adjoint-io/pairing)
+[![Hackage](https://img.shields.io/hackage/v/pairing.svg)](https://hackage.haskell.org/package/pairing)
 
 Implementation of the Barreto-Naehrig (BN) curve construction from
 [[BCTV2015]](https://eprint.iacr.org/2013/879.pdf) to provide two cyclic groups
