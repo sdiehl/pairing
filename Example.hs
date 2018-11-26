@@ -1,0 +1,37 @@
+module Main where
+
+import Protolude
+
+import Pairing.Group
+import Pairing.Pairing
+import Pairing.Point
+import Pairing.Fq (Fq(..))
+import Pairing.Fq2 (Fq2(..))
+
+e1 :: G1
+e1 = Point
+        (Fq 1368015179489954701390400359078579693043519447331113978918064868415326638035)
+        (Fq 9918110051302171585080402603319702774565515993150576347155970296011118125764)
+
+
+e2 :: G2
+e2 = Point
+        (Fq2
+         (Fq 2725019753478801796453339367788033689375851816420509565303521482350756874229)
+          (Fq 7273165102799931111715871471550377909735733521218303035754523677688038059653 )
+          )
+        (Fq2
+         (Fq 2512659008974376214222774206987427162027254181373325676825515531566330959255)
+         (Fq 957874124722006818841961785324909313781880061366718538693995380805373202866)
+        )
+
+
+main :: IO ()
+main  = do
+  putText "Ate pairing:"
+  print (atePairing e1 e2)
+  let 
+    lhs = reducedPairing (gMul e1 2) (gMul e2 3)
+    rhs = (reducedPairing e1 e2)^(2 * 3)
+  putText "Is bilinear:" 
+  print (lhs == rhs)
