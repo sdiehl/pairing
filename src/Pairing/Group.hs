@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 -- | Definitions of the groups the pairing is defined on
 module Pairing.Group (
@@ -16,6 +17,7 @@ module Pairing.Group (
 ) where
 
 import Protolude
+import Data.Semigroup
 
 import Pairing.Fq as Fq
 import Pairing.Fq2 as Fq2
@@ -34,6 +36,15 @@ type G2 = Point Fq2
 -- | GT is subgroup of _r-th roots of unity of the multiplicative
 -- group of Fq12
 type GT = Fq12
+
+instance Semigroup G1 where
+  (<>) = gAdd
+
+instance Semigroup G2 where
+  (<>) = gAdd
+
+instance Semigroup GT where
+  (<>) = (*)
 
 instance Monoid G1 where
   mappend = gAdd
