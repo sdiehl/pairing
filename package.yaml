@@ -1,5 +1,5 @@
 name: pairing
-version: 0.1.0
+version: 0.1.1
 synopsis: Optimal ate pairing over Barreto-Naehrig curves
 description: Optimal ate pairing over Barreto-Naehrig curves
 maintainer: Adjoint Inc (info@adjoint.io)
