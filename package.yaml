@@ -1,5 +1,5 @@
 name: pairing
-version: 0.1.2
+version: 0.1.3
 synopsis: Optimal ate pairing over Barreto-Naehrig curves
 description: Optimal ate pairing over Barreto-Naehrig curves
 maintainer: Adjoint Inc (info@adjoint.io)
@@ -35,19 +35,6 @@ dependencies:
 
 library:
   source-dirs: src
-
-  exposed-modules:
-      Pairing.Params
-      Pairing.Fq
-      Pairing.Fr
-      Pairing.Fq2
-      Pairing.Fq6
-      Pairing.Fq12
-      Pairing.Point
-      Pairing.Group
-      Pairing.Pairing
-      Pairing.Jacobian
-      Pairing.CyclicGroup
 
   ghc-options:
     -fwarn-tabs
@@ -93,6 +80,7 @@ library:
     - Pairing.Group
     - Pairing.Pairing
     - Pairing.Jacobian
+    - Pairing.CyclicGroup
 
 tests:
   test-circuit-compiler:
