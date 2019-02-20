@@ -1,7 +1,3 @@
-{-# LANGUAGE Strict #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE DeriveGeneric #-}
-
 -- | Prime field with characteristic _q, over which the elliptic curve
 -- is defined and the other finite field extensions. First field in
 -- the tower:
@@ -19,7 +15,8 @@ module Pairing.Fq (
   fqOne,
   fqNqr,
   euclidean,
-  random
+  random,
+  Pairing.Fq.fromBytes
 ) where
 
 import Protolude
@@ -27,6 +24,12 @@ import Crypto.Random (MonadRandom)
 import Crypto.Number.Generate (generateMax)
 import Pairing.Params as Params
 import Pairing.CyclicGroup
+import Pairing.Modular as M
+import Data.Bits
+import qualified Data.ByteString as BS
+import Data.Bits
+import Math.NumberTheory.Moduli.Class
+import Math.NumberTheory.Moduli.Sqrt
 
 -------------------------------------------------------------------------------
 -- Types
@@ -56,15 +59,15 @@ instance Fractional Fq where
 -- | Turn an integer into an @Fq@ number, should be used instead of
 -- the @Fq@ constructor.
 new :: Integer -> Fq
-new a = Fq (a `mod` _q)
+new a = Fq $ withQ $ (getVal . newMod a)
 
 {-# INLINE norm #-}
 norm :: Fq -> Fq
-norm (Fq a) = Fq (a `mod` _q)
+norm (Fq a) = new a
 
 {-# INLINE fqAdd #-}
 fqAdd :: Fq -> Fq -> Fq
-fqAdd (Fq a) (Fq b) = norm (Fq (a+b))
+fqAdd (Fq a) (Fq b) = Fq $ withQ (modBinOp a b (+))
 
 {-# INLINE fqAbs #-}
 fqAbs :: Fq -> Fq
@@ -72,19 +75,19 @@ fqAbs (Fq a) = Fq a
 
 {-# INLINE fqSig #-}
 fqSig :: Fq -> Fq
-fqSig (Fq a) = Fq (signum a  `mod` _q)
+fqSig (Fq a) = Fq $ withQ (modUnOp a signum)
 
 {-# INLINE fqMul #-}
 fqMul :: Fq -> Fq -> Fq
-fqMul (Fq a) (Fq b) = norm (Fq (a*b))
+fqMul (Fq a) (Fq b) = Fq $ withQ (modBinOp a b (*))
 
 {-# INLINE fqNeg #-}
 fqNeg :: Fq -> Fq
-fqNeg (Fq a) = Fq ((-a) `mod` _q)
+fqNeg (Fq a) = Fq $ withQ (modUnOp a negate)
 
 {-# INLINE fqDiv #-}
 fqDiv :: Fq -> Fq -> Fq
-fqDiv a b = fqMul a (inv b)
+fqDiv (Fq a) (Fq b) = Fq $ withQ (modBinOp a b (/))
 
 {-# INLINE fqNqr #-}
 -- | Quadratic non-residue
@@ -128,3 +131,8 @@ random :: MonadRandom m => m Fq
 random = do
   seed <- generateMax _q
   pure (Fq seed)
+
+fromBytes :: ByteString -> Fq
+fromBytes bs = Fq $ withQ (M.toInteger . M.fromBytes bs)
+
+
