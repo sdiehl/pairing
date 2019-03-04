@@ -13,7 +13,9 @@ import Pairing.Params
 import Test.Tasty
 import Test.Tasty.QuickCheck
 import Test.Tasty.HUnit
-
+import qualified Test.QuickCheck.Monadic as TQM (monadicIO, assert)
+import Test.QuickCheck.Instances ()
+import Data.ByteString as BS (null, dropWhile)
 import TestCommon
 
 -------------------------------------------------------------------------------
@@ -58,6 +60,11 @@ unit_g1_valid
 unit_order_g1_valid :: Assertion
 unit_order_g1_valid
   = gMul g1 _r @=? Infinity
+
+prop_hashToG1 :: ByteString -> Property
+prop_hashToG1 bs = TQM.monadicIO $ do
+  toCurve <- liftIO (hashToG1 bs) 
+  TQM.assert (isOnCurveG1 toCurve)
 
 -------------------------------------------------------------------------------
 -- G2

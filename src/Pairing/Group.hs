@@ -14,6 +14,9 @@ module Pairing.Group (
   g2,
   b1,
   b2,
+  hashToG1,
+  randomG1,
+  randomG2
 ) where
 
 import Protolude
@@ -26,6 +29,8 @@ import Pairing.Point
 import Pairing.Params
 import Pairing.CyclicGroup
 import Test.QuickCheck
+import Pairing.Hash
+import Crypto.Random (MonadRandom)
 
 -- | G1 is E(Fq) defined by y^2 = x^3 + b
 type G1 = Point Fq
@@ -132,3 +137,16 @@ instance Arbitrary (Point Fq) where -- G1
 
 instance Arbitrary (Point Fq2) where -- G2
   arbitrary = gMul g2 . abs <$> (arbitrary :: Gen Integer)
+
+hashToG1 :: (MonadIO m, MonadRandom m) => ByteString -> m G1
+hashToG1 = swEncBN
+
+randomG1 :: (MonadIO m, MonadRandom m) => m G1
+randomG1 = do
+  Fq r <- Fq.random
+  pure (gMul g1 r)
+
+randomG2 :: (MonadIO m, MonadRandom m) => m G2
+randomG2 = do
+  Fq r <- Fq.random
+  pure (gMul g2 r)

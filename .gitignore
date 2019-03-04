@@ -6,3 +6,5 @@ pairing.cabal
 *~
 *.hi
 *.o
+.ghc.environment.*
+dist*/

@@ -126,6 +126,9 @@ test_g2_2 = Point.Point
     7590136428571280465598215063146990078553196689176860926896020586846726844869
     8036135660414384292776446470327730948618639044617118659780848199544099832559)
 
+test_hash :: ByteString
+test_hash = toS "TyqIPUBYojDVOnDPacfMGrGOzpaQDWD3KZCpqzLhpE4A3kRUCQFUx040Ok139J8WDVV2C99Sfge3G20Q8MEgu23giWmqRxqOc8pH"
+
 benchmarks :: [Benchmark]
 benchmarks
   = [ bgroup "Frobenius in Fq12"
@@ -225,6 +228,8 @@ benchmarks
               $ whnf (uncurry Point.gAdd) (test_g1_1, test_g1_2)
           , bench "multiply"
               $ whnf (uncurry Point.gMul) (test_g1_1, 42)
+          , bench "hashToG1"
+              $ whnfIO (Group.hashToG1 test_hash)
           ]
 
       , bgroup "G2"
