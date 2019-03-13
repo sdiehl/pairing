@@ -11,18 +11,10 @@ import Math.NumberTheory.Moduli.Class
 import Math.NumberTheory.Moduli.Sqrt
 import Crypto.Random (MonadRandom)
 import Data.List
+import Control.Error (runMaybeT, hoistMaybe)
 
-sqrtOfMinusThree :: forall m . KnownNat m => Proxy m -> Mod m
-sqrtOfMinusThree mName = sqrtOf mName (-3)
-
--- |
--- Picks the postive square root only
--- |
-
-sqrtOf :: forall m . KnownNat m => Proxy m -> Mod m -> Mod m
-sqrtOf mName i = case sqrtsMod i of
-  [] -> panic ("Could not calculate sqrt " <> show i)
-  (x:_) -> x
+sqrtOfMinusThree :: forall m . KnownNat m => Proxy m -> Maybe (Mod m)
+sqrtOfMinusThree _ = sqrtOf (-3)
 
 w ::  forall m . KnownNat m => Proxy m -> Mod m -> Mod m -> Mod m
 w mname sq3 t = (sq3 * t) / (1 + (b mname) + (t `powMod` 2))
@@ -30,8 +22,10 @@ w mname sq3 t = (sq3 * t) / (1 + (b mname) + (t `powMod` 2))
 b ::  forall m . KnownNat m => Proxy m -> Mod m
 b mName = fromInteger @(Mod m) _b
 
-x1 :: forall m . KnownNat m => Proxy m -> Mod m -> Mod m -> Mod m
-x1 mName t w = ((sqrtOfMinusThree mName) - 1) / 2 - (t * w)
+x1 :: forall m . KnownNat m => Proxy m -> Mod m -> Mod m -> Maybe (Mod m)
+x1 mName t w = do
+  m3 <- sqrtOfMinusThree mName
+  pure $ (m3  - 1) / 2 - (t * w)
 
 x2 :: forall m . KnownNat m => Proxy m -> Mod m -> Mod m
 x2 mName x1' = (-1) - x1'
@@ -51,11 +45,11 @@ alphaBeta mName pr px = chi mName ((pr * pr) * ((px `powMod` 3) + (b mName)))
 i :: Integer -> Integer -> Integer
 i pa pb = (((pa - 1) * pb) `mod` 3) + 1
 
-swy :: forall m . KnownNat m => Proxy m -> Mod m -> Mod m -> Mod m -> Mod m -> Integer
-swy mn pr3 pt pxi pb = ch * y
+swy :: forall m . KnownNat m => Proxy m -> Mod m -> Mod m -> Mod m -> Mod m -> Maybe Integer
+swy mn pr3 pt pxi pb = (ch *) <$>  y
   where
     ch = chi mn ((pr3 `powMod` 2) * pt)
-    y = getVal $ sqrtOf mn ((pxi `powMod` 3) + pb)
+    y = getVal <$> sqrtOf ((pxi `powMod` 3) + pb)
 
 -- | Encodes a given byte string to a point on the BN curve.
 -- The implemenation uses the Shallue van de Woestijne encoding to BN curves as specifed
@@ -64,23 +58,24 @@ swy mn pr3 pt pxi pb = ch * y
 -- This function evaluates an empty bytestring or one that contains \NUL to zero
 -- which according to Definiton 2 of the paper is sent to an arbitrary point on the curve
 --
-swEncBN :: (MonadIO m, MonadRandom m) => ByteString -> m (Point Fq)
-swEncBN bs = withQM $ \mn -> do
+swEncBN :: MonadIO m => ByteString -> m (Maybe (Point Fq))
+swEncBN bs = runMaybeT $ withQM $ \mn -> do
   let t = M.fromBytes bs mn
-  let sq3 = sqrtOfMinusThree mn
+  sq3 <- hoistMaybe (sqrtOfMinusThree mn)
   let w' = w mn sq3 t
-  let x1' = x1 mn t w'
-  if (t == 0) then
-    pure $ (Point (Fq.new (getVal x1')) (Fq.new (getVal $ sqrtOf mn (1 + (b mn)))))
+  x1' <- hoistMaybe (x1 mn t w')
+  if (t == 0) then do
+    onebmn <- hoistMaybe (sqrtOf (1 + (b mn)))
+    pure $ (Point (Fq.new (getVal x1')) (Fq.new (getVal $ onebmn)))
   else do
     let x2' = x2 mn x1'
     let x3' = x3 mn w'
     let lst = [x1', x2', x3']
-    r1 <- randomMod mn
-    r2 <- randomMod mn
-    r3 <- randomMod mn
+    r1 <- liftIO (randomMod mn)
+    r2 <- liftIO (randomMod mn)
+    r3 <- liftIO (randomMod mn)
     let al = alphaBeta mn r1 x1'
     let bet = alphaBeta mn r2 x2'
     let i' = i al bet
-    let swy' = swy mn r3 t (genericIndex lst (i' -  1)) (b mn)
-    pure (Point (Fq.new (getVal $ genericIndex lst (i' - 1))) (Fq.new swy'))
+    swy' <- hoistMaybe (swy mn r3 t (genericIndex lst (i' -  1)) (b mn))
+    pure $ (Point (Fq.new (getVal $ genericIndex lst (i' - 1))) (Fq.new swy'))

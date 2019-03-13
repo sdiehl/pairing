@@ -5,11 +5,12 @@ module TestGroups where
 import Protolude
 
 import Pairing.Fq as Fq
+import Pairing.Fr as Fr
 import Pairing.Fq2
 import Pairing.Point
-import Pairing.Group 
+import Pairing.Group as G
 import Pairing.Params
-
+import Pairing.Serialize
 import Test.Tasty
 import Test.Tasty.QuickCheck
 import Test.Tasty.HUnit
@@ -41,6 +42,18 @@ testAbelianGroupLaws binOp neg ident descr
       $ isInverse binOp neg ident
     ]
 
+serializeTest gen testFunc = do
+  pt <- G.random gen
+  let ubs = toUncompressedForm pt
+  let npte = testFunc ubs
+  isRight npte @=? True
+  let (Right npt) = npte
+  pt @=? npt
+  let (Just cbs) = toCompressedForm pt
+  let npt2e = testFunc cbs
+  let (Right npt2) = npt2e
+  pt @=? npt2
+
 -------------------------------------------------------------------------------
 -- G1
 -------------------------------------------------------------------------------
@@ -63,8 +76,28 @@ unit_order_g1_valid
 
 prop_hashToG1 :: ByteString -> Property
 prop_hashToG1 bs = TQM.monadicIO $ do
-  toCurve <- liftIO (hashToG1 bs) 
+  toCurveMay <- liftIO (hashToG1 bs)
+  TQM.assert (isJust toCurveMay)
+  let Just toCurve = toCurveMay
   TQM.assert (isOnCurveG1 toCurve)
+
+unit_g1FromX :: Assertion
+unit_g1FromX = do
+  pt@(Point x y) <- G.random (generator :: G1)
+  let ysq = fqPow y 2
+  let (Just lysqrt) = fqSqrt True ysq
+  let (Just sysqrt) = fqSqrt False ysq
+  let egly = groupFromX True x
+  let egsy = groupFromX False x
+  isJust egly @=? True
+  isJust egsy @=? True
+  let Just lyg = egly
+  let Just syg = egsy
+  (Point x lysqrt) @=? lyg
+  (Point x sysqrt) @=? syg
+
+unit_g1Serialize :: Assertion
+unit_g1Serialize = serializeTest (generator :: G1) fromByteStringG1
 
 -------------------------------------------------------------------------------
 -- G2
@@ -85,6 +118,15 @@ unit_order_g2_valid :: Assertion
 unit_order_g2_valid
   = gMul g2 _r @=? Infinity
 
+unit_g2FromX :: Assertion
+unit_g2FromX = do
+  pt@(Point x y) <- G.random (generator :: G2)
+  let ysq = fq2pow y 2
+  let (Just ny) = fq2YforX x True
+  if (ny /= y) then (Point x y) @=? (Point x (negate ny)) else (Point x y) @=? (Point x ny)
+
+unit_g2Serialize :: Assertion
+unit_g2Serialize = serializeTest (generator :: G2) fromByteStringG2
 -------------------------------------------------------------------------------
 -- GT
 -------------------------------------------------------------------------------

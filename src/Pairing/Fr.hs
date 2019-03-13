@@ -6,6 +6,9 @@ module Pairing.Fr (
   Fr(..),
   new,
   frInv,
+  frPow,
+  frAdd,
+  frNeg,
   random,
   isRootOfUnity,
   isPrimitiveRootOfUnity,
@@ -20,8 +23,9 @@ import Crypto.Number.Generate (generateMax)
 import Text.PrettyPrint.Leijen.Text
 
 import Pairing.Params
-import Pairing.CyclicGroup
-import Pairing.Fq (euclidean)
+import Pairing.CyclicGroup (AsInteger(..))
+import Pairing.Modular
+import Math.NumberTheory.Moduli.Class
 
 instance AsInteger Fr where
   asInteger (Fr n) = n
@@ -48,19 +52,15 @@ newtype Fr = Fr Integer -- ^ Use @new@ instead of this constructor
 -- | Turn an integer into an @Fr@ number, should be used instead of
 -- the @Fr@ constructor.
 new :: Integer -> Fr
-new a = Fr (a `mod` _r)
-
-{-# INLINE norm #-}
-norm :: Fr -> Fr
-norm (Fr a) = Fr (a `mod` _r)
+new a = Fr $ withR $ (getVal . newMod a)
 
 {-# INLINE frAdd #-}
 frAdd :: Fr -> Fr -> Fr
-frAdd (Fr a) (Fr b) = norm (Fr (a+b))
+frAdd (Fr a) (Fr b) = Fr $ withR (modBinOp a b (+))
 
 {-# INLINE frMul #-}
 frMul :: Fr -> Fr -> Fr
-frMul (Fr a) (Fr b) = norm (Fr (a*b))
+frMul (Fr a) (Fr b) = Fr $ withR (modBinOp a b (*))
 
 {-# INLINE frAbs #-}
 frAbs :: Fr -> Fr
@@ -68,21 +68,21 @@ frAbs (Fr a) = Fr a
 
 {-# INLINE frSig #-}
 frSig :: Fr -> Fr
-frSig (Fr a) = Fr (signum a  `mod` _r)
+frSig (Fr a) = Fr $ withR (modUnOp a signum)
 
 {-# INLINE frNeg #-}
 frNeg :: Fr -> Fr
-frNeg (Fr a) = Fr ((-a) `mod` _r)
+frNeg (Fr a) = Fr $ withR (modUnOp a negate)
 
 {-# INLINE frDiv #-}
 frDiv :: Fr -> Fr -> Fr
-frDiv a b = frMul a (inv b)
-
-inv :: Fr -> Fr
-inv (Fr a) = Fr $ euclidean a _r `mod` _r
+frDiv (Fr a) (Fr b) = Fr $ withR (modBinOp a b (/))
 
 frInv :: Fr -> Fr
-frInv = inv
+frInv a = 1 / a
+
+frPow :: Integral e => Fr -> e -> Fr
+frPow (Fr a) b = Fr $ withQ (modUnOp a (flip powMod b))
 
 random :: MonadRandom m => m Fr
 random = do
