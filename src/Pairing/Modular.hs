@@ -5,7 +5,7 @@ import Math.NumberTheory.Moduli.Class
 import Math.NumberTheory.Moduli.Sqrt
 import Math.NumberTheory.UniqueFactorisation
 import Pairing.Params
-import Pairing.FieldCurve
+import Pairing.ByteRepr
 import Crypto.Random (MonadRandom)
 import Crypto.Number.Generate (generateMax)
 import qualified Data.ByteString as BS

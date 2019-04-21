@@ -1,15 +1,20 @@
 module Pairing.Serialize where
 
 import Protolude
-import Pairing.FieldCurve
 import Pairing.Point
-import Pairing.Group
 import Data.ByteString.Builder
 import Data.ByteString as B
-import Pairing.Fq
-import Pairing.Fq2
 import Data.Binary.Get
 import Control.Error
+import Pairing.ByteRepr
+import Pairing.CyclicGroup
+
+class ToCompressedForm a where
+  -- | The serialisation may fail if y cannot be obtained from x
+  serializeCompressed :: a -> Maybe ByteString
+
+class ToUncompressedForm a where
+  serializeUncompressed :: a -> ByteString
 
 -- | Point serialisation using https://tools.ietf.org/id/draft-jivsov-ecc-compact-05.html
 -- It is unclear if 02 is smallest y or not so the following is used in the first 2 bytes
@@ -20,6 +25,9 @@ import Control.Error
 
 header :: Word8 -> Builder
 header n = word8 0 <> word8 n
+
+elementToUncompressedForm :: (ByteRepr a) => a -> LByteString
+elementToUncompressedForm a = toLazyByteString  (header 4 <> mkRepr a)
 
 toUncompressedForm :: (ByteRepr a) => Point a -> LByteString
 toUncompressedForm (Point x y) = toLazyByteString  (header 4 <> mkRepr x <> mkRepr y)
@@ -32,25 +40,15 @@ toCompressedForm (Point x y) = do
   Just (toLazyByteString (header yform <> mkRepr x))
 toCompressedForm Infinity = Just (toLazyByteString (word8 0 <> word8 1))
 
-fromByteStringG1 :: LByteString -> Either Text G1
-fromByteStringG1 = fromByteString fqOne (reprLength fqOne)
-
-fromByteStringG2 :: LByteString -> Either Text G2
-fromByteStringG2 = fromByteString fq2one (reprLength fq2one)
-
-fromByteString :: (Show a, Curve (Point a), ByteRepr a, FromX a) => a -> Int -> LByteString -> Either Text (Point a)
-fromByteString a rlen bs = do
-  (_, _, mpt) <- first (\(_,_,err) -> toS err) (runGetOrFail (fromByteStringGet a rlen) bs)
-  case mpt of 
-    Just pt -> if isOnCurve pt then (Right pt) else (Left ("Point not on curve: " <> show pt))
-    Nothing -> Left "Point could not be parsed"
+pointFromByteString :: (Validate (Point a), ByteRepr a, FromX a) => a -> LByteString -> Either Text (Point a)
+pointFromByteString a bs = parseBS fromByteStringGet bs
   where
-    fromByteStringGet one rlen = do
+    fromByteStringGet = do
       ctype <- getCompressionType
-      processCompressed one rlen ctype
+      processCompressed a ctype
 
-processCompressed :: forall a . (ByteRepr a, FromX a) => a -> Int -> Word8 -> Get (Maybe (Point a))
-processCompressed one rlen ct
+processCompressed :: forall a . (ByteRepr a, FromX a) => a -> Word8 -> Get (Maybe (Point a))
+processCompressed one ct
   | ct == 4 = do
       xbs <- getByteString rlen
       ybs <- getByteString rlen
@@ -60,6 +58,7 @@ processCompressed one rlen ct
   | ct == 1 = pure (Just Infinity)
   | otherwise = pure Nothing
   where
+    rlen = reprLength one
     fromCompressed largestY = runMaybeT $ do
       xbs <- lift $ getByteString rlen
       x <- hoistMaybe $ fromRepr one xbs
@@ -74,3 +73,21 @@ buildPoint one xbs ybs = do
 
 getCompressionType :: Get Word8
 getCompressionType = getWord8 >> getWord8
+
+elementReadUncompressed :: (Validate a, ByteRepr a) =>  a -> LByteString -> Either Text a
+elementReadUncompressed ele bs = parseBS runc bs
+  where
+    runc = do 
+      ctype <- getCompressionType
+      if (ctype == 4) then do
+        bs <- getByteString (reprLength ele)
+        pure (fromRepr ele bs)
+      else 
+        pure Nothing
+
+parseBS :: (Validate a) => Get (Maybe a) -> LByteString -> Either Text a
+parseBS f bs = do
+  (_, _, mpt) <- first (\(_,_,err) -> toS err) (runGetOrFail f bs)
+  case mpt of 
+    Just pt -> if isValidElement pt then (Right pt) else (Left ("Element was not valid after deserialisation"))
+    Nothing -> Left "Point could not be parsed"

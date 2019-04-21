@@ -1,34 +1,13 @@
-module Pairing.FieldCurve (
-  FromX(..)
-  , Curve(..)
-  , ByteRepr(..)
-  , fromBytesToInteger
-  , toBytes
-  , toBuilder
-) where
+module Pairing.ByteRepr where
 
 import Protolude
+import Data.ByteString as BS
 import Data.ByteString.Builder
-import qualified Data.ByteString as BS
-
-type LargestY = Bool
-
-class FromX a where
-  yFromX :: a -> LargestY -> Maybe a
-  isLargestY :: a -> Bool
-
-class Curve a where
-  isOnCurve :: a -> Bool
 
 class ByteRepr a where
   mkRepr :: a -> Builder
   fromRepr :: a -> ByteString -> Maybe a
   reprLength :: a -> Int
-
-fromBytesToInteger :: ByteString -> Integer
-fromBytesToInteger = BS.foldl' f 0
-  where
-    f a b = a `shiftL` 8 .|. fromIntegral b
 
 toBytes :: Integer -> ByteString
 toBytes x = BS.reverse . BS.unfoldr (fmap go) . Just $ changeSign x
@@ -45,3 +24,8 @@ toBytes x = BS.reverse . BS.unfoldr (fmap go) . Just $ changeSign x
 
 toBuilder :: Integer -> Builder
 toBuilder = byteString . toBytes
+
+fromBytesToInteger :: ByteString -> Integer
+fromBytesToInteger = BS.foldl' f 0
+  where
+    f a b = a `shiftL` 8 .|. fromIntegral b

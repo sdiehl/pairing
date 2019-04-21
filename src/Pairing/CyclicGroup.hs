@@ -2,10 +2,14 @@ module Pairing.CyclicGroup
   ( AsInteger(..)
   , CyclicGroup(..)
   , sumG
+  , FromX(..)
+  , Validate (..)
   ) where
 
 import Protolude
 import Crypto.Random (MonadRandom)
+import Data.ByteString.Builder
+import Data.ByteString as BS
 
 class AsInteger a where
   asInteger :: a -> Integer
@@ -29,3 +33,11 @@ instance AsInteger Int where
 
 instance AsInteger Integer where
   asInteger = identity
+
+class FromX a where
+  yFromX :: a -> LargestY -> Maybe a
+  isLargestY :: a -> Bool
+
+class Validate a where
+  isValidElement :: a -> Bool
+

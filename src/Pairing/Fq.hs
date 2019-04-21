@@ -18,7 +18,6 @@ module Pairing.Fq (
   fqSqrt,
   random,
   fqYforX,
-  Pairing.Fq.fromBytes,
   fromBytesToInteger
 ) where
 
@@ -26,8 +25,8 @@ import Protolude
 import Crypto.Random (MonadRandom)
 import Crypto.Number.Generate (generateMax)
 import Pairing.Params as Params
-import Pairing.FieldCurve as FC
-import Pairing.CyclicGroup (AsInteger(..))
+import Pairing.CyclicGroup (AsInteger(..), FromX(..))
+import Pairing.ByteRepr
 import Pairing.Modular as M
 import Data.Bits
 import qualified Data.ByteString as BS
@@ -132,8 +131,6 @@ random = do
   seed <- generateMax _q
   pure (Fq seed)
 
-fromBytes :: ByteString -> Fq
-fromBytes bs = Fq $ withQ (M.toInteger . M.fromBytes bs)
 
 fqYforX :: Fq -> Bool -> Maybe Fq
 fqYforX x largestY = fqSqrt largestY (x `fqPow` 3 + new _b)

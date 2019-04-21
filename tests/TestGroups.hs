@@ -7,10 +7,12 @@ import Protolude
 import Pairing.Fq as Fq
 import Pairing.Fr as Fr
 import Pairing.Fq2
+import Pairing.Fq12
 import Pairing.Point
 import Pairing.Group as G
 import Pairing.Params
 import Pairing.Serialize
+import Pairing.Pairing
 import Test.Tasty
 import Test.Tasty.QuickCheck
 import Test.Tasty.HUnit
@@ -42,14 +44,17 @@ testAbelianGroupLaws binOp neg ident descr
       $ isInverse binOp neg ident
     ]
 
-serializeTest gen testFunc = do
+serializeUncompTest gen testFunc = do
   pt <- G.random gen
-  let ubs = toUncompressedForm pt
+  let ubs = serializeUncompressed pt
   let npte = testFunc ubs
   isRight npte @=? True
   let (Right npt) = npte
   pt @=? npt
-  let (Just cbs) = toCompressedForm pt
+
+serializeCompTest gen testFunc = do
+  pt <- G.random gen
+  let (Just cbs) = serializeCompressed pt
   let npt2e = testFunc cbs
   let (Right npt2) = npt2e
   pt @=? npt2
@@ -97,7 +102,9 @@ unit_g1FromX = do
   (Point x sysqrt) @=? syg
 
 unit_g1Serialize :: Assertion
-unit_g1Serialize = serializeTest (generator :: G1) fromByteStringG1
+unit_g1Serialize = do
+  serializeCompTest (generator :: G1) G.fromByteStringG1
+  serializeUncompTest (generator :: G1) G.fromByteStringG1
 
 -------------------------------------------------------------------------------
 -- G2
@@ -126,9 +133,23 @@ unit_g2FromX = do
   if (ny /= y) then (Point x y) @=? (Point x (negate ny)) else (Point x y) @=? (Point x ny)
 
 unit_g2Serialize :: Assertion
-unit_g2Serialize = serializeTest (generator :: G2) fromByteStringG2
+unit_g2Serialize = do
+  serializeCompTest (generator :: G2) G.fromByteStringG2
+  serializeUncompTest (generator :: G2) G.fromByteStringG2
+
 -------------------------------------------------------------------------------
 -- GT
 -------------------------------------------------------------------------------
 
 -- The group laws for GT are implied by the field tests for Fq12.
+
+unit_gtSerialize :: Assertion
+unit_gtSerialize = do
+  g1 <- G.random (generator :: G1)
+  g2 <- G.random (generator :: G2)
+  let gt = reducedPairing g1 g2
+  let bs = serializeUncompressed gt
+  let repreth = fromByteStringGT bs
+  isRight repreth @=? True
+  let (Right repr) = repreth
+  repr @=? gt

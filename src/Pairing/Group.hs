@@ -15,7 +15,10 @@ module Pairing.Group (
   b1,
   b2,
   hashToG1,
-  groupFromX
+  groupFromX,
+  fromByteStringG1,
+  fromByteStringG2,
+  fromByteStringGT
 ) where
 
 import Protolude
@@ -28,13 +31,13 @@ import Pairing.Fr as Fr
 import Pairing.Point
 import Pairing.Params
 import Pairing.CyclicGroup
-import Pairing.FieldCurve as FC
 import Test.QuickCheck
 import Pairing.Hash
 import Crypto.Random (MonadRandom)
 import Pairing.Modular
 import System.Random
-
+import Pairing.Serialize
+import Pairing.ByteRepr
 
 -- | G1 is E(Fq) defined by y^2 = x^3 + b
 type G1 = Point Fq
@@ -66,8 +69,14 @@ instance CyclicGroup G1 where
   inverse = gNeg
   random _ = randomG1
 
-instance Curve G1 where
-  isOnCurve = isOnCurveG1
+instance Validate G1 where
+  isValidElement = isOnCurveG1
+
+instance ToCompressedForm G1 where
+  serializeCompressed = (fmap toS) . toCompressedForm
+
+instance ToUncompressedForm G1 where
+  serializeUncompressed = toS . toUncompressedForm
 
 instance Monoid G2 where
   mappend = gAdd
@@ -80,8 +89,14 @@ instance CyclicGroup G2 where
   inverse = gNeg
   random _ = randomG2
 
-instance Curve G2 where
-  isOnCurve = isOnCurveG2
+instance Validate G2 where
+  isValidElement = isOnCurveG2
+
+instance ToCompressedForm G2 where
+  serializeCompressed = (fmap toS) . toCompressedForm
+
+instance ToUncompressedForm G2 where
+  serializeUncompressed = toS . toUncompressedForm
 
 instance Monoid GT where
   mappend = (*)
@@ -93,6 +108,12 @@ instance CyclicGroup GT where
   expn a b = a ^ asInteger b
   inverse = recip
   random _ = Fq12.random
+
+instance ToUncompressedForm GT where
+  serializeUncompressed = toS . elementToUncompressedForm
+
+instance Validate GT where
+  isValidElement = isInGT
 
 -- | Generator for G1
 g1 :: G1
@@ -116,7 +137,7 @@ isOnCurveG1 :: G1 -> Bool
 isOnCurveG1 Infinity
   = True
 isOnCurveG1 (Point x y)
-  = (y ^ 2 == x ^ 3 + Fq _b)
+  = (y `fqPow` 2 == x `fqPow` 3 + Fq _b)
 
 -- | Test whether a value in G2 satisfies the corresponding curve
 -- equation
@@ -124,7 +145,7 @@ isOnCurveG2 :: G2 -> Bool
 isOnCurveG2 Infinity
   = True
 isOnCurveG2 (Point x y)
-  = (y ^ 2 == x ^ 3 + (Fq2 (b * inv_xi_a) (b * inv_xi_b)))
+  = (y `fq2pow` 2 == x `fq2pow` 3 + (Fq2 (b * inv_xi_a) (b * inv_xi_b)))
   where
     (Fq2 inv_xi_a inv_xi_b) = Fq2.fq2inv Fq2.xi
     b = Fq _b
@@ -164,7 +185,17 @@ randomG2 = do
   Fq r <- Fq.random
   pure (gMul g2 r)
 
-groupFromX :: (Curve (Point a), FromX a) => Bool -> a -> Maybe (Point a)
+groupFromX :: (Validate (Point a), FromX a) => Bool -> a -> Maybe (Point a)
 groupFromX largestY x = do
   y <- yFromX x largestY
-  if isOnCurve (Point x y) then Just (Point x y) else Nothing
+  if isValidElement (Point x y) then Just (Point x y) else Nothing
+
+fromByteStringG1 :: ByteString -> Either Text G1
+fromByteStringG1 = pointFromByteString fqOne . toSL
+
+fromByteStringG2 :: ByteString -> Either Text G2
+fromByteStringG2 = pointFromByteString fq2one . toSL
+
+fromByteStringGT :: ByteString -> Either Text GT
+fromByteStringGT = elementReadUncompressed fq12one . toSL
+

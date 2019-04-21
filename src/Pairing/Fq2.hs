@@ -33,10 +33,11 @@ import Protolude
 import Crypto.Random (MonadRandom)
 import Pairing.Modular
 import Pairing.Fq as Fq
-import Pairing.FieldCurve as FC
 import qualified Pairing.Params as Params
 import Data.Bits
 import Data.ByteString as B (length, splitAt)
+import Pairing.CyclicGroup (AsInteger(..), FromX(..))
+import Pairing.ByteRepr
 
 -- | Quadratic extension of @Fq@ defined as @Fq[u]/x^2 + 1@
 data Fq2 = Fq2 { fq2x :: Fq, fq2y :: Fq } -- ^ Use @new@ instead of

@@ -98,7 +98,7 @@ library:
     - Pairing.CyclicGroup
     - Pairing.Hash
     - Pairing.Serialize
-    - Pairing.FieldCurve
+    - Pairing.ByteRepr
 
   other-modules:
     - Pairing.Modular
