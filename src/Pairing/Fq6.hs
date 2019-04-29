@@ -1,4 +1,5 @@
 {-# LANGUAGE Strict #-}
+{-# LANGUAGE DeriveAnyClass, DeriveGeneric #-}
 
 -- | Cubic extension of the tower:
 --
@@ -37,7 +38,7 @@ data Fq6
     , fq6y :: Fq2
     , fq6z :: Fq2
     }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Generic, NFData)
 
 instance Num Fq6 where
   (+)         = fq6add

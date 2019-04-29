@@ -1,4 +1,5 @@
 {-# LANGUAGE Strict #-}
+{-# LANGUAGE DeriveAnyClass, DeriveGeneric #-}
 
 -- | Final quadratic extension of the tower:
 --
@@ -37,7 +38,7 @@ import Data.ByteString as B (length, splitAt)
 -- | Field extension defined as Fq6[w]/w^2 - v
 data Fq12 = Fq12 { fq12x :: Fq6, fq12y :: Fq6 } -- ^ Use @new@ instead
                                                 -- of this constructor
-  deriving (Eq, Show)
+  deriving (Eq, Show, Generic, NFData)
 
 instance Num Fq12 where
   (+)         = fq12add
