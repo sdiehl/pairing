@@ -73,10 +73,10 @@ instance Validate G1 where
   isValidElement = isOnCurveG1
 
 instance ToCompressedForm G1 where
-  serializeCompressed = (fmap toS) . toCompressedForm
+  serializeCompressed = fmap toS . toCompressedForm
 
 instance ToUncompressedForm G1 where
-  serializeUncompressed = toS . toUncompressedForm
+  serializeUncompressed = fmap toS . toUncompressedForm
 
 instance Monoid G2 where
   mappend = gAdd
@@ -93,10 +93,10 @@ instance Validate G2 where
   isValidElement = isOnCurveG2
 
 instance ToCompressedForm G2 where
-  serializeCompressed = (fmap toS) . toCompressedForm
+  serializeCompressed = fmap toS . toCompressedForm
 
 instance ToUncompressedForm G2 where
-  serializeUncompressed = toS . toUncompressedForm
+  serializeUncompressed = fmap toS . toUncompressedForm
 
 instance Monoid GT where
   mappend = (*)
@@ -110,7 +110,7 @@ instance CyclicGroup GT where
   random _ = Fq12.random
 
 instance ToUncompressedForm GT where
-  serializeUncompressed = toS . elementToUncompressedForm
+  serializeUncompressed = fmap toS . elementToUncompressedForm
 
 instance Validate GT where
   isValidElement = isInGT
@@ -145,7 +145,7 @@ isOnCurveG2 :: G2 -> Bool
 isOnCurveG2 Infinity
   = True
 isOnCurveG2 (Point x y)
-  = (y `fq2pow` 2 == x `fq2pow` 3 + (Fq2 (b * inv_xi_a) (b * inv_xi_b)))
+  = y `fq2pow` 2 == x `fq2pow` 3 + Fq2 (b * inv_xi_a) (b * inv_xi_b)
   where
     (Fq2 inv_xi_a inv_xi_b) = Fq2.fq2inv Fq2.xi
     b = Fq _b

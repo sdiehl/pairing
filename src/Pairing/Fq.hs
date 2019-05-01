@@ -28,7 +28,6 @@ import Pairing.Params as Params
 import Pairing.CyclicGroup (AsInteger(..), FromX(..))
 import Pairing.ByteRepr
 import Pairing.Modular as M
-import Data.Bits
 import qualified Data.ByteString as BS
 import Data.Bits
 import Math.NumberTheory.Moduli.Class
@@ -64,14 +63,14 @@ instance FromX Fq where
   isLargestY y = y > negate y
 
 instance ByteRepr Fq where
-  mkRepr (Fq a) = toBuilder a
+  mkRepr f@(Fq a) = toPaddedBytes (reprLength f) a
   fromRepr _ bs = Just (Fq $ fromBytesToInteger bs)
   reprLength _ = 32
 
 -- | Turn an integer into an @Fq@ number, should be used instead of
 -- the @Fq@ constructor.
 new :: Integer -> Fq
-new a = Fq $ withQ $ (getVal . newMod a)
+new a = Fq $ withQ (getVal . newMod a)
 
 {-# INLINE fqAdd #-}
 fqAdd :: Fq -> Fq -> Fq

@@ -136,7 +136,7 @@ fq2sqr (Fq2 a0 a1) = Fq2 c0 c1
 {-# INLINE fq2pow #-}
 fq2pow :: Fq2 -> Integer -> Fq2
 fq2pow b 0 = fq2one
-fq2pow b e = t * fq2pow ((b * b)) (shiftR e 1)
+fq2pow b e = t * fq2pow (b * b) (shiftR e 1)
   where 
     t = if testBit e 0 then b else fq2one
 
@@ -161,9 +161,9 @@ fq2sqrt a = do
   let a1 = a `fq2pow` qm3by4
   let alpha = (fq2sqr a1) * a
   let a0 = (alpha `fq2pow` Params._q) * alpha
-  if  (a0 == neg1) then Nothing else do
+  if  a0 == neg1 then Nothing else do
     let x0 = a1 * a
-    if alpha == neg1 then Just (a1 `fq2mul` (Pairing.Fq2.new fqZero fqOne)) else do
+    if alpha == neg1 then Just (a1 `fq2mul` Pairing.Fq2.new fqZero fqOne) else do
       let b = (alpha + fq2one) `fq2pow` qm1by2
       Just (b * x0)
   where
@@ -180,10 +180,10 @@ random = do
 -- https://docs.rs/pairing/0.14.1/src/pairing/bls12_381/ec.rs.html#102-124
 fq2YforX :: Fq2 -> Bool -> Maybe Fq2
 fq2YforX x ly 
-  | ly == True = newy
+  | ly = newy
   | otherwise = negate <$> newy
   where
-    newy = fq2sqrt (x `fq2pow` 3 + (Fq2 (b * inv_xi_a) (b * inv_xi_b)))
+    newy = fq2sqrt (x `fq2pow` 3 + Fq2 (b * inv_xi_a) (b * inv_xi_b))
     (Fq2 inv_xi_a inv_xi_b) = fq2inv xi
     b = Fq Params._b
 

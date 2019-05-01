@@ -52,7 +52,7 @@ newtype Fr = Fr Integer -- ^ Use @new@ instead of this constructor
 -- | Turn an integer into an @Fr@ number, should be used instead of
 -- the @Fr@ constructor.
 new :: Integer -> Fr
-new a = Fr $ withR $ (getVal . newMod a)
+new a = Fr $ withR (getVal . newMod a)
 
 {-# INLINE frAdd #-}
 frAdd :: Fr -> Fr -> Fr
@@ -82,7 +82,7 @@ frInv :: Fr -> Fr
 frInv a = 1 / a
 
 frPow :: Integral e => Fr -> e -> Fr
-frPow (Fr a) b = Fr $ withQ (modUnOp a (flip powMod b))
+frPow (Fr a) b = Fr $ withQ (modUnOp a (`powMod` b))
 
 random :: MonadRandom m => m Fr
 random = do

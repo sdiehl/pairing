@@ -16,7 +16,7 @@ import Pairing.Pairing
 import Test.Tasty
 import Test.Tasty.QuickCheck
 import Test.Tasty.HUnit
-import qualified Test.QuickCheck.Monadic as TQM (monadicIO, assert)
+import qualified Test.QuickCheck.Monadic as TQM (monadicIO, assert, run)
 import Test.QuickCheck.Instances ()
 import Data.ByteString as BS (null, dropWhile)
 import TestCommon
@@ -44,20 +44,27 @@ testAbelianGroupLaws binOp neg ident descr
       $ isInverse binOp neg ident
     ]
 
-serializeUncompTest gen testFunc = do
-  pt <- G.random gen
-  let ubs = serializeUncompressed pt
-  let npte = testFunc ubs
-  isRight npte @=? True
-  let (Right npt) = npte
-  pt @=? npt
-
-serializeCompTest gen testFunc = do
-  pt <- G.random gen
-  let (Just cbs) = serializeCompressed pt
+serializeTest pt compFunc testFunc = do
+  let (Just cbs) = compFunc pt
   let npt2e = testFunc cbs
+  isRight npt2e @? (Protolude.show npt2e)
   let (Right npt2) = npt2e
   pt @=? npt2
+
+g1FromXTest :: G1 -> Assertion
+g1FromXTest Infinity = pure ()
+g1FromXTest pt@(Point x y) = do
+  let ysq = fqPow y 2
+  let (Just lysqrt) = fqSqrt True ysq
+  let (Just sysqrt) = fqSqrt False ysq
+  let egly = groupFromX True x
+  let egsy = groupFromX False x
+  isJust egly @=? True
+  isJust egsy @=? True
+  let Just lyg = egly
+  let Just syg = egsy
+  (Point x lysqrt) @=? lyg
+  (Point x sysqrt) @=? syg
 
 -------------------------------------------------------------------------------
 -- G1
@@ -86,25 +93,15 @@ prop_hashToG1 bs = TQM.monadicIO $ do
   let Just toCurve = toCurveMay
   TQM.assert (isOnCurveG1 toCurve)
 
-unit_g1FromX :: Assertion
-unit_g1FromX = do
-  pt@(Point x y) <- G.random (generator :: G1)
-  let ysq = fqPow y 2
-  let (Just lysqrt) = fqSqrt True ysq
-  let (Just sysqrt) = fqSqrt False ysq
-  let egly = groupFromX True x
-  let egsy = groupFromX False x
-  isJust egly @=? True
-  isJust egsy @=? True
-  let Just lyg = egly
-  let Just syg = egsy
-  (Point x lysqrt) @=? lyg
-  (Point x sysqrt) @=? syg
+prop_g1FromX :: G1 -> Property
+prop_g1FromX g = TQM.monadicIO $ do
+  TQM.run $ g1FromXTest g
 
-unit_g1Serialize :: Assertion
-unit_g1Serialize = do
-  serializeCompTest (generator :: G1) G.fromByteStringG1
-  serializeUncompTest (generator :: G1) G.fromByteStringG1
+prop_g1SerializeUncomp :: G1 -> Property
+prop_g1SerializeUncomp g = TQM.monadicIO $ TQM.run $ serializeTest g serializeUncompressed G.fromByteStringG1
+
+prop_g1SerializeComp :: G1 -> Property
+prop_g1SerializeComp g = TQM.monadicIO $ TQM.run $ serializeTest g serializeCompressed G.fromByteStringG1
 
 -------------------------------------------------------------------------------
 -- G2
@@ -125,17 +122,22 @@ unit_order_g2_valid :: Assertion
 unit_order_g2_valid
   = gMul g2 _r @=? Infinity
 
-unit_g2FromX :: Assertion
-unit_g2FromX = do
-  pt@(Point x y) <- G.random (generator :: G2)
+g2FromXTest :: G2 -> Assertion
+g2FromXTest Infinity = pure ()
+g2FromXTest pt@(Point x y) = do
   let ysq = fq2pow y 2
   let (Just ny) = fq2YforX x True
   if (ny /= y) then (Point x y) @=? (Point x (negate ny)) else (Point x y) @=? (Point x ny)
 
-unit_g2Serialize :: Assertion
-unit_g2Serialize = do
-  serializeCompTest (generator :: G2) G.fromByteStringG2
-  serializeUncompTest (generator :: G2) G.fromByteStringG2
+prop_g2FromX :: G2 -> Property
+prop_g2FromX g = TQM.monadicIO $ do
+  TQM.run $ g2FromXTest g
+
+prop_g2SerializeUncomp :: G2 -> Property
+prop_g2SerializeUncomp g = TQM.monadicIO $ TQM.run $ serializeTest g serializeUncompressed G.fromByteStringG2
+
+prop_g2SerializeComp :: G2 -> Property
+prop_g2SerializeComp g = TQM.monadicIO $ TQM.run $ serializeTest g serializeUncompressed G.fromByteStringG2
 
 -------------------------------------------------------------------------------
 -- GT
@@ -143,13 +145,10 @@ unit_g2Serialize = do
 
 -- The group laws for GT are implied by the field tests for Fq12.
 
-unit_gtSerialize :: Assertion
-unit_gtSerialize = do
-  g1 <- G.random (generator :: G1)
-  g2 <- G.random (generator :: G2)
+gtSerializeTest :: G1 -> G2 -> Assertion
+gtSerializeTest g1 g2 = do
   let gt = reducedPairing g1 g2
-  let bs = serializeUncompressed gt
-  let repreth = fromByteStringGT bs
-  isRight repreth @=? True
-  let (Right repr) = repreth
-  repr @=? gt
+  serializeTest gt serializeUncompressed fromByteStringGT
+
+prop_gtSerializeUncomp :: G1 -> G2 -> Property
+prop_gtSerializeUncomp g1 g2 = TQM.monadicIO $ TQM.run $ gtSerializeTest g1 g2
