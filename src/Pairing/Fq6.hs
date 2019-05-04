@@ -1,4 +1,5 @@
 {-# LANGUAGE Strict #-}
+{-# LANGUAGE DeriveAnyClass, DeriveGeneric #-}
 
 -- | Cubic extension of the tower:
 --
@@ -26,6 +27,9 @@ import Crypto.Random (MonadRandom)
 
 import Pairing.Fq2 (Fq2)
 import qualified Pairing.Fq2 as Fq2
+import Pairing.CyclicGroup (AsInteger(..), FromX(..))
+import Data.ByteString as B (length, splitAt)
+import Pairing.ByteRepr
 
 -- | Field extension defined as Fq2[v]/v^3 - (9 + u)
 data Fq6
@@ -34,7 +38,7 @@ data Fq6
     , fq6y :: Fq2
     , fq6z :: Fq2
     }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Generic, NFData)
 
 instance Num Fq6 where
   (+)         = fq6add
@@ -47,6 +51,17 @@ instance Num Fq6 where
 instance Fractional Fq6 where
   (/) = fq6div
   fromRational (a :% b) = fq6int a / fq6int b
+
+instance ByteRepr Fq6 where
+  mkRepr (Fq6 x y z) = mkRepr x <> mkRepr y <> mkRepr z
+  fromRepr (Fq6 x _ _) bs = do
+    let (xbs, yzbs) = B.splitAt (reprLength x) bs
+    let (ybs, zbs) = B.splitAt (reprLength x) yzbs
+    x <- fromRepr Fq2.fq2one xbs
+    y <- fromRepr Fq2.fq2one ybs
+    z <- fromRepr Fq2.fq2one zbs
+    Just (Fq6 x y z)
+  reprLength (Fq6 x y z) = reprLength x + reprLength y + reprLength z
 
 -- | Create a new value in @Fq6@, should be used instead of the @Fq6@
 -- constructor.

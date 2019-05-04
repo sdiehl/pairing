@@ -8,7 +8,7 @@ import Criterion.Main
 import qualified Pairing.Group as Group
 import qualified Pairing.Point as Point
 import qualified Pairing.Pairing as Pairing
-
+import Pairing.CyclicGroup (asInteger)
 import qualified Pairing.Fq as Fq
 import qualified Pairing.Fr as Fr
 import qualified Pairing.Fq2 as Fq2
@@ -159,8 +159,12 @@ benchmarks
               $ whnf (uncurry (+)) (testFq_1, testFq_2)
           , bench "division"
               $ whnf (uncurry (/)) (testFq_1, testFq_2)
+          , bench "pow"
+              $ whnf (Fq.fqPow testFq_1) (asInteger testFr_1)
           , bench "inversion"
               $ whnf Fq.fqInv testFq_1
+          , bench "fqFromX"
+              $ whnf (Fq.fqYforX testFq_1) True
           ]
 
       , bgroup "Fr"
@@ -172,6 +176,8 @@ benchmarks
               $ whnf (uncurry (/)) (testFr_1, testFr_2)
           , bench "inversion"
               $ whnf Fr.frInv testFr_1
+          , bench "pow"
+              $ whnf (Fr.frPow testFr_1) (asInteger testFr_2)
           ]
 
       , bgroup "Fq2"
@@ -183,12 +189,18 @@ benchmarks
               $ whnf (uncurry (/)) (testFq2_1, testFq2_2)
           , bench "squaring"
               $ whnf Fq2.fq2sqr testFq2_1
+          , bench "pow"
+              $ whnf (Fq2.fq2pow testFq2_1) (asInteger testFr_1)
           , bench "negation"
               $ whnf negate testFq2_1
           , bench "inversion"
               $ whnf Fq2.fq2inv testFq2_1
           , bench "conjugation"
               $ whnf Fq2.fq2conj testFq2_1
+          , bench "square root"
+              $ whnf Fq2.fq2sqrt testFq2_1
+          , bench "fq2FromX"
+              $ whnf (Fq2.fq2YforX testFq2_1) True 
           ]
 
       , bgroup "Fq6"

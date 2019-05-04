@@ -14,18 +14,20 @@ module Pairing.Fq (
   fqZero,
   fqOne,
   fqNqr,
-  euclidean,
+  fqPow,
+  fqSqrt,
   random,
-  Pairing.Fq.fromBytes
+  fqYforX,
+  fromBytesToInteger
 ) where
 
 import Protolude
 import Crypto.Random (MonadRandom)
 import Crypto.Number.Generate (generateMax)
 import Pairing.Params as Params
-import Pairing.CyclicGroup
+import Pairing.CyclicGroup (AsInteger(..), FromX(..))
+import Pairing.ByteRepr
 import Pairing.Modular as M
-import Data.Bits
 import qualified Data.ByteString as BS
 import Data.Bits
 import Math.NumberTheory.Moduli.Class
@@ -56,14 +58,19 @@ instance Fractional Fq where
   (/) = fqDiv
   fromRational (a :% b) = Fq a / Fq b
 
+instance FromX Fq where
+  yFromX = fqYforX
+  isLargestY y = y > negate y
+
+instance ByteRepr Fq where
+  mkRepr f@(Fq a) = toPaddedBytes (reprLength f) a
+  fromRepr _ bs = Just (Fq $ fromBytesToInteger bs)
+  reprLength _ = 32
+
 -- | Turn an integer into an @Fq@ number, should be used instead of
 -- the @Fq@ constructor.
 new :: Integer -> Fq
-new a = Fq $ withQ $ (getVal . newMod a)
-
-{-# INLINE norm #-}
-norm :: Fq -> Fq
-norm (Fq a) = new a
+new a = Fq $ withQ (getVal . newMod a)
 
 {-# INLINE fqAdd #-}
 fqAdd :: Fq -> Fq -> Fq
@@ -89,6 +96,10 @@ fqNeg (Fq a) = Fq $ withQ (modUnOp a negate)
 fqDiv :: Fq -> Fq -> Fq
 fqDiv (Fq a) (Fq b) = Fq $ withQ (modBinOp a b (/))
 
+{-# INLINE fqPow #-}
+fqPow :: Integral e => Fq -> e -> Fq
+fqPow (Fq a) b = Fq $ withQ (modUnOp a (flip powMod b))
+
 {-# INLINE fqNqr #-}
 -- | Quadratic non-residue
 fqNqr :: Fq
@@ -109,30 +120,17 @@ fqZero = Fq 0
 fqOne :: Fq
 fqOne = Fq 1
 
-inv :: Fq -> Fq
-inv (Fq a) = Fq $ euclidean a _q `mod` _q
-
--- | Euclidean algorithm to compute inverse in an integral domain @a@
-euclidean :: (Integral a) => a -> a -> a
-euclidean a b = fst (inv' a b)
-
-{-# INLINEABLE inv' #-}
-{-# SPECIALISE inv' :: Integer -> Integer -> (Integer, Integer) #-}
-inv' :: (Integral a) => a -> a -> (a, a)
-inv' a b =
-  case b of
-   1 -> (0, 1)
-   _ -> let (e, f) = inv' b d
-        in (f, e - c*f)
-  where c = a `div` b
-        d = a `mod` b
+fqSqrt :: Bool -> Fq -> Maybe Fq
+fqSqrt largestY (Fq a) = do
+  (y1, y2) <- withQM (modUnOpMTup a bothSqrtOf)
+  Fq <$> if largestY then Just (max y1 y2) else Just (min y1 y2)
 
 random :: MonadRandom m => m Fq
 random = do
   seed <- generateMax _q
   pure (Fq seed)
 
-fromBytes :: ByteString -> Fq
-fromBytes bs = Fq $ withQ (M.toInteger . M.fromBytes bs)
 
-
+fqYforX :: Fq -> Bool -> Maybe Fq
+fqYforX x largestY = fqSqrt largestY (x `fqPow` 3 + new _b)
+  

@@ -1,4 +1,5 @@
 {-# LANGUAGE Strict #-}
+{-# LANGUAGE DeriveAnyClass, DeriveGeneric #-}
 
 -- | Final quadratic extension of the tower:
 --
@@ -29,12 +30,15 @@ import Pairing.Fq (Fq)
 import Pairing.Fq6 (Fq6(..))
 import qualified Pairing.Fq2 as Fq2
 import qualified Pairing.Fq6 as Fq6
+import Pairing.CyclicGroup (AsInteger(..), FromX(..))
 import Pairing.Params
+import Pairing.ByteRepr
+import Data.ByteString as B (length, splitAt)
 
 -- | Field extension defined as Fq6[w]/w^2 - v
 data Fq12 = Fq12 { fq12x :: Fq6, fq12y :: Fq6 } -- ^ Use @new@ instead
                                                 -- of this constructor
-  deriving (Eq, Show)
+  deriving (Eq, Show, Generic, NFData)
 
 instance Num Fq12 where
   (+)         = fq12add
@@ -47,6 +51,15 @@ instance Num Fq12 where
 instance Fractional Fq12 where
   (/) = fq12div
   fromRational (a :% b) = fq12int a / fq12int b
+
+instance ByteRepr Fq12 where
+  mkRepr (Fq12 x y) = mkRepr x <> mkRepr y
+  fromRepr (Fq12 x _) bs = do
+    let (xbs, ybs) = B.splitAt (reprLength x) bs
+    x <- fromRepr Fq6.fq6one xbs
+    y <- fromRepr Fq6.fq6one ybs
+    Just (Fq12 x y)
+  reprLength (Fq12 x y)  = reprLength x + reprLength y
 
 -- | Create a new value in @Fq12@ by providing a list of twelve
 -- coefficients in @Fq@, should be used instead of the @Fq12@

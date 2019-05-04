@@ -97,6 +97,24 @@ unit_uRoot = u^2 @=? minusOne
     u = Fq2.new 0 1
     minusOne = Fq2.new (-1) 0
 
+unit_fq2pow :: Assertion
+unit_fq2pow = do
+  fq2 <- Fq2.random
+  let pow5 = fq2sqr (fq2sqr fq2) * fq2
+  pow5 @=?  fq2pow fq2 5
+  let pow10 = ((fq2sqr (fq2sqr (fq2sqr fq2))) * fq2) * fq2
+  pow10 @=?  fq2pow fq2 10
+  where
+    u = Fq2.new 0 1
+    minusOne = Fq2.new (-1) 0
+
+unit_fq2sqrt :: Assertion
+unit_fq2sqrt = do
+  fq2 <- Fq2.random
+  let sq = fq2sqr fq2
+  let (Just rt) = fq2sqrt sq
+  sq @=? fq2sqr rt
+
 -------------------------------------------------------------------------------
 -- Fq6
 -------------------------------------------------------------------------------
