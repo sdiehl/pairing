@@ -172,7 +172,7 @@ instance Arbitrary (Point Fq) where -- G1
 instance Arbitrary (Point Fq2) where -- G2
   arbitrary = gMul g2 . abs <$> (arbitrary :: Gen Integer)
 
-hashToG1 :: MonadIO m => ByteString -> m (Maybe G1)
+hashToG1 :: MonadRandom m => ByteString -> m (Maybe G1)
 hashToG1 = swEncBN
 
 randomG1 :: (MonadRandom m) => m G1
