@@ -58,7 +58,7 @@ swy mn pr3 pt pxi pb = (ch *) <$>  y
 -- This function evaluates an empty bytestring or one that contains \NUL to zero
 -- which according to Definiton 2 of the paper is sent to an arbitrary point on the curve
 --
-swEncBN :: MonadIO m => ByteString -> m (Maybe (Point Fq))
+swEncBN :: MonadRandom m => ByteString -> m (Maybe (Point Fq))
 swEncBN bs = runMaybeT $ withQM $ \mn -> do
   let t = M.fromBytes bs mn
   sq3 <- hoistMaybe (sqrtOfMinusThree mn)
@@ -71,9 +71,9 @@ swEncBN bs = runMaybeT $ withQM $ \mn -> do
     let x2' = x2 mn x1'
     let x3' = x3 mn w'
     let lst = [x1', x2', x3']
-    r1 <- liftIO (randomMod mn)
-    r2 <- liftIO (randomMod mn)
-    r3 <- liftIO (randomMod mn)
+    r1 <- lift $ randomMod mn
+    r2 <- lift $ randomMod mn
+    r3 <- lift $ randomMod mn
     let al = alphaBeta mn r1 x1'
     let bet = alphaBeta mn r2 x2'
     let i' = i al bet

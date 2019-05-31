@@ -88,7 +88,7 @@ unit_order_g1_valid
 
 prop_hashToG1 :: ByteString -> Property
 prop_hashToG1 bs = TQM.monadicIO $ do
-  toCurveMay <- liftIO (hashToG1 bs)
+  toCurveMay <- TQM.run (hashToG1 bs)
   TQM.assert (isJust toCurveMay)
   let Just toCurve = toCurveMay
   TQM.assert (isOnCurveG1 toCurve)
