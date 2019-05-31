@@ -1,5 +1,9 @@
 # Changelog for pairing
 
+## 0.3.1
+
+* Use `MonadRandom` typeclass constraints for curve hashing functions.
+
 ## 0.3
 
 - Square root calculation on Fq2
