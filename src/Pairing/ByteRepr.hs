@@ -1,4 +1,9 @@
-module Pairing.ByteRepr where
+module Pairing.ByteRepr (
+  ByteRepr(..),
+  toBytes,
+  toPaddedBytes,
+  fromBytesToInteger,
+) where
 
 import Protolude
 import Data.ByteString as B

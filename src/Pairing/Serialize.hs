@@ -1,4 +1,13 @@
-module Pairing.Serialize where
+module Pairing.Serialize (
+  ToCompressedForm(..),
+  ToUncompressedForm(..),
+  header,
+  toCompressedForm,
+  toUncompressedForm,
+  elementToUncompressedForm,
+  pointFromByteString,
+  elementReadUncompressed,
+) where
 
 import Protolude hiding (putByteString)
 import Pairing.Point
@@ -30,8 +39,8 @@ header n = putWord8 0 >> putWord8 n
 elementToUncompressedForm :: (ByteRepr a) => a -> Maybe LByteString
 elementToUncompressedForm a = do
   repr <- mkRepr a
-  pure $ runPut $ do 
-    header 4 
+  pure $ runPut $ do
+    header 4
     putByteString repr
 
 toUncompressedForm :: (ByteRepr a) => Point a -> Maybe LByteString
@@ -39,7 +48,7 @@ toUncompressedForm (Point x y) = do
   rx <- mkRepr x
   ry <- mkRepr y
   pure $ runPut $ do
-    header 4 
+    header 4
     putByteString rx
     putByteString ry
 toUncompressedForm Infinity = pure $ runPut (header 1)
@@ -76,7 +85,7 @@ processCompressed one ct
       x <- hoistMaybe $ fromRepr one xbs
       y <- hoistMaybe $ yFromX x largestY
       pure (Point x y)
-      
+
 buildPoint :: ByteRepr a => a -> ByteString -> ByteString -> Maybe (Point a)
 buildPoint one xbs ybs = do
   x <- fromRepr one xbs
@@ -89,17 +98,17 @@ getCompressionType = getWord8 >> getWord8
 elementReadUncompressed :: (Validate a, Show a, ByteRepr a) =>  a -> LByteString -> Either Text a
 elementReadUncompressed ele = parseBS runc
   where
-    runc = do 
+    runc = do
       ctype <- getCompressionType
       if ctype == 4 then do
         bs <- getByteString (reprLength ele)
         pure (fromRepr ele bs)
-      else 
+      else
         pure Nothing
 
 parseBS :: (Validate a, Show a) => Get (Maybe a) -> LByteString -> Either Text a
 parseBS f bs = do
   (_, _, mpt) <- first (\(_,_,err) -> toS err) (runGetOrFail f bs)
-  case mpt of 
+  case mpt of
     Just pt -> if isValidElement pt then (Right pt) else Left ("Element was not valid after deserialisation: " <> show pt)
     Nothing -> Left "Point could not be parsed"

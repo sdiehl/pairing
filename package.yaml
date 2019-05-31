@@ -65,6 +65,7 @@ library:
     -fno-warn-unused-binds
     -fno-warn-unused-matches
     -fno-warn-unused-do-bind
+    -Wmissing-export-lists
 
   default-extensions:
     - LambdaCase
