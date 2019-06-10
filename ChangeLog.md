@@ -12,6 +12,8 @@
 
 ## 0.2
 
+* Adds Shallue van de Woestijne encoding for curve hashing.
+
 ## 0.1
 
 * Initial release.
