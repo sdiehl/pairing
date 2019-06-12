@@ -32,7 +32,7 @@ dependencies:
   - memory
   - wl-pprint-text
   - QuickCheck
-  - arithmoi
+  - arithmoi >= 0.8
   - integer-logarithms
   - errors
   - binary
