@@ -74,17 +74,17 @@ library:
     - OverloadedStrings
     - NoImplicitPrelude
     - FlexibleInstances
-    - ExplicitForAll
+    - FlexibleContexts
+    - ScopedTypeVariables
     - RankNTypes
+    - ExplicitForAll
     - DataKinds
     - KindSignatures
     - GeneralizedNewtypeDeriving
     - TypeApplications
     - ExistentialQuantification
-    - ScopedTypeVariables
     - DeriveGeneric
     - BangPatterns
-    - FlexibleContexts
     - MultiParamTypeClasses
 
   exposed-modules:
@@ -120,7 +120,15 @@ tests:
       - quickcheck-instances
       - QuickCheck
     default-extensions:
+      - LambdaCase
+      - RecordWildCards
+      - OverloadedStrings
+      - NoImplicitPrelude
+      - FlexibleInstances
       - FlexibleContexts
+      - ScopedTypeVariables
+      - RankNTypes
+      - TypeSynonymInstances
 
 benchmarks:
   pairing-benchmarks:
@@ -136,3 +144,11 @@ benchmarks:
       - tasty-quickcheck
       - tasty-hunit
       - quickcheck-instances
+    default-extensions:
+      - LambdaCase
+      - RecordWildCards
+      - NoImplicitPrelude
+      - FlexibleInstances
+      - FlexibleContexts
+      - ScopedTypeVariables
+      - RankNTypes

@@ -1,5 +1,3 @@
-{-# LANGUAGE FlexibleInstances #-}
-
 module TestGroups where
 
 import Protolude

@@ -1,5 +1,3 @@
-{-# LANGUAGE NoImplicitPrelude #-}
-
 -- To get the benchmarking data, run "stack bench".
 
 module Main where
