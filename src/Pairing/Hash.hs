@@ -66,7 +66,7 @@ swEncBN bs = runMaybeT $ withQM $ \mn -> do
   x1' <- hoistMaybe (x1 mn t w')
   if (t == 0) then do
     onebmn <- hoistMaybe (sqrtOf (1 + (b mn)))
-    pure $ (Point (Fq.new (getVal x1')) (Fq.new (getVal $ onebmn)))
+    pure $ (Point (fromInteger (getVal x1')) (fromInteger (getVal $ onebmn)))
   else do
     let x2' = x2 mn x1'
     let x3' = x3 mn w'
@@ -78,4 +78,4 @@ swEncBN bs = runMaybeT $ withQM $ \mn -> do
     let bet = alphaBeta mn r2 x2'
     let i' = i al bet
     swy' <- hoistMaybe (swy mn r3 t (genericIndex lst (i' -  1)) (b mn))
-    pure $ (Point (Fq.new (getVal $ genericIndex lst (i' - 1))) (Fq.new swy'))
+    pure $ (Point (fromInteger (getVal $ genericIndex lst (i' - 1))) (fromInteger swy'))

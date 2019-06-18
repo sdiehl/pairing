@@ -8,11 +8,7 @@
 --   * Fq12 := Fq6[w]/w^2 - v
 --
 module Pairing.Fq (
-  Fq(..),
-  new,
-  fqInv,
-  fqZero,
-  fqOne,
+  Fq,
   fqNqr,
   fqPow,
   fqSqrt,
@@ -22,115 +18,54 @@ module Pairing.Fq (
 ) where
 
 import Protolude
+
+import PrimeField (PrimeField, toInt)
+
 import Crypto.Random (MonadRandom)
 import Crypto.Number.Generate (generateMax)
 import Pairing.Params as Params
 import Pairing.CyclicGroup (AsInteger(..), FromX(..))
 import Pairing.ByteRepr
 import Pairing.Modular as M
-import qualified Data.ByteString as BS
-import Data.Bits
-import Math.NumberTheory.Moduli.Class
-import Math.NumberTheory.Moduli.Sqrt
+import Math.NumberTheory.Moduli.Class (powMod)
 
 -------------------------------------------------------------------------------
 -- Types
 -------------------------------------------------------------------------------
 
--- | Prime field with characteristic @_q@
-newtype Fq = Fq Integer -- ^ Use @new@ instead of this
-                        -- constructor
-  deriving (Show, Eq, Bits, Generic, NFData, Ord)
+-- | Prime field @Fq@ with characteristic @_q@
+type Fq = PrimeField 21888242871839275222246405745257275088696311157297823662689037894645226208583
 
 instance AsInteger Fq where
-  asInteger (Fq n) = n
+  asInteger = toInt
 
-
-instance Num Fq where
-  (+)           = fqAdd
-  (*)           = fqMul
-  abs           = fqAbs
-  signum        = fqSig
-  negate        = fqNeg
-  fromInteger   = new
-
-instance Fractional Fq where
-  (/) = fqDiv
-  fromRational (a :% b) = Fq a / Fq b
+instance Ord Fq where
+  compare = on compare toInt
 
 instance FromX Fq where
   yFromX = fqYforX
   isLargestY y = y > negate y
 
 instance ByteRepr Fq where
-  mkRepr f@(Fq a) = toPaddedBytes (reprLength f) a
-  fromRepr _ bs = Just (Fq $ fromBytesToInteger bs)
-  reprLength _ = 32
-
--- | Turn an integer into an @Fq@ number, should be used instead of
--- the @Fq@ constructor.
-new :: Integer -> Fq
-new a = Fq $ withQ (getVal . newMod a)
-
-{-# INLINE fqAdd #-}
-fqAdd :: Fq -> Fq -> Fq
-fqAdd (Fq a) (Fq b) = Fq $ withQ (modBinOp a b (+))
-
-{-# INLINE fqAbs #-}
-fqAbs :: Fq -> Fq
-fqAbs (Fq a) = Fq a
-
-{-# INLINE fqSig #-}
-fqSig :: Fq -> Fq
-fqSig (Fq a) = Fq $ withQ (modUnOp a signum)
-
-{-# INLINE fqMul #-}
-fqMul :: Fq -> Fq -> Fq
-fqMul (Fq a) (Fq b) = Fq $ withQ (modBinOp a b (*))
-
-{-# INLINE fqNeg #-}
-fqNeg :: Fq -> Fq
-fqNeg (Fq a) = Fq $ withQ (modUnOp a negate)
-
-{-# INLINE fqDiv #-}
-fqDiv :: Fq -> Fq -> Fq
-fqDiv (Fq a) (Fq b) = Fq $ withQ (modBinOp a b (/))
 
 {-# INLINE fqPow #-}
 fqPow :: Integral e => Fq -> e -> Fq
-fqPow (Fq a) b = Fq $ withQ (modUnOp a (flip powMod b))
+fqPow a b = fromInteger $ withQ (modUnOp (toInt a) (flip powMod b))
 
 {-# INLINE fqNqr #-}
 -- | Quadratic non-residue
 fqNqr :: Fq
-fqNqr = Fq Params._nqr
-
-{-# INLINE fqInv #-}
--- | Multiplicative inverse
-fqInv :: Fq -> Fq
-fqInv x = 1 / x
-
-{-# INLINE fqZero #-}
--- | Additive identity
-fqZero :: Fq
-fqZero = Fq 0
-
-{-# INLINE fqOne #-}
--- | Multiplicative identity
-fqOne :: Fq
-fqOne = Fq 1
+fqNqr = fromInteger Params._nqr
 
 fqSqrt :: Bool -> Fq -> Maybe Fq
-fqSqrt largestY (Fq a) = do
-  (y1, y2) <- withQM (modUnOpMTup a bothSqrtOf)
-  Fq <$> if largestY then Just (max y1 y2) else Just (min y1 y2)
+fqSqrt largestY a = do
+  (y1, y2) <- withQM (modUnOpMTup (toInt a) bothSqrtOf)
+  fromInteger <$> if largestY then Just (max y1 y2) else Just (min y1 y2)
 
 random :: MonadRandom m => m Fq
 random = do
   seed <- generateMax _q
-  pure (Fq seed)
-
+  pure (fromInteger seed)
 
 fqYforX :: Fq -> Bool -> Maybe Fq
-fqYforX x largestY = fqSqrt largestY (x `fqPow` 3 + new _b)
-  
+fqYforX x largestY = fqSqrt largestY (x `fqPow` 3 + fromInteger _b)

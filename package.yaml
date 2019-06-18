@@ -36,6 +36,7 @@ dependencies:
   - integer-logarithms
   - errors
   - binary
+  - galois-field
 
 library:
   source-dirs: src
@@ -84,6 +85,7 @@ library:
     - DeriveGeneric
     - BangPatterns
     - FlexibleContexts
+    - MultiParamTypeClasses
 
   exposed-modules:
     - Pairing.Params

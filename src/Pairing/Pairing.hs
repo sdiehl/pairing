@@ -11,6 +11,8 @@ module Pairing.Pairing
 
 import Protolude
 
+import ExtensionField (fromList)
+
 import Data.List ((!!))
 import Pairing.Point
 import Pairing.Group
@@ -37,7 +39,7 @@ reducedPairing :: G1 -> G2 -> GT
 reducedPairing p@(Point _ _) q@(Point _ _)
   = finalExponentiation $ atePairing p q
 reducedPairing _ _
-  = Fq12.fq12one
+  = 1
 
 -------------------------------------------------------------------------------
 -- Miller loop
@@ -48,7 +50,7 @@ atePairing :: G1 -> G2 -> Fq12
 atePairing p@(Point _ _) q@(Point _ _)
   = ateMillerLoop p (atePrecomputeG2 q)
 atePairing _ _
-  = Fq12.fq12one
+  = 1
 
 -- | Binary expansion (missing the most-significant bit) representing
 -- the number 6 * _t + 2.
@@ -69,7 +71,7 @@ ateLoopCountBinary
 -- | Miller loop with precomputed values for G2
 ateMillerLoop :: G1 -> [EllCoeffs] -> GT
 ateMillerLoop p coeffs  = let
-  (postLoopIx, postLoopF) = foldl' (ateLoopBody p coeffs) (0, Fq12.fq12one) ateLoopCountBinary
+  (postLoopIx, postLoopF) = foldl' (ateLoopBody p coeffs) (0, 1) ateLoopCountBinary
   almostF = mulBy024 postLoopF (prepareCoeffs coeffs p postLoopIx)
   finalF = mulBy024 almostF (prepareCoeffs coeffs p (postLoopIx + 1))
   in finalF
@@ -92,9 +94,7 @@ prepareCoeffs coeffs (Point px py) ix =
 {-# INLINEABLE mulBy024 #-}
 mulBy024 :: Fq12 -> EllCoeffs -> Fq12
 mulBy024 this (EllCoeffs ell0 ellVW ellVV)
-  = let a = Fq12.Fq12
-            (Fq6.Fq6 ell0 Fq2.fq2zero ellVV)
-            (Fq6.Fq6 Fq2.fq2zero ellVW Fq2.fq2zero)
+  = let a = fromList [fromList [ell0, 0, ellVV], fromList [0, ellVW, 0]]
     in this * a
 
 -------------------------------------------------------------------------------
@@ -167,10 +167,10 @@ atePrecomputeG2 origPt@(Point _ _)
         in (nextR, nextCoeffs)
 
 twoInv :: Fq
-twoInv = Fq.fqInv $ Fq.new 2
+twoInv = 0.5
 
 twistCoeffB :: Fq2
-twistCoeffB = Fq2.fq2scalarMul (Fq.new _b) (Fq2.fq2inv Fq2.xi)
+twistCoeffB = Fq2.fq2scalarMul (fromInteger _b) (1 / Fq2.xi)
 
 doublingStepForFlippedMillerLoop :: JG2 -> (JG2, EllCoeffs)
 doublingStepForFlippedMillerLoop (oldX, oldY, oldZ)
@@ -244,9 +244,9 @@ finalExponentiation f = finalExponentiationFirstChunk f ^ expVal
 
 finalExponentiationFirstChunk :: Fq12 -> GT
 finalExponentiationFirstChunk f
-  | f == Fq12.fq12zero = Fq12.fq12zero
+  | f == 0 = 0
   | otherwise = let
   f1 = Fq12.fq12conj f
-  f2 = Fq12.fq12inv f
+  f2 = recip f
   newf0 = f1 * f2 -- == f^(_q ^6 - 1)
   in Fq12.fq12frobenius 2 newf0 * newf0 -- == f^((_q ^ 6 - 1) * (_q ^ 2 + 1))
