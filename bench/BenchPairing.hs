@@ -11,10 +11,6 @@ import qualified Pairing.Pairing as Pairing
 import Pairing.CyclicGroup (asInteger)
 import qualified Pairing.Fq as Fq
 import qualified Pairing.Fr as Fr
-import qualified Pairing.Fq2 as Fq2
-import qualified Pairing.Fq6 as Fq6
-import qualified Pairing.Fq12 as Fq12
-import Pairing.Fq12 (Fq12(..), new, fq12frobenius)
 
 -------------------------------------------------------------------------------
 -- Benchmark Suite
@@ -32,17 +28,17 @@ testFr_1 = Fr.new 26958670324842217843043813306545419508355162527404160919865219
 testFr_2 :: Fr.Fr
 testFr_2 = Fr.new 18361718052247311177607809961708721447660708684581683997732416822928487385039
 
-testFq2_1 :: Fq2.Fq2
+testFq2_1 :: Fq.Fq2
 testFq2_1 = fromList
   [ 19908898611787582971615951530393785823319364696376311494770162270472288380562
   , 2444690988583914246674870181013910409542697083717824402984851238236041783759 ]
 
-testFq2_2 :: Fq2.Fq2
+testFq2_2 :: Fq.Fq2
 testFq2_2 = fromList
   [ 176307305890807650390915550856467756101144733976249050387177647283239486934
   , 9913547941088878400547309488585076816688958962210000330808066250849942240036 ]
 
-testFq6_1 :: Fq6.Fq6
+testFq6_1 :: Fq.Fq6
 testFq6_1 = fromList
   [ fromList
     [ 8727269669017421992537561450387212506711577304101544328736696625792447584819
@@ -55,7 +51,7 @@ testFq6_1 = fromList
     , 21634580953983557175729336703450663797341055784728343534694506874757389871868 ]
   ]
 
-testFq6_2 :: Fq6.Fq6
+testFq6_2 :: Fq.Fq6
 testFq6_2 = fromList
   [ fromList
     [ 21427158918811764040959407626476119248515601360702754918240300689672054041331
@@ -68,8 +64,8 @@ testFq6_2 = fromList
     , 10563739714379631354612735346769824530666877338817980746884577737330686430079 ]
   ]
 
-testFq12_1 :: Fq12.Fq12
-testFq12_1 = Fq12.new
+testFq12_1 :: Fq.Fq12
+testFq12_1 = Fq.construct
   [ 4025484419428246835913352650763180341703148406593523188761836807196412398582
   , 5087667423921547416057913184603782240965080921431854177822601074227980319916
   , 8868355606921194740459469119392835913522089996670570126495590065213716724895
@@ -84,8 +80,8 @@ testFq12_1 = Fq12.new
   , 1205855382909824928004884982625565310515751070464736233368671939944606335817
   ]
 
-testFq12_2 :: Fq12.Fq12
-testFq12_2 = Fq12.new
+testFq12_2 :: Fq.Fq12
+testFq12_2 = Fq.construct
   [ 495492586688946756331205475947141303903957329539236899715542920513774223311
   , 9283314577619389303419433707421707208215462819919253486023883680690371740600
   , 11142072730721162663710262820927009044232748085260948776285443777221023820448
@@ -141,7 +137,7 @@ benchmarks
           [ bench "naive"
               $ whnf (Pairing.frobeniusNaive 1) testFq12_1
           , bench "fast"
-              $ whnf (fq12frobenius 1) testFq12_1
+              $ whnf (Fq.fq12Frobenius 1) testFq12_1
           ]
 
       , bgroup "Final exponentiation"
@@ -196,17 +192,17 @@ benchmarks
           , bench "squaring"
               $ whnf (^ 2) testFq2_1
           , bench "pow"
-              $ whnf (Fq2.fq2pow testFq2_1) (asInteger testFr_1)
+              $ whnf (Fq.fq2Pow testFq2_1) (asInteger testFr_1)
           , bench "negation"
               $ whnf negate testFq2_1
           , bench "inversion"
               $ whnf recip testFq2_1
           , bench "conjugation"
-              $ whnf Fq2.fq2conj testFq2_1
+              $ whnf Fq.fq2Conj testFq2_1
           , bench "square root"
-              $ whnf Fq2.fq2sqrt testFq2_1
+              $ whnf Fq.fq2Sqrt testFq2_1
           , bench "fq2FromX"
-              $ whnf (Fq2.fq2YforX testFq2_1) True 
+              $ whnf (Fq.fq2YforX testFq2_1) True 
           ]
 
       , bgroup "Fq6"
@@ -236,7 +232,7 @@ benchmarks
           , bench "inversion"
               $ whnf recip testFq12_1
           , bench "conjugation"
-              $ whnf Fq12.fq12conj testFq12_1
+              $ whnf Fq.fq12Conj testFq12_1
           ]
 
       , bgroup "G1"

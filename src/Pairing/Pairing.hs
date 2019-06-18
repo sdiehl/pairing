@@ -17,13 +17,7 @@ import Data.List ((!!))
 import Pairing.Point
 import Pairing.Group
 import Pairing.Jacobian
-import Pairing.Fq (Fq)
-import qualified Pairing.Fq as Fq
-import Pairing.Fq2 (Fq2)
-import qualified Pairing.Fq2 as Fq2
-import Pairing.Fq6 as Fq6
-import Pairing.Fq12 (Fq12)
-import qualified Pairing.Fq12 as Fq12
+import Pairing.Fq
 import Pairing.Params
 
 -- G2, but using Jacobian coordinates
@@ -89,7 +83,7 @@ prepareCoeffs :: [EllCoeffs] -> G1 -> Int -> EllCoeffs
 prepareCoeffs _ Infinity _ = panic "prepareCoeffs: received trivial point"
 prepareCoeffs coeffs (Point px py) ix =
   let (EllCoeffs ell0 ellVW ellVV) = coeffs !! ix
-  in EllCoeffs ell0 (Fq2.fq2scalarMul py ellVW) (Fq2.fq2scalarMul px ellVV)
+  in EllCoeffs ell0 (fq2ScalarMul py ellVW) (fq2ScalarMul px ellVV)
 
 {-# INLINEABLE mulBy024 #-}
 mulBy024 :: Fq12 -> EllCoeffs -> Fq12
@@ -122,13 +116,13 @@ mulByQ (x, y, z)
 
 -- xi ^ ((_q - 1) `div` 3)
 twistMulX :: Fq2
-twistMulX = Fq2.xi ^ ((_q - 1) `div` 3) -- Fq2
+twistMulX = xi ^ ((_q - 1) `div` 3) -- Fq2
 --  21575463638280843010398324269430826099269044274347216827212613867836435027261
 --  10307601595873709700152284273816112264069230130616436755625194854815875713954
 
 -- xi ^ ((_q - 1) `div` 2)
 twistMulY :: Fq2
-twistMulY = Fq2.xi ^ ((_q - 1) `div` 2) -- Fq2
+twistMulY = xi ^ ((_q - 1) `div` 2) -- Fq2
 --  2821565182194536844548159561693502659359617185244120367078079554186484126554
 --  3505843767911556378687030309984248845540243509899259641013678093033130930403
 
@@ -170,20 +164,20 @@ twoInv :: Fq
 twoInv = 0.5
 
 twistCoeffB :: Fq2
-twistCoeffB = Fq2.fq2scalarMul (fromInteger _b) (1 / Fq2.xi)
+twistCoeffB = fq2ScalarMul (fromInteger _b) (1 / xi)
 
 doublingStepForFlippedMillerLoop :: JG2 -> (JG2, EllCoeffs)
 doublingStepForFlippedMillerLoop (oldX, oldY, oldZ)
   = let
-  a, b, c, d, e, f, g, h, i, j, eSquared :: Fq2.Fq2
+  a, b, c, d, e, f, g, h, i, j, eSquared :: Fq2
 
-  a = Fq2.fq2scalarMul twoInv (oldX * oldY)
+  a = fq2ScalarMul twoInv (oldX * oldY)
   b = oldY * oldY
   c = oldZ * oldZ
   d = c + c + c
   e = twistCoeffB * d
   f = e + e + e
-  g = Fq2.fq2scalarMul twoInv (b + f)
+  g = fq2ScalarMul twoInv (b + f)
   h = (oldY + oldZ) * (oldY + oldZ) - (b + c)
   i = e - b
   j = oldX * oldX
@@ -193,7 +187,7 @@ doublingStepForFlippedMillerLoop (oldX, oldY, oldZ)
   newY = g * g - (eSquared + eSquared + eSquared)
   newZ = b * h
 
-  ell0 = Fq2.xi * i
+  ell0 = xi * i
   ellVV = j + j + j
   ellVW = - h
 
@@ -204,7 +198,7 @@ doublingStepForFlippedMillerLoop (oldX, oldY, oldZ)
 mixedAdditionStepForFlippedMillerLoop :: JG2 -> JG2 -> (JG2, EllCoeffs)
 mixedAdditionStepForFlippedMillerLoop _base@(x2, y2, _z2) _current@(x1, y1, z1)
   = let
-  d, e, f, g, h, i, j :: Fq2.Fq2
+  d, e, f, g, h, i, j :: Fq2
   d = x1 - (x2 * z1)
   e = y1 - (y2 * z1)
   f = d * d
@@ -217,7 +211,7 @@ mixedAdditionStepForFlippedMillerLoop _base@(x2, y2, _z2) _current@(x1, y1, z1)
   newY = e * (i - j) - (h * y1)
   newZ = z1 * h
 
-  ell0 = Fq2.xi * (e * x2 - d * y2)
+  ell0 = xi * (e * x2 - d * y2)
   ellVV = - e
   ellVW = d
 
@@ -246,7 +240,7 @@ finalExponentiationFirstChunk :: Fq12 -> GT
 finalExponentiationFirstChunk f
   | f == 0 = 0
   | otherwise = let
-  f1 = Fq12.fq12conj f
+  f1 = fq12Conj f
   f2 = recip f
   newf0 = f1 * f2 -- == f^(_q ^6 - 1)
-  in Fq12.fq12frobenius 2 newf0 * newf0 -- == f^((_q ^ 6 - 1) * (_q ^ 2 + 1))
+  in fq12Frobenius 2 newf0 * newf0 -- == f^((_q ^ 6 - 1) * (_q ^ 2 + 1))

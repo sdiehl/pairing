@@ -8,10 +8,7 @@ import TestFields () -- for its Arbitrary instances
 import Pairing.Group
 import Pairing.Pairing
 import Pairing.Point
-import Pairing.Fq (Fq(..))
-import Pairing.Fq2 (Fq2(..))
-import Pairing.Fq12 (Fq12(..))
-import qualified Pairing.Fq12 as Fq12
+import Pairing.Fq
 import Test.QuickCheck
 import Test.Tasty.HUnit
 
@@ -35,7 +32,7 @@ inpG2 = Point
 
 beforeExponentiation :: Fq12
 beforeExponentiation
-  = Fq12.new
+  = construct
     [ 10244919957345566208036224388367387294947954375520342002142038721148536068658
     , 20520725903107462730350108147804326707908059028221039276493719519842949720531
     , 6086095302240468555411758663466251351417777262748587710512082696159022563215
@@ -52,7 +49,7 @@ beforeExponentiation
 
 afterExponentiation :: Fq12
 afterExponentiation
-  = Fq12.new
+  = construct
     [ 7297928317524675251652102644847406639091474940444702627333408876432772026640
     , 18010865284024443253481973710158529446817119443459787454101328040744995455319
     , 14179125828660221708486990054318233868908974550229474018509093903907472063156
@@ -116,7 +113,7 @@ prop_pairingPowerTest = withMaxSuccess pairingTestCount prop
     prop e1 e2 = isInGT (reducedPairing e1 e2)
 
 prop_frobeniusFq12Correct :: Fq12 -> Bool
-prop_frobeniusFq12Correct f = frobeniusNaive 1 f == Fq12.fq12frobenius 1 f
+prop_frobeniusFq12Correct f = frobeniusNaive 1 f == fq12Frobenius 1 f
 
 prop_finalExponentiationCorrect :: Property
 prop_finalExponentiationCorrect = withMaxSuccess 10 prop

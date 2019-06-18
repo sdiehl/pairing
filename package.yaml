@@ -77,23 +77,20 @@ library:
     - FlexibleContexts
     - ScopedTypeVariables
     - RankNTypes
-    - ExplicitForAll
-    - DataKinds
-    - KindSignatures
-    - GeneralizedNewtypeDeriving
-    - TypeApplications
-    - ExistentialQuantification
-    - DeriveGeneric
     - BangPatterns
+    - DataKinds
+    - DeriveGeneric
+    - ExistentialQuantification
+    - ExplicitForAll
+    - GeneralizedNewtypeDeriving
+    - KindSignatures
     - MultiParamTypeClasses
+    - TypeApplications
 
   exposed-modules:
     - Pairing.Params
     - Pairing.Fq
     - Pairing.Fr
-    - Pairing.Fq2
-    - Pairing.Fq6
-    - Pairing.Fq12
     - Pairing.Point
     - Pairing.Group
     - Pairing.Pairing

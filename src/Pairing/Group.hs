@@ -27,10 +27,7 @@ import PrimeField (toInt)
 import ExtensionField (fromList)
 
 import Data.Semigroup
-import Pairing.Fq as Fq
-import Pairing.Fq2 as Fq2
-import Pairing.Fq12 as Fq12
-import Pairing.Fr as Fr
+import Pairing.Fq
 import Pairing.Point
 import Pairing.Params
 import Pairing.CyclicGroup
@@ -109,7 +106,7 @@ instance CyclicGroup GT where
   order = notImplemented -- should be a factor of _r
   expn a b = a ^ asInteger b
   inverse = recip
-  random _ = Fq12.random
+  random _ = fq12Random
 
 instance ToUncompressedForm GT where
   serializeUncompressed = fmap toS . elementToUncompressedForm
@@ -147,7 +144,7 @@ isOnCurveG2 :: G2 -> Bool
 isOnCurveG2 Infinity
   = True
 isOnCurveG2 (Point x y)
-  = y `fq2pow` 2 == x `fq2pow` 3 + fromList [fromInteger _b] / Fq2.xi
+  = y `fq2Pow` 2 == x `fq2Pow` 3 + fromList [fromInteger _b] / xi
 
 -- | Test whether a value is an _r-th root of unity
 isInGT :: GT -> Bool
@@ -159,7 +156,7 @@ b1 = fromInteger _b
 
 -- | Parameter for twisted curve over Fq2
 b2 :: Fq2
-b2 = fromList [b1] / Fq2.xi
+b2 = fromList [b1] / xi
 
 -------------------------------------------------------------------------------
 -- Generators
@@ -176,12 +173,12 @@ hashToG1 = swEncBN
 
 randomG1 :: (MonadRandom m) => m G1
 randomG1 = do
-  r <- toInt <$> Fq.random
+  r <- toInt <$> fqRandom
   pure (gMul g1 r)
 
 randomG2 :: (MonadRandom m) => m G2
 randomG2 = do
-  r <- toInt <$> Fq.random
+  r <- toInt <$> fqRandom
   pure (gMul g2 r)
 
 groupFromX :: (Validate (Point a), FromX a) => Bool -> a -> Maybe (Point a)

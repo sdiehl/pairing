@@ -2,12 +2,10 @@ module TestGroups where
 
 import Protolude
 
-import Pairing.Fq as Fq
-import Pairing.Fr as Fr
-import Pairing.Fq2
-import Pairing.Fq12
+import Pairing.Fq
+import Pairing.Fr
 import Pairing.Point
-import Pairing.Group as G
+import Pairing.Group
 import Pairing.Params
 import Pairing.Serialize
 import Pairing.Pairing
@@ -96,10 +94,10 @@ prop_g1FromX g = TQM.monadicIO $ do
   TQM.run $ g1FromXTest g
 
 prop_g1SerializeUncomp :: G1 -> Property
-prop_g1SerializeUncomp g = TQM.monadicIO $ TQM.run $ serializeTest g serializeUncompressed G.fromByteStringG1
+prop_g1SerializeUncomp g = TQM.monadicIO $ TQM.run $ serializeTest g serializeUncompressed fromByteStringG1
 
 prop_g1SerializeComp :: G1 -> Property
-prop_g1SerializeComp g = TQM.monadicIO $ TQM.run $ serializeTest g serializeCompressed G.fromByteStringG1
+prop_g1SerializeComp g = TQM.monadicIO $ TQM.run $ serializeTest g serializeCompressed fromByteStringG1
 
 -------------------------------------------------------------------------------
 -- G2
@@ -123,7 +121,7 @@ unit_order_g2_valid
 g2FromXTest :: G2 -> Assertion
 g2FromXTest Infinity = pure ()
 g2FromXTest pt@(Point x y) = do
-  let ysq = fq2pow y 2
+  let ysq = fq2Pow y 2
   let (Just ny) = fq2YforX x True
   if (ny /= y) then (Point x y) @=? (Point x (negate ny)) else (Point x y) @=? (Point x ny)
 
@@ -132,10 +130,10 @@ prop_g2FromX g = TQM.monadicIO $ do
   TQM.run $ g2FromXTest g
 
 prop_g2SerializeUncomp :: G2 -> Property
-prop_g2SerializeUncomp g = TQM.monadicIO $ TQM.run $ serializeTest g serializeUncompressed G.fromByteStringG2
+prop_g2SerializeUncomp g = TQM.monadicIO $ TQM.run $ serializeTest g serializeUncompressed fromByteStringG2
 
 prop_g2SerializeComp :: G2 -> Property
-prop_g2SerializeComp g = TQM.monadicIO $ TQM.run $ serializeTest g serializeUncompressed G.fromByteStringG2
+prop_g2SerializeComp g = TQM.monadicIO $ TQM.run $ serializeTest g serializeUncompressed fromByteStringG2
 
 -------------------------------------------------------------------------------
 -- GT

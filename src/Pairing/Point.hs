@@ -13,8 +13,7 @@ module Pairing.Point (
 ) where
 
 import Protolude
-import Pairing.Fq (Fq)
-import Pairing.Fq2 (Fq2)
+import Pairing.Fq (Fq, Fq2)
 
 -- | Points on a curve over a field @a@ represented as either affine
 -- coordinates or as a point at infinity.
