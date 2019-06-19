@@ -102,36 +102,62 @@ instance ByteRepr Fq where
   reprLength _ = 32
 
 instance ByteRepr Fq2 where
-  mkRepr fq2 = foldl' (<>) mempty (mkRepr <$> fromField fq2)
+  mkRepr = foldl' (<>) mempty . map mkRepr . fromField
   fromRepr fq2 bs = do
     let x = maybe 0 identity (head (fromField fq2))
         (xbs, ybs) = B.splitAt (reprLength x) bs
-    x <- fromRepr (witness :: Fq) xbs
-    y <- fromRepr (witness :: Fq) ybs
+    x <- fromRepr (1 :: Fq) xbs
+    y <- fromRepr (1 :: Fq) ybs
     return (fromList [x, y])
-  reprLength = foldl' ((. reprLength) . (+)) 0 . fromField
+  reprLength = sum . map reprLength . fromField
 
 instance ByteRepr Fq6 where
-  mkRepr fq6 = foldl' (<>) mempty (mkRepr <$> fromField fq6)
+  mkRepr = foldl' (<>) mempty . map mkRepr . fromField
   fromRepr fq6 bs = do
     let x = maybe 0 identity (head (fromField fq6))
         (xbs, yzbs) = B.splitAt (reprLength x) bs
         (ybs, zbs) = B.splitAt (reprLength x) yzbs
-    x <- fromRepr (witness :: Fq2) xbs
-    y <- fromRepr (witness :: Fq2) ybs
-    z <- fromRepr (witness :: Fq2) zbs
+    x <- fromRepr (1 :: Fq2) xbs
+    y <- fromRepr (1 :: Fq2) ybs
+    z <- fromRepr (1 :: Fq2) zbs
     return (fromList [x, y, z])
-  reprLength = foldl' ((. reprLength) . (+)) 0 . fromField
+  reprLength = sum . map reprLength . fromField
 
 instance ByteRepr Fq12 where
-  mkRepr fq12 = foldl' (<>) mempty (mkRepr <$> fromField fq12)
+  mkRepr = foldl' (<>) mempty . map mkRepr . fromField
   fromRepr fq12 bs = do
     let x = maybe 0 identity (head (fromField fq12))
         (xbs, ybs) = B.splitAt (reprLength x) bs
-    x <- fromRepr (witness :: Fq6) xbs
-    y <- fromRepr (witness :: Fq6) ybs
+    x <- fromRepr (1 :: Fq6) xbs
+    y <- fromRepr (1 :: Fq6) ybs
     return (fromList [x, y])
-  reprLength = foldl' ((. reprLength) . (+)) 0 . fromField
+  reprLength = sum . map reprLength . fromField
+
+-------------------------------------------------------------------------------
+-- Byte lists
+-------------------------------------------------------------------------------
+
+fq2Bytes :: Fq2 -> [Fq]
+fq2Bytes w = case fromField w of
+  [x, y] -> [x, y]
+  [x]    -> [x, 0]
+  []     -> [0, 0]
+  _      -> panic "fq2Bytes not exhaustive."
+
+fq6Bytes :: Fq6 -> [[Fq]]
+fq6Bytes w = map fq2Bytes $ case fromField w of
+  [x, y, z] -> [x, y, z]
+  [x, y]    -> [x, y, 0]
+  [x]       -> [x, 0, 0]
+  []        -> [0, 0, 0]
+  _         -> panic "fq6Bytes not exhaustive."
+
+fq12Bytes :: Fq12 -> [[[Fq]]]
+fq12Bytes w = map fq6Bytes $ case fromField w of
+  [x, y] -> [x, y]
+  [x]    -> [x, 0]
+  []     -> [0, 0]
+  _      -> panic "fq12Bytes not exhaustive."
 
 -------------------------------------------------------------------------------
 -- Random
@@ -177,7 +203,7 @@ fq2Pow b e = t * fq2Pow (b * b) (shiftR e 1)
 fqSqrt :: Bool -> Fq -> Maybe Fq
 fqSqrt largestY a = do
   (y1, y2) <- withQM (modUnOpMTup (toInt a) bothSqrtOf)
-  fromInteger <$> if largestY then Just (max y1 y2) else Just (min y1 y2)
+  return (fromInteger ((if largestY then max else min) y1 y2))
 
 -- | Square root of Fq2 are specified by https://eprint.iacr.org/2012/685.pdf,
 -- Algorithm 9 with lots of help from https://docs.rs/pairing/0.14.1/src/pairing/bls12_381/fq2.rs.html#162-222
@@ -206,8 +232,7 @@ fq2YforX x ly
   | ly = newy
   | otherwise = negate <$> newy
   where
-    newy = fq2Sqrt (x `fq2Pow` 3 + b / xi)
-    b = fromInteger _b
+    newy = fq2Sqrt (x `fq2Pow` 3 + fromInteger _b / xi)
 
 -------------------------------------------------------------------------------
 -- Conjugation
@@ -280,7 +305,7 @@ xi = fromList [fromInteger _xiA, fromInteger _xiB]
 
 -- | Multiply by @xi@ (cubic nonresidue in @Fq2@) and reorder coefficients
 mulXi :: Fq6 -> Fq6
-mulXi x = case fromField x of
+mulXi w = case fromField w of
   [x, y, z] -> fromList [z * xi, x, y]
   [x, y]    -> fromList [0, x, y]
   [x]       -> fromList [0, x]
