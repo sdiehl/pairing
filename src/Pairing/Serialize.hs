@@ -12,13 +12,12 @@ module Pairing.Serialize (
 import Protolude hiding (putByteString)
 import Pairing.Point
 import Data.ByteString.Builder
-import Data.ByteString as B
+import Data.ByteString as B hiding (length)
 import Data.Binary.Get
 import Data.Binary.Put (Put, putWord8, runPut, putByteString)
 import Control.Error
 import Pairing.ByteRepr
 import Pairing.CyclicGroup
-
 class ToCompressedForm a where
   -- | The serialisation may fail if y cannot be obtained from x
   serializeCompressed :: a -> Maybe ByteString
@@ -43,13 +42,17 @@ elementToUncompressedForm a = do
     header 4
     putByteString repr
 
-toUncompressedForm :: (ByteRepr a) => Point a -> Maybe LByteString
+toUncompressedForm :: (Show a, ByteRepr a) => Point a -> Maybe LByteString
 toUncompressedForm (Point x y) = do
+  let rxLen = fromIntegral $ reprLength x
+      ryLen = fromIntegral $ reprLength y
   rx <- mkRepr x
   ry <- mkRepr y
   pure $ runPut $ do
     header 4
+    putWord8 rxLen
     putByteString rx
+    putWord8 ryLen
     putByteString ry
 toUncompressedForm Infinity = pure $ runPut (header 1)
 
@@ -57,8 +60,12 @@ toCompressedForm :: (ByteRepr a, FromX a, Eq a) => Point a -> Maybe LByteString
 toCompressedForm (Point x y) = do
   ny <- yFromX x True
   let yform = if ny == y then 3 else 2
+  let rxLen = fromIntegral $ reprLength x
   rx <- mkRepr x
-  pure (runPut $ header yform >> putByteString rx)
+  pure (runPut $ do
+           header yform
+           putWord8 rxLen
+           putByteString rx)
 toCompressedForm Infinity = Just (toLazyByteString (word8 0 <> word8 1))
 
 pointFromByteString :: (Show a, Validate (Point a), ByteRepr a, FromX a) => a -> LByteString -> Either Text (Point a)
@@ -68,20 +75,22 @@ pointFromByteString a = parseBS fromByteStringGet
       ctype <- getCompressionType
       processCompressed a ctype
 
-processCompressed :: forall a . (ByteRepr a, FromX a) => a -> Word8 -> Get (Maybe (Point a))
+processCompressed :: forall a . (Show a, ByteRepr a, FromX a) => a -> Word8 -> Get (Maybe (Point a))
 processCompressed one ct
   | ct == 4 = do
-      xbs <- getByteString rlen
-      ybs <- getByteString rlen
+      xlen <- fromIntegral <$> getWord8
+      xbs <- getByteString xlen
+      ylen <- fromIntegral <$> getWord8
+      ybs <- getByteString ylen
       pure (buildPoint one xbs ybs)
   | ct == 2 = fromCompressed False
   | ct == 3 = fromCompressed True
   | ct == 1 = pure (Just Infinity)
   | otherwise = pure Nothing
   where
-    rlen = reprLength one
     fromCompressed largestY = runMaybeT $ do
-      xbs <- lift $ getByteString rlen
+      xlen <- lift $ fromIntegral <$> getWord8
+      xbs <- lift $ getByteString xlen
       x <- hoistMaybe $ fromRepr one xbs
       y <- hoistMaybe $ yFromX x largestY
       pure (Point x y)
