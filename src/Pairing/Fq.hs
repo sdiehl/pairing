@@ -35,12 +35,13 @@ module Pairing.Fq
 
 import Protolude
 
-import Data.ByteString as B (splitAt)
 import Crypto.Random (MonadRandom)
 import Crypto.Number.Generate (generateMax)
+import Data.ByteString as B (splitAt)
 import ExtensionField (ExtensionField, IrreducibleMonic(..), fromField, fromList, t, x)
 import Math.NumberTheory.Moduli.Class (powMod)
 import PrimeField (PrimeField, toInt)
+
 import Pairing.ByteRepr
 import Pairing.CyclicGroup
 import Pairing.Modular
@@ -84,8 +85,15 @@ type Fq12 = ExtensionField Fq6 PolynomialW
 instance Ord Fq where
   compare = on compare toInt
 
+instance Ord Fq2 where
+  compare = on compare fromField
+
 instance FromX Fq where
   yFromX = fqYforX
+  isLargestY y = y > negate y
+
+instance FromX Fq2 where
+  yFromX = fq2YforX
   isLargestY y = y > negate y
 
 instance ByteRepr Fq where
@@ -93,42 +101,35 @@ instance ByteRepr Fq where
   fromRepr _ bs = Just (fromInteger (fromBytesToInteger bs))
   reprLength _ = 32
 
-instance Ord Fq2 where
-  compare = on compare fromField
-
-instance FromX Fq2 where
-  yFromX = fq2YforX
-  isLargestY y = y > negate y
-
 instance ByteRepr Fq2 where
   mkRepr fq2 = foldl' (<>) mempty (mkRepr <$> fromField fq2)
   fromRepr fq2 bs = do
-    let (Just x) = head $ fromField fq2
+    let (Just x) = head (fromField fq2)
     let (xbs, ybs) = B.splitAt (reprLength x) bs
-    Just (fromList [fromInteger $ fromBytesToInteger xbs, fromInteger $ fromBytesToInteger ybs])
-  reprLength (fromField -> [x, y]) = reprLength x + reprLength y
+    Just (fromList [fromInteger (fromBytesToInteger xbs), fromInteger (fromBytesToInteger ybs)])
+  reprLength = foldl' ((. reprLength) . (+)) 0 . fromField
 
 instance ByteRepr Fq6 where
   mkRepr fq6 = foldl' (<>) mempty (mkRepr <$> fromField fq6)
   fromRepr fq6 bs = do
-    let (Just x) = head $ fromField fq6
+    let (Just x) = head (fromField fq6)
     let (xbs, yzbs) = B.splitAt (reprLength x) bs
     let (ybs, zbs) = B.splitAt (reprLength x) yzbs
     x <- fromRepr (witness :: Fq2) xbs
     y <- fromRepr (witness :: Fq2) ybs
     z <- fromRepr (witness :: Fq2) zbs
     Just (fromList [x, y, z])
-  reprLength (fromField -> [x, y, z]) = reprLength x + reprLength y + reprLength z
+  reprLength = foldl' ((. reprLength) . (+)) 0 . fromField
 
 instance ByteRepr Fq12 where
   mkRepr fq12 = foldl' (<>) mempty (mkRepr <$> fromField fq12)
   fromRepr fq12 bs = do
-    let (Just x) = head $ fromField fq12
+    let (Just x) = head (fromField fq12)
     let (xbs, ybs) = B.splitAt (reprLength x) bs
     x <- fromRepr (witness :: Fq6) xbs
     y <- fromRepr (witness :: Fq6) ybs
     Just (fromList [x, y])
-  reprLength (fromField -> [x, y]) = reprLength x + reprLength y
+  reprLength = foldl' ((. reprLength) . (+)) 0 . fromField
 
 -------------------------------------------------------------------------------
 -- Random
@@ -214,21 +215,24 @@ fq2YforX x ly
 fq2Conj :: Fq2 -> Fq2
 fq2Conj x = case fromField x of
   [y, z] -> fromList [y, -z]
-  _      -> panic "panicking."
+  [y]    -> fromList [y]
+  []     -> 0
+  _      -> panic "fq2Conj not exhaustive."
 
 -- | Conjugation
 fq12Conj :: Fq12 -> Fq12
 fq12Conj x = case fromField x of
   [y, z] -> fromList [y, -z]
-  _      -> panic "panicking."
+  [y]    -> fromList [y]
+  []     -> 0
+  _      -> panic "fq12Conj not exhaustive."
 
 -------------------------------------------------------------------------------
 -- Fq12
 -------------------------------------------------------------------------------
 
--- | Create a new value in @Fq12@ by providing a list of twelve
--- coefficients in @Fq@, should be used instead of the @Fq12@
--- constructor.
+-- | Create a new value in @Fq12@ by providing a list of twelve coefficients
+-- in @Fq@, should be used instead of the @Fq12@ constructor.
 construct :: [Fq] -> Fq12
 construct [a, b, c, d, e, f, g, h, i, j, k, l] = fromList
   [ fromList [fromList [a, b], fromList [c, d], fromList [e, f]]
@@ -243,14 +247,14 @@ deconstruct = concatMap fromField . concatMap fromField . fromField
 fq12Frobenius :: Int -> Fq12 -> Fq12
 fq12Frobenius i a
   | i == 0 = a
-  | i == 1 = fastFrobenius1 a
+  | i == 1 = fastFrobenius a
   | i > 1 = let prev = fq12Frobenius (i - 1) a
-            in fastFrobenius1 prev
+            in fastFrobenius prev
   | otherwise = panic "fq12Frobenius not defined for negative values of i"
 
 -- | Fast Frobenius automorphism
-fastFrobenius1 :: Fq12 -> Fq12
-fastFrobenius1 = collapse . convert [[0,2,4],[1,3,5]] . conjugate
+fastFrobenius :: Fq12 -> Fq12
+fastFrobenius = collapse . convert [[0,2,4],[1,3,5]] . conjugate
   where
     conjugate :: Fq12 -> [[Fq2]]
     conjugate = map (map fq2Conj . fromField) . fromField
@@ -272,15 +276,14 @@ fqNqr = fromInteger _nqr
 xi :: Fq2
 xi = fromList [fromInteger _xiA, fromInteger _xiB]
 
--- | Multiply by @xi@ (cubic nonresidue in @Fq2@) and reorder
--- coefficients
+-- | Multiply by @xi@ (cubic nonresidue in @Fq2@) and reorder coefficients
 mulXi :: Fq6 -> Fq6
 mulXi x = case fromField x of
   [x, y, z] -> fromList [z * xi, x, y]
   [x, y]    -> fromList [0, x, y]
   [x]       -> fromList [0, x]
   []        -> fromList []
-  _         -> panic "panicking."
+  _         -> panic "mulXi not exhaustive."
 {-# INLINE mulXi #-}
 
 -- | Multiplication by a scalar in @Fq@
