@@ -5,6 +5,7 @@
 --   * Fq2 := Fq[u]/u^2 + 1
 --   * Fq6 := Fq2[v]/v^3 - (9 + u)
 --   * Fq12 := Fq6[w]/w^2 - v
+{-# LANGUAGE ViewPatterns #-}
 
 module Pairing.Fq
   ( Fq
@@ -34,12 +35,12 @@ module Pairing.Fq
 
 import Protolude
 
+import Data.ByteString as B (splitAt)
 import Crypto.Random (MonadRandom)
 import Crypto.Number.Generate (generateMax)
 import ExtensionField (ExtensionField, IrreducibleMonic(..), fromField, fromList, t, x)
 import Math.NumberTheory.Moduli.Class (powMod)
 import PrimeField (PrimeField, toInt)
-
 import Pairing.ByteRepr
 import Pairing.CyclicGroup
 import Pairing.Modular
@@ -100,10 +101,34 @@ instance FromX Fq2 where
   isLargestY y = y > negate y
 
 instance ByteRepr Fq2 where
+  mkRepr fq2 = foldl' (<>) mempty (mkRepr <$> fromField fq2)
+  fromRepr fq2 bs = do
+    let (Just x) = head $ fromField fq2
+    let (xbs, ybs) = B.splitAt (reprLength x) bs
+    Just (fromList [fromInteger $ fromBytesToInteger xbs, fromInteger $ fromBytesToInteger ybs])
+  reprLength (fromField -> [x, y]) = reprLength x + reprLength y
 
 instance ByteRepr Fq6 where
+  mkRepr fq6 = foldl' (<>) mempty (mkRepr <$> fromField fq6)
+  fromRepr fq6 bs = do
+    let (Just x) = head $ fromField fq6
+    let (xbs, yzbs) = B.splitAt (reprLength x) bs
+    let (ybs, zbs) = B.splitAt (reprLength x) yzbs
+    x <- fromRepr (witness :: Fq2) xbs
+    y <- fromRepr (witness :: Fq2) ybs
+    z <- fromRepr (witness :: Fq2) zbs
+    Just (fromList [x, y, z])
+  reprLength (fromField -> [x, y, z]) = reprLength x + reprLength y + reprLength z
 
 instance ByteRepr Fq12 where
+  mkRepr fq12 = foldl' (<>) mempty (mkRepr <$> fromField fq12)
+  fromRepr fq12 bs = do
+    let (Just x) = head $ fromField fq12
+    let (xbs, ybs) = B.splitAt (reprLength x) bs
+    x <- fromRepr (witness :: Fq6) xbs
+    y <- fromRepr (witness :: Fq6) ybs
+    Just (fromList [x, y])
+  reprLength (fromField -> [x, y]) = reprLength x + reprLength y
 
 -------------------------------------------------------------------------------
 -- Random
@@ -142,7 +167,7 @@ fqPow a b = fromInteger (withQ (modUnOp (toInt a) (flip powMod b)))
 fq2Pow :: Fq2 -> Integer -> Fq2
 fq2Pow b 0 = 1
 fq2Pow b e = t * fq2Pow (b * b) (shiftR e 1)
-  where 
+  where
     t = if testBit e 0 then b else 1
 {-# INLINE fq2Pow #-}
 
