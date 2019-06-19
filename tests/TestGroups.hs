@@ -133,7 +133,7 @@ prop_g2SerializeUncomp :: G2 -> Property
 prop_g2SerializeUncomp g = TQM.monadicIO $ TQM.run $ serializeTest g serializeUncompressed fromByteStringG2
 
 prop_g2SerializeComp :: G2 -> Property
-prop_g2SerializeComp g = TQM.monadicIO $ TQM.run $ serializeTest g serializeUncompressed fromByteStringG2
+prop_g2SerializeComp g = TQM.monadicIO $ TQM.run $ serializeTest g serializeCompressed fromByteStringG2
 
 -------------------------------------------------------------------------------
 -- GT
@@ -142,9 +142,7 @@ prop_g2SerializeComp g = TQM.monadicIO $ TQM.run $ serializeTest g serializeUnco
 -- The group laws for GT are implied by the field tests for Fq12.
 
 gtSerializeTest :: G1 -> G2 -> Assertion
-gtSerializeTest g1 g2 = do
-  let gt = reducedPairing g1 g2
-  serializeTest gt serializeUncompressed fromByteStringGT
+gtSerializeTest g1 g2 = serializeTest (reducedPairing g1 g2) serializeUncompressed fromByteStringGT
 
 prop_gtSerializeUncomp :: G1 -> G2 -> Property
 prop_gtSerializeUncomp g1 g2 = TQM.monadicIO $ TQM.run $ gtSerializeTest g1 g2
