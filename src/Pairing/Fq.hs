@@ -104,31 +104,33 @@ instance ByteRepr Fq where
 instance ByteRepr Fq2 where
   mkRepr fq2 = foldl' (<>) mempty (mkRepr <$> fromField fq2)
   fromRepr fq2 bs = do
-    let (Just x) = head (fromField fq2)
-    let (xbs, ybs) = B.splitAt (reprLength x) bs
-    Just (fromList [fromInteger (fromBytesToInteger xbs), fromInteger (fromBytesToInteger ybs)])
+    let x = maybe 0 identity (head (fromField fq2))
+        (xbs, ybs) = B.splitAt (reprLength x) bs
+    x <- fromRepr (witness :: Fq) xbs
+    y <- fromRepr (witness :: Fq) ybs
+    return (fromList [x, y])
   reprLength = foldl' ((. reprLength) . (+)) 0 . fromField
 
 instance ByteRepr Fq6 where
   mkRepr fq6 = foldl' (<>) mempty (mkRepr <$> fromField fq6)
   fromRepr fq6 bs = do
-    let (Just x) = head (fromField fq6)
-    let (xbs, yzbs) = B.splitAt (reprLength x) bs
-    let (ybs, zbs) = B.splitAt (reprLength x) yzbs
+    let x = maybe 0 identity (head (fromField fq6))
+        (xbs, yzbs) = B.splitAt (reprLength x) bs
+        (ybs, zbs) = B.splitAt (reprLength x) yzbs
     x <- fromRepr (witness :: Fq2) xbs
     y <- fromRepr (witness :: Fq2) ybs
     z <- fromRepr (witness :: Fq2) zbs
-    Just (fromList [x, y, z])
+    return (fromList [x, y, z])
   reprLength = foldl' ((. reprLength) . (+)) 0 . fromField
 
 instance ByteRepr Fq12 where
   mkRepr fq12 = foldl' (<>) mempty (mkRepr <$> fromField fq12)
   fromRepr fq12 bs = do
-    let (Just x) = head (fromField fq12)
-    let (xbs, ybs) = B.splitAt (reprLength x) bs
+    let x = maybe 0 identity (head (fromField fq12))
+        (xbs, ybs) = B.splitAt (reprLength x) bs
     x <- fromRepr (witness :: Fq6) xbs
     y <- fromRepr (witness :: Fq6) ybs
-    Just (fromList [x, y])
+    return (fromList [x, y])
   reprLength = foldl' ((. reprLength) . (+)) 0 . fromField
 
 -------------------------------------------------------------------------------
@@ -177,10 +179,10 @@ fqSqrt largestY a = do
   (y1, y2) <- withQM (modUnOpMTup (toInt a) bothSqrtOf)
   fromInteger <$> if largestY then Just (max y1 y2) else Just (min y1 y2)
 
--- | Square root of Fq2 are specified by https://eprint.iacr.org/2012/685.pdf, Algorithm 9
--- with lots of help from https://docs.rs/pairing/0.14.1/src/pairing/bls12_381/fq2.rs.html#162-222
--- This implementation appears to return the larger square root so check the return value and
--- negate as necessary
+-- | Square root of Fq2 are specified by https://eprint.iacr.org/2012/685.pdf,
+-- Algorithm 9 with lots of help from https://docs.rs/pairing/0.14.1/src/pairing/bls12_381/fq2.rs.html#162-222
+-- This implementation appears to return the larger square root so check the
+-- return value and negate as necessary
 fq2Sqrt :: Fq2 -> Maybe Fq2
 fq2Sqrt a = do
   let a1 = a `fq2Pow` qm3by4
