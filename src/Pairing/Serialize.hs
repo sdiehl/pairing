@@ -42,7 +42,7 @@ elementToUncompressedForm a = do
     header 4
     putByteString repr
 
-toUncompressedForm :: (Show a, ByteRepr a) => Point a -> Maybe LByteString
+toUncompressedForm :: (ByteRepr a) => Point a -> Maybe LByteString
 toUncompressedForm (Point x y) = do
   let rxLen = fromIntegral $ reprLength x
       ryLen = fromIntegral $ reprLength y
@@ -75,7 +75,7 @@ pointFromByteString a = parseBS fromByteStringGet
       ctype <- getCompressionType
       processCompressed a ctype
 
-processCompressed :: forall a . (Show a, ByteRepr a, FromX a) => a -> Word8 -> Get (Maybe (Point a))
+processCompressed :: forall a . (ByteRepr a, FromX a) => a -> Word8 -> Get (Maybe (Point a))
 processCompressed one ct
   | ct == 4 = do
       xlen <- fromIntegral <$> getWord8
