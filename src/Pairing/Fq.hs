@@ -104,34 +104,34 @@ instance ByteRepr Fq where
 instance ByteRepr Fq2 where
   mkRepr = foldl' (<>) mempty . map mkRepr . fromField
   fromRepr fq2 bs = do
-    let x = maybe 0 identity (head (fromField fq2))
+    let x = maybe 0 identity (head (fq2Bytes fq2))
         (xbs, ybs) = B.splitAt (reprLength x) bs
     x <- fromRepr (1 :: Fq) xbs
     y <- fromRepr (1 :: Fq) ybs
     return (fromList [x, y])
-  reprLength = sum . map reprLength . fromField
+  reprLength = sum . map reprLength . fq2Bytes
 
 instance ByteRepr Fq6 where
   mkRepr = foldl' (<>) mempty . map mkRepr . fromField
   fromRepr fq6 bs = do
-    let x = maybe 0 identity (head (fromField fq6))
+    let x = maybe 0 identity (head (fq6Bytes fq6))
         (xbs, yzbs) = B.splitAt (reprLength x) bs
         (ybs, zbs) = B.splitAt (reprLength x) yzbs
     x <- fromRepr (1 :: Fq2) xbs
     y <- fromRepr (1 :: Fq2) ybs
     z <- fromRepr (1 :: Fq2) zbs
     return (fromList [x, y, z])
-  reprLength = sum . map reprLength . fromField
+  reprLength = sum . map reprLength . fq6Bytes
 
 instance ByteRepr Fq12 where
   mkRepr = foldl' (<>) mempty . map mkRepr . fromField
   fromRepr fq12 bs = do
-    let x = maybe 0 identity (head (fromField fq12))
+    let x = maybe 0 identity (head (fq12Bytes fq12))
         (xbs, ybs) = B.splitAt (reprLength x) bs
     x <- fromRepr (1 :: Fq6) xbs
     y <- fromRepr (1 :: Fq6) ybs
     return (fromList [x, y])
-  reprLength = sum . map reprLength . fromField
+  reprLength = sum . map reprLength . fq12Bytes
 
 -------------------------------------------------------------------------------
 -- Byte lists
@@ -144,16 +144,16 @@ fq2Bytes w = case fromField w of
   []     -> [0, 0]
   _      -> panic "fq2Bytes not exhaustive."
 
-fq6Bytes :: Fq6 -> [[Fq]]
-fq6Bytes w = map fq2Bytes $ case fromField w of
+fq6Bytes :: Fq6 -> [Fq2]
+fq6Bytes w = case fromField w of
   [x, y, z] -> [x, y, z]
   [x, y]    -> [x, y, 0]
   [x]       -> [x, 0, 0]
   []        -> [0, 0, 0]
   _         -> panic "fq6Bytes not exhaustive."
 
-fq12Bytes :: Fq12 -> [[[Fq]]]
-fq12Bytes w = map fq6Bytes $ case fromField w of
+fq12Bytes :: Fq12 -> [Fq6]
+fq12Bytes w = case fromField w of
   [x, y] -> [x, y]
   [x]    -> [x, 0]
   []     -> [0, 0]

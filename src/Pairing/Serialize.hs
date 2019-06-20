@@ -13,6 +13,7 @@ import Protolude hiding (putByteString)
 import Pairing.Point
 import Data.ByteString.Builder
 import Data.ByteString as B hiding (length)
+import qualified Data.ByteString as B
 import Data.Binary.Get
 import Data.Binary.Put (Put, putWord8, putWord16le, runPut, putByteString)
 import Control.Error
@@ -38,13 +39,12 @@ putCompressionType n = putWord8 0 >> putWord8 n
 getCompressionType :: Get Word8
 getCompressionType = getWord8 >> getWord8
 
-elementToUncompressedForm :: (ByteRepr a, Show a) => a -> Maybe LByteString
+elementToUncompressedForm :: (ByteRepr a) => a -> Maybe LByteString
 elementToUncompressedForm a = do
-  let aLen = fromIntegral $ reprLength a
   repr <- mkRepr a
   pure $ runPut $ do
     putCompressionType 4
-    putWord16le aLen
+    putWord16le (fromIntegral $ B.length repr)
     putByteString repr
 
 toUncompressedForm :: (ByteRepr a) => Point a -> Maybe LByteString

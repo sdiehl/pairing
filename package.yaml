@@ -130,7 +130,9 @@ tests:
 benchmarks:
   pairing-benchmarks:
     main: Main.hs
-    source-dirs: bench, tests
+    source-dirs:
+      - bench
+      - tests
     other-modules:
       - BenchPairing
     dependencies:
