@@ -6,10 +6,12 @@ import ExtensionField
 
 import Pairing.Fq
 import Pairing.Fr
+import Pairing.ByteRepr
 
 import Test.Tasty
 import Test.Tasty.QuickCheck
 import Test.Tasty.HUnit
+import qualified Test.QuickCheck.Monadic as TQM (monadicIO, assert, run)
 
 import TestCommon
 
@@ -142,3 +144,39 @@ unit_wRoot = w^2 @=? v
 
 test_fieldLaws_Fr :: TestTree
 test_fieldLaws_Fr = testFieldLaws (Proxy :: Proxy Fr) "Fr"
+
+-------------------------------------------------------------------------------
+-- Byte Representation
+-------------------------------------------------------------------------------
+
+primeFieldByteRepresentationTest :: Fq -> Assertion
+primeFieldByteRepresentationTest f = do
+  let t = mkRepr (ByteOrderLength MostSignificantFirst 32) f
+  assertBool ("mkRepr " <> show f) (isJust t)
+  let Just bs = t
+  let d = fromRepr (ByteOrderLength MostSignificantFirst 32) f bs
+  assertBool ("fromRepr " <> show f) (isJust d)
+  (Just f) @=? d
+
+extensionFieldByteRepresentationTest :: (Show a, Eq a, ByteRepr (ExtensionField a b)) => ExtensionField a b -> Assertion
+extensionFieldByteRepresentationTest f = case fromField f of
+  [] -> pure ()
+  _ -> do
+    let t = mkRepr (ByteOrderLength MostSignificantFirst 32) f
+    assertBool ("mkRepr " <> show f) (isJust t)
+    let Just bs = t
+    let d = fromRepr (ByteOrderLength MostSignificantFirst 32) f bs
+    assertBool ("fromRepr " <> show f) (isJust d)
+    (Just f) @=? d
+
+prop_fqByteRepr :: Fq -> Property
+prop_fqByteRepr a = TQM.monadicIO $ TQM.run $ primeFieldByteRepresentationTest a
+
+prop_fq2ByteRepr :: Fq2 -> Property
+prop_fq2ByteRepr a = TQM.monadicIO $ TQM.run $ extensionFieldByteRepresentationTest a
+
+prop_fq6ByteRepr :: Fq6 -> Property
+prop_fq6ByteRepr a = TQM.monadicIO $ TQM.run $ extensionFieldByteRepresentationTest a
+
+prop_fq12ByteRepr :: Fq12 -> Property
+prop_fq12ByteRepr a = TQM.monadicIO $ TQM.run $ extensionFieldByteRepresentationTest a

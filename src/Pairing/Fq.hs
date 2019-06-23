@@ -37,7 +37,7 @@ import Protolude
 
 import Crypto.Random (MonadRandom)
 import Crypto.Number.Generate (generateMax)
-import Data.ByteString as B (splitAt)
+import Data.ByteString as B (splitAt, length)
 import ExtensionField (ExtensionField, IrreducibleMonic(..), fromField, fromList, t, x)
 import Math.NumberTheory.Moduli.Class (powMod)
 import PrimeField (PrimeField, toInt)
@@ -97,67 +97,76 @@ instance FromX Fq2 where
   isLargestY y = y > negate y
 
 instance ByteRepr Fq where
-  mkRepr = toPaddedBytes <$> reprLength <*> toInt
-  fromRepr _ bs = Just (fromInteger (fromBytesToInteger bs))
-  reprLength _ = 32
+  mkRepr bo = toPaddedBytes bo <$> toInt
+  fromRepr bo _ bs = Just (fromInteger (fromBytesToInteger (byteOrder bo) bs))
+  calcReprLength _ n = n
 
 instance ByteRepr Fq2 where
-  mkRepr = foldl' (<>) mempty . map mkRepr . fromField
-  fromRepr fq2 bs = do
-    let x = maybe 0 identity (head (fq2Bytes fq2))
-        (xbs, ybs) = B.splitAt (reprLength x) bs
-    x <- fromRepr (1 :: Fq) xbs
-    y <- fromRepr (1 :: Fq) ybs
+  mkRepr bo f2 = do
+    bites <- fq2Bytes f2
+    (foldl' (<>) mempty . map (mkRepr bo)) bites
+  fromRepr bo fq2 bs = do
+    let 
+      blen = calcReprLength (1 :: Fq) $ lenPerElement bo
+      (xbs, ybs) = B.splitAt blen bs
+    x <- fromRepr bo (1 :: Fq) xbs
+    y <- fromRepr bo (1 :: Fq) ybs
     return (fromList [x, y])
-  reprLength = sum . map reprLength . fq2Bytes
+  calcReprLength _ n = 2 * calcReprLength (1 :: Fq) n
 
 instance ByteRepr Fq6 where
-  mkRepr = foldl' (<>) mempty . map mkRepr . fromField
-  fromRepr fq6 bs = do
-    let x = maybe 0 identity (head (fq6Bytes fq6))
-        (xbs, yzbs) = B.splitAt (reprLength x) bs
-        (ybs, zbs) = B.splitAt (reprLength x) yzbs
-    x <- fromRepr (1 :: Fq2) xbs
-    y <- fromRepr (1 :: Fq2) ybs
-    z <- fromRepr (1 :: Fq2) zbs
+  mkRepr bo f6 = do
+    bites <- fq6Bytes f6
+    (foldl' (<>) mempty . map (mkRepr bo)) bites
+  fromRepr bo fq6 bs = do
+    let 
+      blen = calcReprLength (1 :: Fq2) $ lenPerElement bo
+      (xbs, yzbs) = B.splitAt blen bs
+      (ybs, zbs) = B.splitAt blen yzbs
+    x <- fromRepr bo (1 :: Fq2) xbs
+    y <- fromRepr bo (1 :: Fq2) ybs
+    z <- fromRepr bo (1 :: Fq2) zbs
     return (fromList [x, y, z])
-  reprLength = sum . map reprLength . fq6Bytes
+  calcReprLength _ n = 3 * calcReprLength (1 :: Fq2) n
 
 instance ByteRepr Fq12 where
-  mkRepr = foldl' (<>) mempty . map mkRepr . fromField
-  fromRepr fq12 bs = do
-    let x = maybe 0 identity (head (fq12Bytes fq12))
-        (xbs, ybs) = B.splitAt (reprLength x) bs
-    x <- fromRepr (1 :: Fq6) xbs
-    y <- fromRepr (1 :: Fq6) ybs
+  mkRepr bo f12= do
+    bites <- fq12Bytes f12
+    (foldl' (<>) mempty . map (mkRepr bo)) bites
+  fromRepr bo fq12 bs = do
+    let
+      blen = calcReprLength (1 :: Fq6) $ lenPerElement bo
+      (xbs, ybs) = B.splitAt blen bs
+    x <- fromRepr bo (1 :: Fq6) xbs
+    y <- fromRepr bo (1 :: Fq6) ybs
     return (fromList [x, y])
-  reprLength = sum . map reprLength . fq12Bytes
+  calcReprLength _ n = 2 * calcReprLength (1 :: Fq6) n
 
 -------------------------------------------------------------------------------
 -- Byte lists
 -------------------------------------------------------------------------------
 
-fq2Bytes :: Fq2 -> [Fq]
+fq2Bytes :: Fq2 -> Maybe [Fq]
 fq2Bytes w = case fromField w of
-  [x, y] -> [x, y]
-  [x]    -> [x, 0]
-  []     -> [0, 0]
-  _      -> panic "fq2Bytes not exhaustive."
+  [x, y] -> Just [x, y]
+  [x]    -> Just [x, 0]
+  []     -> Just [0, 0]
+  _      -> Nothing
 
-fq6Bytes :: Fq6 -> [Fq2]
+fq6Bytes :: Fq6 -> Maybe [Fq2]
 fq6Bytes w = case fromField w of
-  [x, y, z] -> [x, y, z]
-  [x, y]    -> [x, y, 0]
-  [x]       -> [x, 0, 0]
-  []        -> [0, 0, 0]
-  _         -> panic "fq6Bytes not exhaustive."
+  [x, y, z] -> Just [x, y, z]
+  [x, y]    -> Just [x, y, 0]
+  [x]       -> Just [x, 0, 0]
+  []        -> Just [0, 0, 0]
+  _         -> Nothing
 
-fq12Bytes :: Fq12 -> [Fq6]
+fq12Bytes :: Fq12 -> Maybe [Fq6]
 fq12Bytes w = case fromField w of
-  [x, y] -> [x, y]
-  [x]    -> [x, 0]
-  []     -> [0, 0]
-  _      -> panic "fq12Bytes not exhaustive."
+  [x, y] -> Just [x, y]
+  [x]    -> Just [x, 0]
+  []     -> Just [0, 0]
+  _      -> Nothing
 
 -------------------------------------------------------------------------------
 -- Random

@@ -97,5 +97,5 @@ randomMod mName = do
   seed <- generateMax _q
   pure (fromInteger @(Mod n) seed)
 
-fromBytes :: forall n. (KnownNat n) => ByteString -> Proxy n -> Mod n
-fromBytes bs mn = newMod (fromBytesToInteger bs) mn
+fromBytes :: forall n. (KnownNat n) => ByteOrder -> ByteString -> Proxy n -> Mod n
+fromBytes bo bs = newMod (fromBytesToInteger bo bs)
