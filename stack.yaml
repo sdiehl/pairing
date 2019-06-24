@@ -39,8 +39,7 @@ packages:
 # using the same syntax as the packages field.
 # (e.g., acme-missiles-0.3)
 extra-deps:
-- git: git@github.com:adjoint-io/galois-field.git
-  commit: 61fe642be6d8d1052d07247b7d380a0d317bac05
+- galois-field-0.1.0
 
 # Override default flag values for local packages and extra-deps
 # flags: {}
