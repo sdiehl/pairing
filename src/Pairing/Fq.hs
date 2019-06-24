@@ -5,7 +5,6 @@
 --   * Fq2 := Fq[u]/u^2 + 1
 --   * Fq6 := Fq2[v]/v^3 - (9 + u)
 --   * Fq12 := Fq6[w]/w^2 - v
-{-# LANGUAGE ViewPatterns #-}
 
 module Pairing.Fq
   ( Fq
@@ -81,6 +80,8 @@ type Fq12 = ExtensionField Fq6 PolynomialW
 -------------------------------------------------------------------------------
 -- Instances
 -------------------------------------------------------------------------------
+
+instance Bits Fq where -- WIP
 
 instance Ord Fq where
   compare = on compare toInt
