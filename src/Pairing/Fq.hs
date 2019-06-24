@@ -25,10 +25,10 @@ module Pairing.Fq
   , fqNqr
   , xi
   , mulXi
+  , fq2Conj
   , fq2ScalarMul
   , construct
   , deconstruct
-  , fq2Conj
   , fq12Conj
   , fq12Frobenius
   ) where
@@ -134,32 +134,6 @@ instance ByteRepr Fq12 where
   reprLength = sum . map reprLength . fq12Bytes
 
 -------------------------------------------------------------------------------
--- Byte lists
--------------------------------------------------------------------------------
-
-fq2Bytes :: Fq2 -> [Fq]
-fq2Bytes w = case fromField w of
-  [x, y] -> [x, y]
-  [x]    -> [x, 0]
-  []     -> [0, 0]
-  _      -> panic "fq2Bytes not exhaustive."
-
-fq6Bytes :: Fq6 -> [Fq2]
-fq6Bytes w = case fromField w of
-  [x, y, z] -> [x, y, z]
-  [x, y]    -> [x, y, 0]
-  [x]       -> [x, 0, 0]
-  []        -> [0, 0, 0]
-  _         -> panic "fq6Bytes not exhaustive."
-
-fq12Bytes :: Fq12 -> [Fq6]
-fq12Bytes w = case fromField w of
-  [x, y] -> [x, y]
-  [x]    -> [x, 0]
-  []     -> [0, 0]
-  _      -> panic "fq12Bytes not exhaustive."
-
--------------------------------------------------------------------------------
 -- Random
 -------------------------------------------------------------------------------
 
@@ -235,7 +209,56 @@ fq2YforX x ly
     newy = fq2Sqrt (x `fq2Pow` 3 + fromInteger _b / xi)
 
 -------------------------------------------------------------------------------
--- Conjugation
+-- Non-residues
+-------------------------------------------------------------------------------
+
+-- | Quadratic non-residue
+fqNqr :: Fq
+fqNqr = fromInteger _nqr
+{-# INLINE fqNqr #-}
+
+-- | Cubic non-residue in @Fq2@
+xi :: Fq2
+xi = fromList [fromInteger _xiA, fromInteger _xiB]
+
+-- | Multiply by @xi@ (cubic nonresidue in @Fq2@) and reorder coefficients
+mulXi :: Fq6 -> Fq6
+mulXi w = case fromField w of
+  [x, y, z] -> fromList [z * xi, x, y]
+  [x, y]    -> fromList [0, x, y]
+  [x]       -> fromList [0, x]
+  []        -> fromList []
+  _         -> panic "mulXi not exhaustive."
+{-# INLINE mulXi #-}
+
+-------------------------------------------------------------------------------
+-- Byte lists
+-------------------------------------------------------------------------------
+
+fq2Bytes :: Fq2 -> [Fq]
+fq2Bytes w = case fromField w of
+  [x, y] -> [x, y]
+  [x]    -> [x, 0]
+  []     -> [0, 0]
+  _      -> panic "fq2Bytes not exhaustive."
+
+fq6Bytes :: Fq6 -> [Fq2]
+fq6Bytes w = case fromField w of
+  [x, y, z] -> [x, y, z]
+  [x, y]    -> [x, y, 0]
+  [x]       -> [x, 0, 0]
+  []        -> [0, 0, 0]
+  _         -> panic "fq6Bytes not exhaustive."
+
+fq12Bytes :: Fq12 -> [Fq6]
+fq12Bytes w = case fromField w of
+  [x, y] -> [x, y]
+  [x]    -> [x, 0]
+  []     -> [0, 0]
+  _      -> panic "fq12Bytes not exhaustive."
+
+-------------------------------------------------------------------------------
+-- Fq2 and Fq12
 -------------------------------------------------------------------------------
 
 -- | Conjugation
@@ -246,6 +269,10 @@ fq2Conj x = case fromField x of
   []     -> 0
   _      -> panic "fq2Conj not exhaustive."
 
+-- | Multiplication by a scalar in @Fq@
+fq2ScalarMul :: Fq -> Fq2 -> Fq2
+fq2ScalarMul a x = fromList [a] * x
+
 -- | Conjugation
 fq12Conj :: Fq12 -> Fq12
 fq12Conj x = case fromField x of
@@ -253,10 +280,6 @@ fq12Conj x = case fromField x of
   [y]    -> fromList [y]
   []     -> 0
   _      -> panic "fq12Conj not exhaustive."
-
--------------------------------------------------------------------------------
--- Fq12
--------------------------------------------------------------------------------
 
 -- | Create a new value in @Fq12@ by providing a list of twelve coefficients
 -- in @Fq@, should be used instead of the @Fq12@ constructor.
@@ -289,30 +312,3 @@ fastFrobenius = collapse . convert [[0,2,4],[1,3,5]] . conjugate
     convert = zipWith (zipWith (\x y -> xi ^ ((x * (_q - 1)) `div` 6) * y))
     collapse :: [[Fq2]] -> Fq12
     collapse = fromList . map fromList
-
--------------------------------------------------------------------------------
--- Miscellaneous
--------------------------------------------------------------------------------
-
--- | Quadratic non-residue
-fqNqr :: Fq
-fqNqr = fromInteger _nqr
-{-# INLINE fqNqr #-}
-
--- | Cubic non-residue in @Fq2@
-xi :: Fq2
-xi = fromList [fromInteger _xiA, fromInteger _xiB]
-
--- | Multiply by @xi@ (cubic nonresidue in @Fq2@) and reorder coefficients
-mulXi :: Fq6 -> Fq6
-mulXi w = case fromField w of
-  [x, y, z] -> fromList [z * xi, x, y]
-  [x, y]    -> fromList [0, x, y]
-  [x]       -> fromList [0, x]
-  []        -> fromList []
-  _         -> panic "mulXi not exhaustive."
-{-# INLINE mulXi #-}
-
--- | Multiplication by a scalar in @Fq@
-fq2ScalarMul :: Fq -> Fq2 -> Fq2
-fq2ScalarMul a x = fromList [a] * x
