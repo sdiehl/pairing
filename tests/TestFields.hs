@@ -17,28 +17,6 @@ import TestCommon
 -- Generators
 -------------------------------------------------------------------------------
 
-instance Arbitrary Fq where
-  arbitrary = fromInteger <$> arbitrary
-
-instance Arbitrary Fq2 where
-  arbitrary = do
-    x <- arbitrary
-    y <- arbitrary
-    return (fromList [x, y])
-
-instance Arbitrary Fq6 where
-  arbitrary = do
-    x <- arbitrary
-    y <- arbitrary
-    z <- arbitrary
-    return (fromList [x, y, z])
-
-instance Arbitrary Fq12 where
-  arbitrary = do
-    x <- arbitrary
-    y <- arbitrary
-    return (fromList [x, y])
-
 instance Arbitrary Fr where
   arbitrary = new <$> arbitrary
 
