@@ -1,95 +1,38 @@
-{-# LANGUAGE Strict #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-
 -- | Prime field from which exponents should be chosen
-module Pairing.Fr (
-  Fr(..),
-  new,
-  frInv,
-  frPow,
-  frAdd,
-  frNeg,
-  random,
-  isRootOfUnity,
-  isPrimitiveRootOfUnity,
-  primitiveRootOfUnity,
-  precompRootOfUnity
-) where
+module Pairing.Fr
+  ( Fr
+  , frPow
+  , random
+  , isRootOfUnity
+  , isPrimitiveRootOfUnity
+  , primitiveRootOfUnity
+  , precompRootOfUnity
+  ) where
 
 import Protolude
 
 import Crypto.Random (MonadRandom)
 import Crypto.Number.Generate (generateMax)
-import Text.PrettyPrint.Leijen.Text
+import Math.NumberTheory.Moduli.Class (powMod)
+import PrimeField (PrimeField, toInt)
 
-import Pairing.Params
-import Pairing.CyclicGroup (AsInteger(..))
+import Pairing.CyclicGroup
 import Pairing.Modular
-import Math.NumberTheory.Moduli.Class
+import Pairing.Params
+
+-------------------------------------------------------------------------------
+-- Types
+-------------------------------------------------------------------------------
+
+-- | Prime field @Fr@ with characteristic @_r@
+type Fr = PrimeField 21888242871839275222246405745257275088548364400416034343698204186575808495617
 
 instance AsInteger Fr where
-  asInteger (Fr n) = n
+  asInteger = toInt
 
-instance Num Fr where
-  (+)           = frAdd
-  (*)           = frMul
-  abs           = frAbs
-  signum        = frSig
-  negate        = frNeg
-  fromInteger n = Fr (n `mod` _r)
-
-instance Fractional Fr where
-  (/) = frDiv
-  fromRational (a :% b) = Fr a / Fr b
-
-instance Pretty Fr where
-  pretty (Fr fr) = pretty fr
-
--- | Prime field with characteristic @_r@
-newtype Fr = Fr Integer -- ^ Use @new@ instead of this constructor
-  deriving (Show, Eq, Ord, Bits, NFData)
-
--- | Turn an integer into an @Fr@ number, should be used instead of
--- the @Fr@ constructor.
-new :: Integer -> Fr
-new a = Fr $ withR (getVal . newMod a)
-
-{-# INLINE frAdd #-}
-frAdd :: Fr -> Fr -> Fr
-frAdd (Fr a) (Fr b) = Fr $ withR (modBinOp a b (+))
-
-{-# INLINE frMul #-}
-frMul :: Fr -> Fr -> Fr
-frMul (Fr a) (Fr b) = Fr $ withR (modBinOp a b (*))
-
-{-# INLINE frAbs #-}
-frAbs :: Fr -> Fr
-frAbs (Fr a) = Fr a
-
-{-# INLINE frSig #-}
-frSig :: Fr -> Fr
-frSig (Fr a) = Fr $ withR (modUnOp a signum)
-
-{-# INLINE frNeg #-}
-frNeg :: Fr -> Fr
-frNeg (Fr a) = Fr $ withR (modUnOp a negate)
-
-{-# INLINE frDiv #-}
-frDiv :: Fr -> Fr -> Fr
-frDiv (Fr a) (Fr b) = Fr $ withR (modBinOp a b (/))
-
-frInv :: Fr -> Fr
-frInv a = 1 / a
-
-frPow :: Integral e => Fr -> e -> Fr
-frPow (Fr a) b = Fr $ withQ (modUnOp a (`powMod` b))
-
-random :: MonadRandom m => m Fr
-random = do
-  seed <- generateMax _r
-  pure (Fr seed)
-
--- Roots of unity stuff
+-------------------------------------------------------------------------------
+-- Roots of unity
+-------------------------------------------------------------------------------
 
 isRootOfUnity :: Integer -> Fr -> Bool
 isRootOfUnity n x
@@ -104,14 +47,10 @@ isPrimitiveRootOfUnity n x
 -- | Compute primitive roots of unity for 2^0, 2^1, ..., 2^28. (2^28
 -- is the largest power of two that divides _r - 1, therefore there
 -- are no primitive roots of unity for higher powers of 2 in Fr.)
-primitiveRootOfUnity
-  :: Int -- ^ exponent of 2 for which we want to get the primitive
-         -- root of unity
-  -> Fr
+primitiveRootOfUnity :: Int -> Fr
 primitiveRootOfUnity k
-  | 0 <= k && k <= 28
-    = 5 ^ ((_r - 1) `div` (2^k))
-  | otherwise = panic "primitiveRootOfUnity: no primitive root for given power of 2"
+  | 0 <= k && k <= 28 = 5^((_r - 1) `div` (2^k))
+  | otherwise         = panic "primitiveRootOfUnity: no primitive root for given power of 2"
 
 precompRootOfUnity :: Int -> Fr
 precompRootOfUnity 0 = 1
@@ -144,3 +83,13 @@ precompRootOfUnity 26 = 74195885525073956524816510880344848975797249529535626186
 precompRootOfUnity 27 = 2082940218526944230311718225077035922214683169814847712455127909555749686340
 precompRootOfUnity 28 = 19103219067921713944291392827692070036145651957329286315305642004821462161904
 precompRootOfUnity _ = panic "precompRootOfUnity: exponent too big for Fr / negative"
+
+-------------------------------------------------------------------------------
+-- Miscellaneous
+-------------------------------------------------------------------------------
+
+frPow :: Integral e => Fr -> e -> Fr
+frPow a b = fromInteger (withQ (modUnOp (toInt a) (flip powMod b)))
+
+frRandom :: MonadRandom m => m Fr
+frRandom = fromInteger <$> generateMax _r
