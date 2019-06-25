@@ -81,8 +81,6 @@ type Fq12 = ExtensionField Fq6 PolynomialW
 -- Instances
 -------------------------------------------------------------------------------
 
-instance Bits Fq where -- WIP
-
 instance Ord Fq where
   compare = on compare toInt
 
