@@ -2,7 +2,7 @@
 module Pairing.Fr
   ( Fr
   , frPow
-  , random
+  , frRandom
   , isRootOfUnity
   , isPrimitiveRootOfUnity
   , primitiveRootOfUnity
@@ -21,7 +21,7 @@ import Pairing.Modular
 import Pairing.Params
 
 -------------------------------------------------------------------------------
--- Types
+-- Types and instances
 -------------------------------------------------------------------------------
 
 -- | Prime field @Fr@ with characteristic @_r@
@@ -29,6 +29,9 @@ type Fr = PrimeField 21888242871839275222246405745257275088548364400416034343698
 
 instance AsInteger Fr where
   asInteger = toInt
+
+instance Ord Fr where
+  compare = on compare toInt
 
 -------------------------------------------------------------------------------
 -- Roots of unity
