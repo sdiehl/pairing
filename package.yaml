@@ -99,8 +99,6 @@ library:
     - Pairing.Hash
     - Pairing.Serialize
     - Pairing.ByteRepr
-
-  other-modules:
     - Pairing.Modular
 
 tests:
