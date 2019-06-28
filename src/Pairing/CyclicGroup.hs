@@ -10,6 +10,7 @@ import Protolude
 import Crypto.Random (MonadRandom)
 import Data.ByteString.Builder
 import Data.ByteString as BS
+import PrimeField (PrimeField, toInt)
 
 class AsInteger a where
   asInteger :: a -> Integer
@@ -33,6 +34,11 @@ instance AsInteger Int where
 
 instance AsInteger Integer where
   asInteger = identity
+
+-- Temporary solution.
+-- TODO: Maybe move these definitions to galois-field library
+instance AsInteger (PrimeField p) where
+  asInteger = toInt
 
 class FromX a where
   yFromX :: a -> LargestY -> Maybe a
