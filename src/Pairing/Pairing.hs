@@ -11,14 +11,14 @@ module Pairing.Pairing
 
 import Protolude
 
+import Data.List ((!!))
 import ExtensionField (fromList)
 
-import Data.List ((!!))
-import Pairing.Point
+import Pairing.Fq
 import Pairing.Group
 import Pairing.Jacobian
-import Pairing.Fq
 import Pairing.Params
+import Pairing.Point
 
 -- G2, but using Jacobian coordinates
 type JG2 = JPoint Fq2

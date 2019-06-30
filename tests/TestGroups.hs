@@ -2,19 +2,20 @@ module TestGroups where
 
 import Protolude
 
+import Data.ByteString as BS (null, dropWhile)
 import Pairing.Fq
 import Pairing.Fr
-import Pairing.Point
 import Pairing.Group
-import Pairing.Params
-import Pairing.Serialize
 import Pairing.Pairing
+import Pairing.Params
+import Pairing.Point
+import Pairing.Serialize
+import Test.QuickCheck.Instances
 import Test.Tasty
-import Test.Tasty.QuickCheck
 import Test.Tasty.HUnit
 import qualified Test.QuickCheck.Monadic as TQM (monadicIO, assert, run)
-import Test.QuickCheck.Instances ()
-import Data.ByteString as BS (null, dropWhile)
+import Test.Tasty.QuickCheck
+
 import TestCommon
 
 -------------------------------------------------------------------------------
@@ -50,7 +51,7 @@ serializeTest pt compFunc testFunc = do
 g1FromXTest :: G1 -> Assertion
 g1FromXTest Infinity = pure ()
 g1FromXTest pt@(Point x y) = do
-  let ysq = fqPow y 2
+  let ysq = y ^ 2
   let (Just lysqrt) = fqSqrt True ysq
   let (Just sysqrt) = fqSqrt False ysq
   let egly = groupFromX True x
@@ -121,7 +122,7 @@ unit_order_g2_valid
 g2FromXTest :: G2 -> Assertion
 g2FromXTest Infinity = pure ()
 g2FromXTest pt@(Point x y) = do
-  let ysq = fq2Pow y 2
+  let ysq = y ^ 2
   let (Just ny) = fq2YforX x True
   if (ny /= y) then (Point x y) @=? (Point x (negate ny)) else (Point x y) @=? (Point x ny)
 

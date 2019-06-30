@@ -4,7 +4,6 @@ import Protolude
 
 import ExtensionField
 
-import TestFields () -- for its Arbitrary instances
 import Pairing.Group
 import Pairing.Pairing
 import Pairing.Point

@@ -1,41 +1,38 @@
-{-# LANGUAGE FlexibleInstances #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 -- | Definitions of the groups the pairing is defined on
-module Pairing.Group (
-  CyclicGroup(..),
-  G1,
-  G2,
-  GT,
-  isOnCurveG1,
-  isOnCurveG2,
-  isInGT,
-  g1,
-  g2,
-  b1,
-  b2,
-  hashToG1,
-  groupFromX,
-  fromByteStringG1,
-  fromByteStringG2,
-  fromByteStringGT
-) where
+module Pairing.Group
+  ( CyclicGroup(..)
+  , G1
+  , G2
+  , GT
+  , b1
+  , b2
+  , g1
+  , g2
+  , groupFromX
+  , hashToG1
+  , isInGT
+  , isOnCurveG1
+  , isOnCurveG2
+  , fromByteStringG1
+  , fromByteStringG2
+  , fromByteStringGT
+  ) where
 
 import Protolude
 
-import PrimeField (toInt)
+import Control.Monad.Random (MonadRandom)
 import ExtensionField (fromList)
+import GaloisField (GaloisField(..))
+import PrimeField (toInt)
+import Test.QuickCheck (Arbitrary(..), Gen)
 
-import Data.Semigroup
-import Pairing.Fq
-import Pairing.Point
-import Pairing.Params
 import Pairing.CyclicGroup
-import Test.QuickCheck
+import Pairing.Fq
 import Pairing.Hash
-import Crypto.Random (MonadRandom)
-import Pairing.Modular
-import System.Random
+import Pairing.Params
+import Pairing.Point
 import Pairing.Serialize
 
 -- | G1 is E(Fq) defined by y^2 = x^3 + b
@@ -66,7 +63,7 @@ instance CyclicGroup G1 where
   order _ = _r
   expn a b = gMul a (asInteger b)
   inverse = gNeg
-  random _ = randomG1
+  random = randomG1
 
 instance Validate G1 where
   isValidElement = isOnCurveG1
@@ -86,7 +83,7 @@ instance CyclicGroup G2 where
   order _ = _r
   expn a b = gMul a (asInteger b)
   inverse = gNeg
-  random _ = randomG2
+  random = randomG2
 
 instance Validate G2 where
   isValidElement = isOnCurveG2
@@ -102,11 +99,11 @@ instance Monoid GT where
   mempty = 1
 
 instance CyclicGroup GT where
-  generator = notImplemented -- this should be the _r-th primitive root of unity
-  order = notImplemented -- should be a factor of _r
+  generator = panic "not implemented." -- this should be the _r-th primitive root of unity
+  order = panic "not implemented." -- should be a factor of _r
   expn a b = a ^ asInteger b
   inverse = recip
-  random _ = fq12Random
+  random = rnd
 
 instance ToUncompressedForm GT where
   serializeUncompressed = fmap toS . elementToUncompressedForm
@@ -133,18 +130,14 @@ g2 = Point x y
 -- | Test whether a value in G1 satisfies the corresponding curve
 -- equation
 isOnCurveG1 :: G1 -> Bool
-isOnCurveG1 Infinity
-  = True
-isOnCurveG1 (Point x y)
-  = (y `fqPow` 2 == x `fqPow` 3 + fromInteger _b)
+isOnCurveG1 Infinity    = True
+isOnCurveG1 (Point x y) = (y ^ 2 == x ^ 3 + fromInteger _b)
 
 -- | Test whether a value in G2 satisfies the corresponding curve
 -- equation
 isOnCurveG2 :: G2 -> Bool
-isOnCurveG2 Infinity
-  = True
-isOnCurveG2 (Point x y)
-  = y `fq2Pow` 2 == x `fq2Pow` 3 + fromList [fromInteger _b] / xi
+isOnCurveG2 Infinity    = True
+isOnCurveG2 (Point x y) = y ^ 2 == x ^ 3 + fromList [fromInteger _b] / xi
 
 -- | Test whether a value is an _r-th root of unity
 isInGT :: GT -> Bool
@@ -162,24 +155,20 @@ b2 = fromList [b1] / xi
 -- Generators
 -------------------------------------------------------------------------------
 
-instance Arbitrary (Point Fq) where -- G1
+instance Arbitrary G1 where
   arbitrary = gMul g1 . abs <$> (arbitrary :: Gen Integer)
 
-instance Arbitrary (Point Fq2) where -- G2
+instance Arbitrary G2 where
   arbitrary = gMul g2 . abs <$> (arbitrary :: Gen Integer)
 
 hashToG1 :: MonadRandom m => ByteString -> m (Maybe G1)
 hashToG1 = swEncBN
 
-randomG1 :: (MonadRandom m) => m G1
-randomG1 = do
-  r <- toInt <$> fqRandom
-  pure (gMul g1 r)
+randomG1 :: forall m . MonadRandom m => m G1
+randomG1 = expn generator <$> (rnd :: m Fq)
 
-randomG2 :: (MonadRandom m) => m G2
-randomG2 = do
-  r <- toInt <$> fqRandom
-  pure (gMul g2 r)
+randomG2 :: forall m . MonadRandom m => m G2
+randomG2 = expn generator <$> (rnd :: m Fq)
 
 groupFromX :: (Validate (Point a), FromX a) => Bool -> a -> Maybe (Point a)
 groupFromX largestY x = do
@@ -194,4 +183,3 @@ fromByteStringG2 = pointFromByteString 1 . toSL
 
 fromByteStringGT :: ByteString -> Either Text GT
 fromByteStringGT = elementReadUncompressed 1 . toSL
-

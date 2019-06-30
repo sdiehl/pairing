@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -fno-warn-orphans #-}
+
 -- | Prime field with characteristic _q, over which the elliptic curve
 -- is defined and the other finite field extensions.
 --
@@ -11,12 +13,6 @@ module Pairing.Fq
   , Fq2
   , Fq6
   , Fq12
-  , fqRandom
-  , fq2Random
-  , fq6Random
-  , fq12Random
-  , fqPow
-  , fq2Pow
   , fqSqrt
   , fq2Sqrt
   , fqYforX
@@ -34,8 +30,6 @@ module Pairing.Fq
 
 import Protolude
 
-import Crypto.Random (MonadRandom)
-import Crypto.Number.Generate (generateMax)
 import Data.ByteString as B (splitAt)
 import ExtensionField (ExtensionField, IrreducibleMonic(..), fromField, fromList, t, x)
 import Math.NumberTheory.Moduli.Class (powMod)
@@ -103,7 +97,7 @@ instance ByteRepr Fq where
 instance ByteRepr Fq2 where
   mkRepr = foldl' (<>) mempty . map mkRepr . fromField
   fromRepr fq2 bs = do
-    let x = maybe 0 identity (head (fq2Bytes fq2))
+    let x          = fromMaybe 0 (head (fq2Bytes fq2))
         (xbs, ybs) = B.splitAt (reprLength x) bs
     x <- fromRepr (1 :: Fq) xbs
     y <- fromRepr (1 :: Fq) ybs
@@ -113,9 +107,9 @@ instance ByteRepr Fq2 where
 instance ByteRepr Fq6 where
   mkRepr = foldl' (<>) mempty . map mkRepr . fromField
   fromRepr fq6 bs = do
-    let x = maybe 0 identity (head (fq6Bytes fq6))
+    let x           = fromMaybe 0 (head (fq6Bytes fq6))
         (xbs, yzbs) = B.splitAt (reprLength x) bs
-        (ybs, zbs) = B.splitAt (reprLength x) yzbs
+        (ybs, zbs)  = B.splitAt (reprLength x) yzbs
     x <- fromRepr (1 :: Fq2) xbs
     y <- fromRepr (1 :: Fq2) ybs
     z <- fromRepr (1 :: Fq2) zbs
@@ -125,7 +119,7 @@ instance ByteRepr Fq6 where
 instance ByteRepr Fq12 where
   mkRepr = foldl' (<>) mempty . map mkRepr . fromField
   fromRepr fq12 bs = do
-    let x = maybe 0 identity (head (fq12Bytes fq12))
+    let x          = fromMaybe 0 (head (fq12Bytes fq12))
         (xbs, ybs) = B.splitAt (reprLength x) bs
     x <- fromRepr (1 :: Fq6) xbs
     y <- fromRepr (1 :: Fq6) ybs
@@ -133,45 +127,8 @@ instance ByteRepr Fq12 where
   reprLength = sum . map reprLength . fq12Bytes
 
 -------------------------------------------------------------------------------
--- Random
--------------------------------------------------------------------------------
-
-fqRandom :: MonadRandom m => m Fq
-fqRandom = fromInteger <$> generateMax _q
-
-fq2Random :: MonadRandom m => m Fq2
-fq2Random = do
-  a <- fqRandom
-  b <- fqRandom
-  return (fromList [a, b])
-
-fq6Random :: MonadRandom m => m Fq6
-fq6Random = do
-  a <- fq2Random
-  b <- fq2Random
-  c <- fq2Random
-  return (fromList [a, b, c])
-
-fq12Random :: MonadRandom m => m Fq12
-fq12Random = do
-  a <- fq6Random
-  b <- fq6Random
-  return (fromList [a, b])
-
--------------------------------------------------------------------------------
 -- Y for X
 -------------------------------------------------------------------------------
-
-fqPow :: Integral e => Fq -> e -> Fq
-fqPow a b = fromInteger (withQ (modUnOp (toInt a) (flip powMod b)))
-{-# INLINE fqPow #-}
-
-fq2Pow :: Fq2 -> Integer -> Fq2
-fq2Pow b 0 = 1
-fq2Pow b e = t * fq2Pow (b * b) (shiftR e 1)
-  where
-    t = if testBit e 0 then b else 1
-{-# INLINE fq2Pow #-}
 
 fqSqrt :: Bool -> Fq -> Maybe Fq
 fqSqrt largestY a = do
@@ -184,20 +141,20 @@ fqSqrt largestY a = do
 -- return value and negate as necessary
 fq2Sqrt :: Fq2 -> Maybe Fq2
 fq2Sqrt a = do
-  let a1 = a `fq2Pow` qm3by4
+  let a1 = a ^ qm3by4
   let alpha = (a1 ^ 2) * a
-  let a0 = (alpha `fq2Pow` _q) * alpha
+  let a0 = (alpha ^ _q) * alpha
   if  a0 == -1 then Nothing else do
     let x0 = a1 * a
     if alpha == -1 then Just (a1 * fromList [0, 1]) else do
-      let b = (alpha + 1) `fq2Pow` qm1by2
+      let b = (alpha + 1) ^ qm1by2
       Just (b * x0)
   where
     qm3by4 = withQ (modBinOp (_q -3) 4 (/))
     qm1by2 = withQ (modBinOp (_q -1) 2 (/))
 
 fqYforX :: Fq -> Bool -> Maybe Fq
-fqYforX x largestY = fqSqrt largestY (x `fqPow` 3 + fromInteger _b)
+fqYforX x largestY = fqSqrt largestY (x ^ 3 + fromInteger _b)
 
 -- https://docs.rs/pairing/0.14.1/src/pairing/bls12_381/ec.rs.html#102-124
 fq2YforX :: Fq2 -> Bool -> Maybe Fq2
@@ -205,7 +162,7 @@ fq2YforX x ly
   | ly = newy
   | otherwise = negate <$> newy
   where
-    newy = fq2Sqrt (x `fq2Pow` 3 + fromInteger _b / xi)
+    newy = fq2Sqrt (x ^ 3 + fromInteger _b / xi)
 
 -------------------------------------------------------------------------------
 -- Non-residues

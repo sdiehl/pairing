@@ -1,8 +1,8 @@
+{-# OPTIONS_GHC -fno-warn-orphans #-}
+
 -- | Prime field from which exponents should be chosen
 module Pairing.Fr
   ( Fr
-  , frPow
-  , frRandom
   , isRootOfUnity
   , isPrimitiveRootOfUnity
   , primitiveRootOfUnity
@@ -11,9 +11,6 @@ module Pairing.Fr
 
 import Protolude
 
-import Crypto.Random (MonadRandom)
-import Crypto.Number.Generate (generateMax)
-import Math.NumberTheory.Moduli.Class (powMod)
 import PrimeField (PrimeField, toInt)
 
 import Pairing.CyclicGroup
@@ -83,13 +80,3 @@ precompRootOfUnity 26 = 74195885525073956524816510880344848975797249529535626186
 precompRootOfUnity 27 = 2082940218526944230311718225077035922214683169814847712455127909555749686340
 precompRootOfUnity 28 = 19103219067921713944291392827692070036145651957329286315305642004821462161904
 precompRootOfUnity _ = panic "precompRootOfUnity: exponent too big for Fr / negative"
-
--------------------------------------------------------------------------------
--- Miscellaneous
--------------------------------------------------------------------------------
-
-frPow :: Integral e => Fr -> e -> Fr
-frPow a b = fromInteger (withQ (modUnOp (toInt a) (flip powMod b)))
-
-frRandom :: MonadRandom m => m Fr
-frRandom = fromInteger <$> generateMax _r

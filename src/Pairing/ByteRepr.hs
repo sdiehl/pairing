@@ -1,13 +1,13 @@
-module Pairing.ByteRepr (
-  ByteRepr(..),
-  toBytes,
-  toPaddedBytes,
-  fromBytesToInteger,
-) where
+module Pairing.ByteRepr
+  ( ByteRepr(..)
+  , fromBytesToInteger
+  , toBytes
+  , toPaddedBytes
+  ) where
 
 import Protolude
+
 import Data.ByteString as B
-import Data.ByteString.Builder
 
 class ByteRepr a where
   mkRepr :: a -> Maybe ByteString
@@ -21,14 +21,15 @@ toBytes x = B.reverse . B.unfoldr (fmap go) . Just $ changeSign x
     changeSign | x < 0     = subtract 1 . negate
                | otherwise = identity
     go :: Integer -> (Word8, Maybe Integer)
-    go x = ( b, i )
+    go x = (b, i)
       where
         b = changeSign (fromInteger x)
-        i | x >= 128  = Just (x `shiftR` 8 )
+        i | x >= 128  = Just (x `shiftR` 8)
           | otherwise = Nothing
 
 toPaddedBytes :: Int -> Integer -> Maybe ByteString
-toPaddedBytes len a = if B.length bs > len then Nothing else Just (B.append (B.replicate (len - B.length bs) 0x0)  bs)
+toPaddedBytes len a = if B.length bs > len then Nothing
+  else Just (B.append (B.replicate (len - B.length bs) 0x0) bs)
   where
     bs = toBytes a
 

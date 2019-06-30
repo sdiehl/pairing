@@ -2,15 +2,14 @@ module BenchPairing (benchmarks) where
 
 import Protolude
 
-import ExtensionField
-
 import Criterion.Main
-import qualified Pairing.Group as Group
-import qualified Pairing.Point as Point
-import qualified Pairing.Pairing as Pairing
+import ExtensionField
 import Pairing.CyclicGroup (asInteger)
 import qualified Pairing.Fq as Fq
 import qualified Pairing.Fr as Fr
+import qualified Pairing.Group as Group
+import qualified Pairing.Pairing as Pairing
+import qualified Pairing.Point as Point
 
 -------------------------------------------------------------------------------
 -- Benchmark Suite
@@ -129,130 +128,120 @@ test_g2_2 = Point.Point
   )
 
 test_hash :: ByteString
-test_hash = toS "TyqIPUBYojDVOnDPacfMGrGOzpaQDWD3KZCpqzLhpE4A3kRUCQFUx040Ok139J8WDVV2C99Sfge3G20Q8MEgu23giWmqRxqOc8pH"
+test_hash = toS ("TyqIPUBYojDVOnDPacfMGrGOzpaQDWD3KZCpqzLhpE4A3kRUCQFUx040Ok139J8WDVV2C99Sfge3G20Q8MEgu23giWmqRxqOc8pH" :: ByteString)
 
 benchmarks :: [Benchmark]
-benchmarks
-  = [ bgroup "Frobenius in Fq12"
-          [ bench "naive"
-              $ whnf (Pairing.frobeniusNaive 1) testFq12_1
-          , bench "fast"
-              $ whnf (Fq.fq12Frobenius 1) testFq12_1
-          ]
-
-      , bgroup "Final exponentiation"
-          [ bench "naive"
-              $ whnf Pairing.finalExponentiationNaive testFq12_1
-          , bench "fast"
-              $ whnf Pairing.finalExponentiation testFq12_1
-          ]
-
-      , bgroup "Pairing"
-          [ bench "without final exponentiation"
-              $ whnf (uncurry Pairing.atePairing) (Group.g1, Group.g2)
-          , bench "with final exponentiation"
-              $ whnf (uncurry Pairing.reducedPairing) (Group.g1, Group.g2)
-          ]
-
-      , bgroup "Fq"
-          [ bench "multiplication"
-              $ whnf (uncurry (*)) (testFq_1, testFq_2)
-          , bench "addition"
-              $ whnf (uncurry (+)) (testFq_1, testFq_2)
-          , bench "division"
-              $ whnf (uncurry (/)) (testFq_1, testFq_2)
-          , bench "pow"
-              $ whnf (Fq.fqPow testFq_1) (asInteger testFr_1)
-          , bench "inversion"
-              $ whnf recip testFq_1
-          , bench "fqFromX"
-              $ whnf (Fq.fqYforX testFq_1) True
-          ]
-
-      , bgroup "Fr"
-          [ bench "multiplication"
-              $ whnf (uncurry (*)) (testFr_1, testFr_2)
-          , bench "addition"
-              $ whnf (uncurry (+)) (testFr_1, testFr_2)
-          , bench "division"
-              $ whnf (uncurry (/)) (testFr_1, testFr_2)
-          , bench "inversion"
-              $ whnf recip testFr_1
-          , bench "pow"
-              $ whnf (Fr.frPow testFr_1) (asInteger testFr_2)
-          ]
-
-      , bgroup "Fq2"
-          [ bench "multiplication"
-              $ whnf (uncurry (*)) (testFq2_1, testFq2_2)
-          , bench "addition"
-              $ whnf (uncurry (+)) (testFq2_1, testFq2_2)
-          , bench "division"
-              $ whnf (uncurry (/)) (testFq2_1, testFq2_2)
-          , bench "squaring"
-              $ whnf (^ 2) testFq2_1
-          , bench "pow"
-              $ whnf (Fq.fq2Pow testFq2_1) (asInteger testFr_1)
-          , bench "negation"
-              $ whnf negate testFq2_1
-          , bench "inversion"
-              $ whnf recip testFq2_1
-          , bench "conjugation"
-              $ whnf Fq.fq2Conj testFq2_1
-          , bench "square root"
-              $ whnf Fq.fq2Sqrt testFq2_1
-          , bench "fq2FromX"
-              $ whnf (Fq.fq2YforX testFq2_1) True 
-          ]
-
-      , bgroup "Fq6"
-          [ bench "multiplication"
-              $ whnf (uncurry (*)) (testFq6_1, testFq6_2)
-          , bench "addition"
-              $ whnf (uncurry (+)) (testFq6_1, testFq6_2)
-          , bench "division"
-              $ whnf (uncurry (/)) (testFq6_1, testFq6_2)
-          , bench "squaring"
-              $ whnf (^ 2) testFq6_1
-          , bench "negation"
-              $ whnf negate testFq6_1
-          , bench "inversion"
-              $ whnf recip testFq6_1
-          ]
-
-      , bgroup "Fq12"
-          [ bench "multiplication"
-              $ whnf (uncurry (*)) (testFq12_1, testFq12_2)
-          , bench "addition"
-              $ whnf (uncurry (+)) (testFq12_1, testFq12_2)
-          , bench "division"
-              $ whnf (uncurry (/)) (testFq12_1, testFq12_2)
-          , bench "negation"
-              $ whnf negate testFq12_1
-          , bench "inversion"
-              $ whnf recip testFq12_1
-          , bench "conjugation"
-              $ whnf Fq.fq12Conj testFq12_1
-          ]
-
-      , bgroup "G1"
-          [ bench "double"
-              $ whnf Point.gDouble test_g1_1
-          , bench "add"
-              $ whnf (uncurry Point.gAdd) (test_g1_1, test_g1_2)
-          , bench "multiply"
-              $ whnf (uncurry Point.gMul) (test_g1_1, 42)
-          , bench "hashToG1"
-              $ whnfIO (Group.hashToG1 test_hash)
-          ]
-
-      , bgroup "G2"
-          [ bench "double"
-              $ whnf Point.gDouble test_g2_1
-          , bench "add"
-              $ whnf (uncurry Point.gAdd) (test_g2_1, test_g2_2)
-          , bench "multiply"
-              $ whnf (uncurry Point.gMul) (test_g2_1, 42)
-          ]
-
-      ]
+benchmarks =
+  [ bgroup "Frobenius in Fq12"
+    [ bench "naive"
+      $ whnf (Pairing.frobeniusNaive 1) testFq12_1
+    , bench "fast"
+      $ whnf (Fq.fq12Frobenius 1) testFq12_1
+    ]
+  , bgroup "Final exponentiation"
+    [ bench "naive"
+      $ whnf Pairing.finalExponentiationNaive testFq12_1
+    , bench "fast"
+      $ whnf Pairing.finalExponentiation testFq12_1
+    ]
+  , bgroup "Pairing"
+    [ bench "without final exponentiation"
+      $ whnf (uncurry Pairing.atePairing) (Group.g1, Group.g2)
+    , bench "with final exponentiation"
+      $ whnf (uncurry Pairing.reducedPairing) (Group.g1, Group.g2)
+    ]
+  , bgroup "Fq"
+    [ bench "multiplication"
+      $ whnf (uncurry (*)) (testFq_1, testFq_2)
+    , bench "addition"
+      $ whnf (uncurry (+)) (testFq_1, testFq_2)
+    , bench "division"
+      $ whnf (uncurry (/)) (testFq_1, testFq_2)
+    , bench "pow"
+      $ whnf (testFq_1 ^) (asInteger testFr_1)
+    , bench "inversion"
+      $ whnf recip testFq_1
+    , bench "fqFromX"
+      $ whnf (Fq.fqYforX testFq_1) True
+    ]
+  , bgroup "Fr"
+    [ bench "multiplication"
+      $ whnf (uncurry (*)) (testFr_1, testFr_2)
+    , bench "addition"
+      $ whnf (uncurry (+)) (testFr_1, testFr_2)
+    , bench "division"
+      $ whnf (uncurry (/)) (testFr_1, testFr_2)
+    , bench "inversion"
+      $ whnf recip testFr_1
+    , bench "pow"
+      $ whnf (testFr_1 ^) (asInteger testFr_2)
+    ]
+  , bgroup "Fq2"
+    [ bench "multiplication"
+      $ whnf (uncurry (*)) (testFq2_1, testFq2_2)
+    , bench "addition"
+      $ whnf (uncurry (+)) (testFq2_1, testFq2_2)
+    , bench "division"
+      $ whnf (uncurry (/)) (testFq2_1, testFq2_2)
+    , bench "squaring"
+      $ whnf (^ 2) testFq2_1
+    , bench "pow"
+      $ whnf (testFq2_1 ^) (asInteger testFr_1)
+    , bench "negation"
+      $ whnf negate testFq2_1
+    , bench "inversion"
+      $ whnf recip testFq2_1
+    , bench "conjugation"
+      $ whnf Fq.fq2Conj testFq2_1
+    , bench "square root"
+      $ whnf Fq.fq2Sqrt testFq2_1
+    , bench "fq2FromX"
+      $ whnf (Fq.fq2YforX testFq2_1) True 
+    ]
+  , bgroup "Fq6"
+    [ bench "multiplication"
+      $ whnf (uncurry (*)) (testFq6_1, testFq6_2)
+    , bench "addition"
+      $ whnf (uncurry (+)) (testFq6_1, testFq6_2)
+    , bench "division"
+      $ whnf (uncurry (/)) (testFq6_1, testFq6_2)
+    , bench "squaring"
+      $ whnf (^ 2) testFq6_1
+    , bench "negation"
+      $ whnf negate testFq6_1
+    , bench "inversion"
+      $ whnf recip testFq6_1
+    ]
+  , bgroup "Fq12"
+    [ bench "multiplication"
+      $ whnf (uncurry (*)) (testFq12_1, testFq12_2)
+    , bench "addition"
+      $ whnf (uncurry (+)) (testFq12_1, testFq12_2)
+    , bench "division"
+      $ whnf (uncurry (/)) (testFq12_1, testFq12_2)
+    , bench "negation"
+      $ whnf negate testFq12_1
+    , bench "inversion"
+      $ whnf recip testFq12_1
+    , bench "conjugation"
+      $ whnf Fq.fq12Conj testFq12_1
+    ]
+  , bgroup "G1"
+    [ bench "double"
+      $ whnf Point.gDouble test_g1_1
+    , bench "add"
+      $ whnf (uncurry Point.gAdd) (test_g1_1, test_g1_2)
+    , bench "multiply"
+      $ whnf (uncurry Point.gMul) (test_g1_1, 42)
+    , bench "hashToG1"
+      $ whnfIO (Group.hashToG1 test_hash)
+    ]
+  , bgroup "G2"
+    [ bench "double"
+      $ whnf Point.gDouble test_g2_1
+    , bench "add"
+      $ whnf (uncurry Point.gAdd) (test_g2_1, test_g2_2)
+    , bench "multiply"
+      $ whnf (uncurry Point.gMul) (test_g2_1, 42)
+    ]
+  ]

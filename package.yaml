@@ -1,42 +1,31 @@
-name: pairing
-version: 0.3.1
-synopsis: Optimal ate pairing over Barreto-Naehrig curves
+name:        pairing
+version:     0.3.1
+synopsis:    Optimal ate pairing over Barreto-Naehrig curves
 description: Optimal ate pairing over Barreto-Naehrig curves
-maintainer: Adjoint Inc (info@adjoint.io)
-license: MIT
-github: adjoint-io/pairing
-category: Cryptography
+maintainer:  Adjoint Inc (info@adjoint.io)
+license:     MIT
+github:      adjoint-io/pairing
+category:    Cryptography
 
 extra-source-files:
 - README.md
 - ChangeLog.md
 
-flags:
-  static:
-    description: Emit statically-linked binary
-    manual: False
-    default: False
-
-  optimized:
-    description: Perform compiler optimizations
-    manual: False
-    default: False
-
 dependencies:
   # Prelude
   - base >= 4.7 && < 5
-  - protolude  >= 0.2
-  - cryptonite
-  - bytestring
-  - random
-  - memory
-  - wl-pprint-text
-  - QuickCheck
+  - protolude >= 0.2
   - arithmoi >= 0.8
-  - integer-logarithms
-  - errors
   - binary
+  - bytestring
+  - errors
   - galois-field
+  - integer-logarithms
+  - memory
+  - MonadRandom
+  - QuickCheck
+  - random
+  - wl-pprint-text
 
 library:
   source-dirs: src
@@ -77,13 +66,11 @@ library:
     - FlexibleContexts
     - ScopedTypeVariables
     - RankNTypes
-    - BangPatterns
     - DataKinds
+    - DeriveAnyClass
+    - DeriveFunctor
     - DeriveGeneric
-    - ExistentialQuantification
-    - ExplicitForAll
     - GeneralizedNewtypeDeriving
-    - KindSignatures
     - MultiParamTypeClasses
     - TypeApplications
 
@@ -104,16 +91,16 @@ library:
 tests:
   test-circuit-compiler:
     main: Driver.hs
-    source-dirs: tests
+    source-dirs:
+      - src
+      - tests
     dependencies:
-      - pairing
-      - base
+      - QuickCheck
+      - quickcheck-instances
       - tasty
       - tasty-discover
       - tasty-hunit
       - tasty-quickcheck
-      - quickcheck-instances
-      - QuickCheck
     default-extensions:
       - LambdaCase
       - RecordWildCards
@@ -123,29 +110,39 @@ tests:
       - FlexibleContexts
       - ScopedTypeVariables
       - RankNTypes
+      - DataKinds
+      - DeriveAnyClass
+      - DeriveFunctor
+      - DeriveGeneric
+      - MultiParamTypeClasses
+      - TypeApplications
       - TypeSynonymInstances
 
 benchmarks:
   pairing-benchmarks:
     main: Main.hs
     source-dirs:
+      - src
       - bench
-      - tests
-    other-modules:
-      - BenchPairing
     dependencies:
-      - pairing
       - criterion
       - QuickCheck
-      - tasty
-      - tasty-quickcheck
-      - tasty-hunit
       - quickcheck-instances
+      - tasty
+      - tasty-hunit
+      - tasty-quickcheck
     default-extensions:
       - LambdaCase
       - RecordWildCards
+      - OverloadedStrings
       - NoImplicitPrelude
       - FlexibleInstances
       - FlexibleContexts
       - ScopedTypeVariables
       - RankNTypes
+      - DataKinds
+      - DeriveAnyClass
+      - DeriveFunctor
+      - DeriveGeneric
+      - MultiParamTypeClasses
+      - TypeApplications

@@ -2,14 +2,13 @@ module TestFields where
 
 import Protolude
 
+import GaloisField
 import ExtensionField
-
 import Pairing.Fq
 import Pairing.Fr
-
 import Test.Tasty
-import Test.Tasty.QuickCheck
 import Test.Tasty.HUnit
+import Test.Tasty.QuickCheck
 
 import TestCommon
 
@@ -66,15 +65,15 @@ unit_uRoot = u^2 @=? -1
 
 unit_fq2Pow :: Assertion
 unit_fq2Pow = do
-  fq2 <- fq2Random
+  fq2 :: Fq2 <- rnd
   let pow5 = ((fq2 ^ 2) ^ 2) * fq2
-  pow5 @=? fq2Pow fq2 5
+  pow5 @=? fq2 ^ 5
   let pow10 = ((((fq2 ^ 2) ^ 2) ^ 2) * fq2) * fq2
-  pow10 @=? fq2Pow fq2 10
+  pow10 @=? fq2 ^ 10
 
 unit_fq2Sqrt :: Assertion
 unit_fq2Sqrt = do
-  fq2 <- fq2Random
+  fq2 :: Fq2 <- rnd
   let sq = fq2 ^ 2
   let (Just rt) = fq2Sqrt sq
   sq @=? rt ^ 2

@@ -1,24 +1,26 @@
-module Pairing.Serialize (
-  ToCompressedForm(..),
-  ToUncompressedForm(..),
-  putCompressionType,
-  toCompressedForm,
-  toUncompressedForm,
-  elementToUncompressedForm,
-  pointFromByteString,
-  elementReadUncompressed,
-) where
+module Pairing.Serialize
+  ( ToCompressedForm(..)
+  , ToUncompressedForm(..)
+  , elementReadUncompressed
+  , elementToUncompressedForm
+  , pointFromByteString
+  , putCompressionType
+  , toCompressedForm
+  , toUncompressedForm
+  ) where
 
 import Protolude hiding (putByteString)
-import Pairing.Point
-import Data.ByteString.Builder
-import Data.ByteString as B hiding (length)
-import qualified Data.ByteString as B
+
+import Control.Error
 import Data.Binary.Get
 import Data.Binary.Put (Put, putWord8, putWord16le, runPut, putByteString)
-import Control.Error
+import qualified Data.ByteString as B
+import Data.ByteString.Builder
+
+import Pairing.Point
 import Pairing.ByteRepr
 import Pairing.CyclicGroup
+
 class ToCompressedForm a where
   -- | The serialisation may fail if y cannot be obtained from x
   serializeCompressed :: a -> Maybe ByteString

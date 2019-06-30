@@ -4,11 +4,11 @@
 -- @(X / Z^2, Y / Z^3)@.  Curve operations are more optimal in Jacobian
 -- coordinates when the time complexity for underlying field inversions is
 -- significantly higher than field multiplications.
-module Pairing.Jacobian (
-  JPoint,
-  toJacobian,
-  fromJacobian
-) where
+module Pairing.Jacobian
+  ( JPoint
+  , toJacobian
+  , fromJacobian
+  ) where
 
 import Protolude
 

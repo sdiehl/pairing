@@ -1,15 +1,15 @@
 module Pairing.Modular where
 
 import Protolude
+
 import Math.NumberTheory.Moduli.Class
 import Math.NumberTheory.Moduli.Sqrt
-import Math.NumberTheory.UniqueFactorisation
+
+import Control.Monad.Random (MonadRandom(..))
+
 import Pairing.Params
 import Pairing.ByteRepr
-import Crypto.Random (MonadRandom)
-import Crypto.Number.Generate (generateMax)
 import qualified Data.ByteString as BS
-import Math.NumberTheory.Logarithms
 
 withMod :: Integer -> (forall m . KnownNat m => Proxy m -> r) -> r
 withMod n cont = case someNatVal n of 
@@ -86,16 +86,14 @@ bothSqrtOf i = case sqrtsMod i of
   [_] -> Nothing
 
 legendre :: Integer -> Integer
-legendre a = if  conv > 1 then (-1) else conv 
+legendre a = if conv > 1 then (-1) else conv 
   where
     conv = withQ (modUnOp a f)
     f m = m `powMod` p2
     p2 = (_q - 1) `quot` 2
 
 randomMod :: forall n m. (MonadRandom m, KnownNat n) => Proxy n -> m (Mod n)
-randomMod mName = do
-  seed <- generateMax _q
-  pure (fromInteger @(Mod n) seed)
+randomMod n = fromInteger <$> getRandomR (0, natVal n - 1)
 
 fromBytes :: forall n. (KnownNat n) => ByteString -> Proxy n -> Mod n
 fromBytes bs mn = newMod (fromBytesToInteger bs) mn

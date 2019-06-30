@@ -51,4 +51,3 @@ distributes
  -> Bool
 distributes mult add x y z
   = x `mult` (y `add` z) == (x `mult` y) `add` (x `mult` z)
-

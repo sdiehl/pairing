@@ -1,15 +1,14 @@
 module Pairing.CyclicGroup
   ( AsInteger(..)
   , CyclicGroup(..)
-  , sumG
   , FromX(..)
-  , Validate (..)
+  , Validate(..)
+  , sumG
   ) where
 
 import Protolude
-import Crypto.Random (MonadRandom)
-import Data.ByteString.Builder
-import Data.ByteString as BS
+
+import Control.Monad.Random (MonadRandom)
 import PrimeField (PrimeField, toInt)
 
 class AsInteger a where
@@ -22,7 +21,7 @@ class Monoid g => CyclicGroup g where
   order :: Proxy g -> Integer
   expn :: AsInteger e => g -> e -> g
   inverse :: g -> g
-  random :: (MonadRandom m) => g -> m g
+  random :: MonadRandom m => m g
 
 -- | Sum all the elements of some container according to its group
 -- structure.
@@ -46,4 +45,3 @@ class FromX a where
 
 class Validate a where
   isValidElement :: a -> Bool
-

@@ -1,17 +1,18 @@
-module Pairing.Hash (
-    swEncBN
+module Pairing.Hash
+  ( swEncBN
   ) where
 
 import Protolude
+
+import Control.Error (runMaybeT, hoistMaybe)
+import Control.Monad.Random (MonadRandom)
+import Data.List (genericIndex)
+import Math.NumberTheory.Moduli.Class (Mod, getVal, powMod)
+
 import Pairing.Params
 import Pairing.Point
 import Pairing.Modular as M
 import Pairing.Fq as Fq
-import Math.NumberTheory.Moduli.Class
-import Math.NumberTheory.Moduli.Sqrt
-import Crypto.Random (MonadRandom)
-import Data.List
-import Control.Error (runMaybeT, hoistMaybe)
 
 sqrtOfMinusThree :: forall m . KnownNat m => Proxy m -> Maybe (Mod m)
 sqrtOfMinusThree _ = sqrtOf (-3)

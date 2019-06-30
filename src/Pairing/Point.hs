@@ -1,18 +1,16 @@
-{-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE DeriveAnyClass, DeriveGeneric #-}
---
 -- | Affine point arithmetic defining the group operation on an
 -- elliptic curve E(F), for some field F. In our case the field F is
 -- given as some type t with Num and Fractional instances.
-module Pairing.Point (
-  Point(..),
-  gDouble,
-  gAdd,
-  gNeg,
-  gMul,
-) where
+module Pairing.Point
+  ( Point(..)
+  , gDouble
+  , gAdd
+  , gNeg
+  , gMul
+  ) where
 
 import Protolude
+
 import Pairing.Fq (Fq, Fq2)
 
 -- | Points on a curve over a field @a@ represented as either affine
@@ -36,11 +34,7 @@ data Point a
 
 -- | Point addition, provides a group structure on an elliptic curve
 -- with the point at infinity as its unit.
-gAdd
-  :: (Fractional t, Eq t)
-  => Point t
-  -> Point t
-  -> Point t
+gAdd :: (Fractional t, Eq t) => Point t -> Point t -> Point t
 gAdd Infinity a = a
 gAdd a Infinity = a
 gAdd (Point x1 y1) (Point x2 y2)
@@ -63,22 +57,15 @@ gDouble (Point x y) = Point x' y'
     y' = -l * x' + l * x - y
 
 -- | Negation (flipping the y component)
-gNeg
-  :: (Fractional t, Eq t)
-  => Point t
-  -> Point t
-gNeg Infinity = Infinity
+gNeg :: (Fractional t) => Point t -> Point t
+gNeg Infinity    = Infinity
 gNeg (Point x y) = Point x (-y)
 
 
 -- | Multiplication by a scalar
-gMul
-  :: (Eq t, Integral a, Fractional t)
-  => Point t
-  -> a
-  -> Point t
-gMul _ 0 = Infinity
-gMul pt 1 = pt
+gMul :: (Eq t, Integral a, Fractional t) => Point t -> a -> Point t
+gMul _ 0      = Infinity
+gMul pt 1     = pt
 gMul pt n
   | n < 0     = panic "gMul: negative scalar not supported"
   | even n    = gMul (gDouble pt) (n `div` 2)
