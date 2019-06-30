@@ -31,6 +31,8 @@ module Pairing.Fq
   , fq2Conj
   , fq12Conj
   , fq12Frobenius
+  , fromField
+  , fromList
   ) where
 
 import Protolude
@@ -90,11 +92,15 @@ instance Ord Fq2 where
 
 instance FromX Fq where
   yFromX = fqYforX
-  isLargestY y = y > negate y
+  -- isLargestY y = y > negate y
+  isOdd y = odd (toInt y)
 
 instance FromX Fq2 where
   yFromX = fq2YforX
-  isLargestY y = y > negate y
+  -- isLargestY y = y > negate y
+  isOdd a = case fromField a of -- This is generalised from the MCL implementation where in Fq2 oddness is based on the first element
+    (x : xs) -> isOdd x
+    [] -> False -- Assume zero
 
 instance ByteRepr Fq where
   mkRepr bo = toPaddedBytes bo <$> toInt
@@ -209,10 +215,10 @@ fq2Pow b e = t * fq2Pow (b * b) (shiftR e 1)
     t = if testBit e 0 then b else 1
 {-# INLINE fq2Pow #-}
 
-fqSqrt :: Bool -> Fq -> Maybe Fq
-fqSqrt largestY a = do
-  (y1, y2) <- withQM (modUnOpMTup (toInt a) bothSqrtOf)
-  return (fromInteger ((if largestY then max else min) y1 y2))
+fqSqrt :: (Fq -> Fq -> Fq) -> Fq -> Maybe Fq
+fqSqrt ysel a = case withQM (modUnOpMTup (toInt a) bothSqrtOf) of
+  Just (y1, y2) -> Just (ysel (fromInteger y1) (fromInteger y2))
+  Nothing -> Nothing
 
 -- | Square root of Fq2 are specified by https://eprint.iacr.org/2012/685.pdf,
 -- Algorithm 9 with lots of help from https://docs.rs/pairing/0.14.1/src/pairing/bls12_381/fq2.rs.html#162-222
@@ -232,14 +238,14 @@ fq2Sqrt a = do
     qm3by4 = withQ (modBinOp (_q -3) 4 (/))
     qm1by2 = withQ (modBinOp (_q -1) 2 (/))
 
-fqYforX :: Fq -> Bool -> Maybe Fq
-fqYforX x largestY = fqSqrt largestY (x `fqPow` 3 + fromInteger _b)
+fqYforX :: Fq -> (Fq -> Fq -> Fq) -> Maybe Fq
+fqYforX x ysel = fqSqrt ysel (x `fqPow` 3 + fromInteger _b)
 
 -- https://docs.rs/pairing/0.14.1/src/pairing/bls12_381/ec.rs.html#102-124
-fq2YforX :: Fq2 -> Bool -> Maybe Fq2
-fq2YforX x ly 
-  | ly = newy
-  | otherwise = negate <$> newy
+fq2YforX :: Fq2 -> (Fq2 -> Fq2 -> Fq2) -> Maybe Fq2
+fq2YforX x ly = do
+  y <- newy
+  pure (ly y (negate y))
   where
     newy = fq2Sqrt (x `fq2Pow` 3 + fromInteger _b / xi)
 

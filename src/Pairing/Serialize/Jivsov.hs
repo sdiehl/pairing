@@ -15,6 +15,12 @@ import Control.Error
 import Pairing.ByteRepr
 import Pairing.CyclicGroup
 
+-- | Point serialisation using https://tools.ietf.org/id/draft-jivsov-ecc-compact-05.html
+-- It is unclear if 02 is smallest y or not so the following is used in the first 2 bytes
+-- 01 - Point at infinity
+-- 02 - Compressed repr i.e. x only but use smallest y on decode
+-- 03 - Compressed repr i.e. x only but use largest y on decode
+-- 04 -- Uncompressed repr i.e. x & y
 data Jivsov = Jivsov
 
 instance MkCompressedForm Jivsov where
@@ -26,6 +32,8 @@ instance MkUncompressedForm Jivsov where
 
 instance FromSerialisedForm Jivsov where
   unserializePoint _ = pointFromByteString
+
+instance FromUncompressedForm Jivsov where
   unserialize _ = elementReadUncompressed
 
 putCompressionType :: Word8 -> Put
@@ -71,9 +79,9 @@ toUncompressedForm (Point x y) = do
     putByteString ry
 toUncompressedForm Infinity = pure $ runPut (putCompressionType 1)
 
-toCompressedForm :: (ByteRepr a, FromX a, Eq a) => Point a -> Maybe LByteString
+toCompressedForm :: (ByteRepr a, FromX a, Eq a, Ord a) => Point a -> Maybe LByteString
 toCompressedForm (Point x y) = do
-  ny <- yFromX x True
+  ny <- yFromX x max
   let yform = if ny == y then 3 else 2
   rx <- mkRepr (ByteOrderLength MostSignificantFirst minReprLength) x
   pure (runPut $ do
@@ -81,14 +89,15 @@ toCompressedForm (Point x y) = do
            putByteString rx)
 toCompressedForm Infinity = Just (toLazyByteString (word8 0 <> word8 1))
 
-pointFromByteString :: (Show a, Validate (Point a), ByteRepr a, FromX a) => a -> LByteString -> Either Text (Point a)
-pointFromByteString a = parseBS fromByteStringGet
+pointFromByteString :: (Show a, Validate (Point a), ByteRepr a, FromX a, Ord a) => Point a -> LByteString -> Either Text (Point a)
+pointFromByteString (Point a _) bs = parseBS fromByteStringGet bs
   where
     fromByteStringGet = do
       ctype <- getCompressionType
       processCompressed a ctype
+pointFromByteString Infinity _ = Left "Cannot use infinity to extract from bytestring"
 
-processCompressed :: forall a . (ByteRepr a, FromX a) => a -> Word8 -> Get (Maybe (Point a))
+processCompressed :: forall a . (ByteRepr a, FromX a, Ord a) => a -> Word8 -> Get (Maybe (Point a))
 processCompressed one ct
   | ct == 4 = do
       xbs <- getByteString blen
@@ -103,5 +112,5 @@ processCompressed one ct
     fromCompressed largestY = runMaybeT $ do
       xbs <- lift $ getByteString blen
       x <- hoistMaybe $ fromRepr (ByteOrderLength MostSignificantFirst minReprLength) one xbs
-      y <- hoistMaybe $ yFromX x largestY
+      y <- hoistMaybe $ yFromX x (\y1 y2 -> if largestY then max y1 y2 else min y1 y2)
       pure (Point x y)

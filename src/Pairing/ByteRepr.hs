@@ -37,11 +37,13 @@ toBytes x = B.reverse . B.unfoldr (fmap go) . Just $ changeSign x
 
 toPaddedBytes :: ByteOrderLength -> Integer -> Maybe ByteString
 toPaddedBytes bo a = case byteOrder bo of 
-  LeastSignificantFirst -> B.reverse <$> mkbs
-  MostSignificantFirst -> mkbs
+  LeastSignificantFirst -> B.reverse <$> mkbs (toBytes a)
+  MostSignificantFirst -> mkbs (toBytes a)
   where
-    mkbs = if B.length bs > lenPerElement bo then Nothing else Just (B.append (B.replicate (lenPerElement bo - B.length bs) 0x0)  bs)
-    bs = toBytes a
+    mkbs bs
+      | B.length bs > lenPerElement bo = Nothing 
+      | B.length bs == lenPerElement bo = Just bs
+      | otherwise = Just (B.append (B.replicate (lenPerElement bo - B.length bs) 0x0)  bs)
 
 fromBytesToInteger :: ByteOrder -> ByteString -> Integer
 fromBytesToInteger MostSignificantFirst = B.foldl' f 0

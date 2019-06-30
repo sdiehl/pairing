@@ -36,7 +36,7 @@ import Pairing.Hash
 import Crypto.Random (MonadRandom)
 import Pairing.Modular
 import System.Random
-import Pairing.Serialize
+import Pairing.Serialize.Types
 
 -- | G1 is E(Fq) defined by y^2 = x^3 + b
 type G1 = Point Fq
@@ -71,12 +71,6 @@ instance CyclicGroup G1 where
 instance Validate G1 where
   isValidElement = isOnCurveG1
 
-instance ToCompressedForm G1 where
-  serializeCompressed = fmap toS . toCompressedForm
-
-instance ToUncompressedForm G1 where
-  serializeUncompressed = fmap toS . toUncompressedForm
-
 instance Monoid G2 where
   mappend = gAdd
   mempty = Infinity
@@ -91,12 +85,6 @@ instance CyclicGroup G2 where
 instance Validate G2 where
   isValidElement = isOnCurveG2
 
-instance ToCompressedForm G2 where
-  serializeCompressed = fmap toS . toCompressedForm
-
-instance ToUncompressedForm G2 where
-  serializeUncompressed = fmap toS . toUncompressedForm
-
 instance Monoid GT where
   mappend = (*)
   mempty = 1
@@ -107,9 +95,6 @@ instance CyclicGroup GT where
   expn a b = a ^ asInteger b
   inverse = recip
   random _ = fq12Random
-
-instance ToUncompressedForm GT where
-  serializeUncompressed = fmap toS . elementToUncompressedForm
 
 instance Validate GT where
   isValidElement = isInGT
@@ -181,17 +166,17 @@ randomG2 = do
   r <- toInt <$> fqRandom
   pure (gMul g2 r)
 
-groupFromX :: (Validate (Point a), FromX a) => Bool -> a -> Maybe (Point a)
-groupFromX largestY x = do
-  y <- yFromX x largestY
+groupFromX :: (Validate (Point a), FromX a) => (a -> a -> a) -> a -> Maybe (Point a)
+groupFromX checkF x = do
+  y <- yFromX x checkF
   if isValidElement (Point x y) then Just (Point x y) else Nothing
 
-fromByteStringG1 :: ByteString -> Either Text G1
-fromByteStringG1 = pointFromByteString 1 . toSL
+fromByteStringG1 :: (FromSerialisedForm u) => u -> LByteString -> Either Text G1
+fromByteStringG1 unser = unserializePoint unser g1 . toSL
 
-fromByteStringG2 :: ByteString -> Either Text G2
-fromByteStringG2 = pointFromByteString 1 . toSL
+fromByteStringG2 :: (FromSerialisedForm u) => u -> LByteString -> Either Text G2
+fromByteStringG2 unser = unserializePoint unser g2 . toSL
 
-fromByteStringGT :: ByteString -> Either Text GT
-fromByteStringGT = elementReadUncompressed 1 . toSL
+fromByteStringGT :: (FromUncompressedForm u) => u -> LByteString -> Either Text GT
+fromByteStringGT unser = unserialize unser 1 . toSL
 

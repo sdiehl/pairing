@@ -97,7 +97,9 @@ library:
     - Pairing.Jacobian
     - Pairing.CyclicGroup
     - Pairing.Hash
-    - Pairing.Serialize
+    - Pairing.Serialize.Types
+    - Pairing.Serialize.Jivsov
+    - Pairing.Serialize.MCLWasm
     - Pairing.ByteRepr
 
   other-modules:
@@ -116,6 +118,7 @@ tests:
       - tasty-quickcheck
       - quickcheck-instances
       - QuickCheck
+      - hexstring
     default-extensions:
       - LambdaCase
       - RecordWildCards

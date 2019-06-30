@@ -2,6 +2,7 @@ module Pairing.Serialize.Types (
   MkCompressedForm(..),
   MkUncompressedForm(..),
   FromSerialisedForm(..),
+  FromUncompressedForm(..),
   minReprLength,
   buildPoint,
   parseBS
@@ -21,14 +22,16 @@ import Pairing.CyclicGroup
 
 class MkCompressedForm a where
   -- | The serialisation may fail if y cannot be obtained from x
-  serializeCompressed :: (ByteRepr b, FromX b, Eq b) => a -> Point b -> Maybe LByteString
+  serializeCompressed :: (ByteRepr b, FromX b, Ord b) => a -> Point b -> Maybe LByteString
 
 class MkUncompressedForm a where
   serializePointUncompressed :: (ByteRepr b, FromX b, Eq b) => a -> Point b -> Maybe LByteString
   serializeUncompressed :: (ByteRepr c) => a -> c -> Maybe LByteString
 
 class FromSerialisedForm a where
-  unserializePoint :: (ByteRepr b, FromX b, Eq b, Show b, Validate (Point b)) => a -> b -> LByteString -> Either Text (Point b)
+  unserializePoint :: (ByteRepr b, FromX b, Ord b, Show b, Validate (Point b)) => a -> Point b -> LByteString -> Either Text (Point b)
+
+class FromUncompressedForm a where
   unserialize :: (ByteRepr b, Validate b, Eq b, Show b) => a -> b -> LByteString -> Either Text b
 
 minReprLength :: Int
