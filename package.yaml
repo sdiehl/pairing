@@ -89,7 +89,7 @@ library:
     - Pairing.Modular
 
 tests:
-  test-circuit-compiler:
+  pairing-tests:
     main: Driver.hs
     source-dirs:
       - src

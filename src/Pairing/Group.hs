@@ -101,7 +101,7 @@ instance Monoid GT where
 instance CyclicGroup GT where
   generator = panic "not implemented." -- this should be the _r-th primitive root of unity
   order = panic "not implemented." -- should be a factor of _r
-  expn a b = a ^ asInteger b
+  expn a b = pow a (asInteger b)
   inverse = recip
   random = rnd
 
@@ -131,17 +131,17 @@ g2 = Point x y
 -- equation
 isOnCurveG1 :: G1 -> Bool
 isOnCurveG1 Infinity    = True
-isOnCurveG1 (Point x y) = (y ^ 2 == x ^ 3 + fromInteger _b)
+isOnCurveG1 (Point x y) = pow y 2 == pow x 3 + fromInteger _b
 
 -- | Test whether a value in G2 satisfies the corresponding curve
 -- equation
 isOnCurveG2 :: G2 -> Bool
 isOnCurveG2 Infinity    = True
-isOnCurveG2 (Point x y) = y ^ 2 == x ^ 3 + fromList [fromInteger _b] / xi
+isOnCurveG2 (Point x y) = pow y 2 == pow x 3 + fromList [fromInteger _b] / xi
 
 -- | Test whether a value is an _r-th root of unity
 isInGT :: GT -> Bool
-isInGT f = f ^ _r == 1
+isInGT f = pow f _r == 1
 
 -- | Parameter for curve on Fq
 b1 :: Fq

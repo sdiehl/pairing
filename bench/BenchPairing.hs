@@ -4,6 +4,7 @@ import Protolude
 
 import Criterion.Main
 import ExtensionField
+import GaloisField
 import Pairing.CyclicGroup (asInteger)
 import qualified Pairing.Fq as Fq
 import qualified Pairing.Fr as Fr
@@ -128,7 +129,7 @@ test_g2_2 = Point.Point
   )
 
 test_hash :: ByteString
-test_hash = toS ("TyqIPUBYojDVOnDPacfMGrGOzpaQDWD3KZCpqzLhpE4A3kRUCQFUx040Ok139J8WDVV2C99Sfge3G20Q8MEgu23giWmqRxqOc8pH" :: ByteString)
+test_hash = "TyqIPUBYojDVOnDPacfMGrGOzpaQDWD3KZCpqzLhpE4A3kRUCQFUx040Ok139J8WDVV2C99Sfge3G20Q8MEgu23giWmqRxqOc8pH"
 
 benchmarks :: [Benchmark]
 benchmarks =
@@ -158,7 +159,7 @@ benchmarks =
     , bench "division"
       $ whnf (uncurry (/)) (testFq_1, testFq_2)
     , bench "pow"
-      $ whnf (testFq_1 ^) (asInteger testFr_1)
+      $ whnf (testFq_1 `pow`) (asInteger testFr_1)
     , bench "inversion"
       $ whnf recip testFq_1
     , bench "fqFromX"
@@ -186,7 +187,7 @@ benchmarks =
     , bench "squaring"
       $ whnf (^ 2) testFq2_1
     , bench "pow"
-      $ whnf (testFq2_1 ^) (asInteger testFr_1)
+      $ whnf (testFq2_1 `pow`) (asInteger testFr_1)
     , bench "negation"
       $ whnf negate testFq2_1
     , bench "inversion"

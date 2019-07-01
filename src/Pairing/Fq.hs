@@ -32,6 +32,7 @@ import Protolude
 
 import Data.ByteString as B (splitAt)
 import ExtensionField (ExtensionField, IrreducibleMonic(..), fromField, fromList, t, x)
+import GaloisField (GaloisField(..))
 import Math.NumberTheory.Moduli.Class (powMod)
 import PrimeField (PrimeField, toInt)
 
@@ -141,20 +142,20 @@ fqSqrt largestY a = do
 -- return value and negate as necessary
 fq2Sqrt :: Fq2 -> Maybe Fq2
 fq2Sqrt a = do
-  let a1 = a ^ qm3by4
-  let alpha = (a1 ^ 2) * a
-  let a0 = (alpha ^ _q) * alpha
-  if  a0 == -1 then Nothing else do
+  let a1 = pow a qm3by4
+  let alpha = pow a1 2 * a
+  let a0 = pow alpha _q * alpha
+  if a0 == -1 then Nothing else do
     let x0 = a1 * a
     if alpha == -1 then Just (a1 * fromList [0, 1]) else do
-      let b = (alpha + 1) ^ qm1by2
+      let b = pow (alpha + 1) qm1by2
       Just (b * x0)
   where
     qm3by4 = withQ (modBinOp (_q -3) 4 (/))
     qm1by2 = withQ (modBinOp (_q -1) 2 (/))
 
 fqYforX :: Fq -> Bool -> Maybe Fq
-fqYforX x largestY = fqSqrt largestY (x ^ 3 + fromInteger _b)
+fqYforX x largestY = fqSqrt largestY (pow x 3 + fromInteger _b)
 
 -- https://docs.rs/pairing/0.14.1/src/pairing/bls12_381/ec.rs.html#102-124
 fq2YforX :: Fq2 -> Bool -> Maybe Fq2
@@ -162,7 +163,7 @@ fq2YforX x ly
   | ly = newy
   | otherwise = negate <$> newy
   where
-    newy = fq2Sqrt (x ^ 3 + fromInteger _b / xi)
+    newy = fq2Sqrt (pow x 3 + fromInteger _b / xi)
 
 -------------------------------------------------------------------------------
 -- Non-residues
@@ -265,6 +266,6 @@ fastFrobenius = collapse . convert [[0,2,4],[1,3,5]] . conjugate
     conjugate :: Fq12 -> [[Fq2]]
     conjugate = map (map fq2Conj . fromField) . fromField
     convert :: [[Integer]] -> [[Fq2]] -> [[Fq2]]
-    convert = zipWith (zipWith (\x y -> xi ^ ((x * (_q - 1)) `div` 6) * y))
+    convert = zipWith (zipWith (\x y -> pow xi ((x * (_q - 1)) `div` 6) * y))
     collapse :: [[Fq2]] -> Fq12
     collapse = fromList . map fromList

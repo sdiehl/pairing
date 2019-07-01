@@ -11,6 +11,7 @@ module Pairing.Fr
 
 import Protolude
 
+import GaloisField (GaloisField(..))
 import PrimeField (PrimeField, toInt)
 
 import Pairing.CyclicGroup
@@ -33,7 +34,7 @@ instance Ord Fr where
 
 isRootOfUnity :: Integer -> Fr -> Bool
 isRootOfUnity n x
-  | n > 0 = x^n == 1
+  | n > 0 = pow x n == 1
   | otherwise = panic "isRootOfUnity: negative powers not supported"
 
 isPrimitiveRootOfUnity :: Integer -> Fr -> Bool

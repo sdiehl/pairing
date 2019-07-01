@@ -13,6 +13,7 @@ import Protolude
 
 import Data.List ((!!))
 import ExtensionField (fromList)
+import GaloisField (GaloisField(..))
 
 import Pairing.Fq
 import Pairing.Group
@@ -73,7 +74,7 @@ ateMillerLoop p coeffs  = let
 ateLoopBody :: G1 -> [EllCoeffs] -> (Int, Fq12) -> Bool -> (Int, Fq12)
 ateLoopBody p coeffs (oldIx, oldF) currentBit
   = let
-  fFirst = mulBy024 (oldF^2) (prepareCoeffs coeffs p oldIx)
+  fFirst = mulBy024 (pow oldF 2) (prepareCoeffs coeffs p oldIx)
   (nextIx, nextF) = if currentBit
           then (oldIx + 2, mulBy024 fFirst (prepareCoeffs coeffs p (oldIx + 1)))
           else (oldIx + 1, fFirst)
@@ -116,13 +117,13 @@ mulByQ (x, y, z)
 
 -- xi ^ ((_q - 1) `div` 3)
 twistMulX :: Fq2
-twistMulX = xi ^ ((_q - 1) `div` 3) -- Fq2
+twistMulX = pow xi ((_q - 1) `div` 3) -- Fq2
 --  21575463638280843010398324269430826099269044274347216827212613867836435027261
 --  10307601595873709700152284273816112264069230130616436755625194854815875713954
 
 -- xi ^ ((_q - 1) `div` 2)
 twistMulY :: Fq2
-twistMulY = xi ^ ((_q - 1) `div` 2) -- Fq2
+twistMulY = pow xi ((_q - 1) `div` 2) -- Fq2
 --  2821565182194536844548159561693502659359617185244120367078079554186484126554
 --  3505843767911556378687030309984248845540243509899259641013678093033130930403
 
@@ -225,16 +226,16 @@ mixedAdditionStepForFlippedMillerLoop _base@(x2, y2, _z2) _current@(x1, y1, z1)
 
 -- | Naive implementation of the final exponentiation step
 finalExponentiationNaive :: Fq12 -> GT
-finalExponentiationNaive f = f ^ expVal
+finalExponentiationNaive f = pow f expVal
   where
     expVal :: Integer
-    expVal = (_q ^ _k - 1) `div` _r
+    expVal = div (_q ^ _k - 1) _r
 
 -- | A faster way of performing the final exponentiation step
 finalExponentiation :: Fq12 -> GT
-finalExponentiation f = finalExponentiationFirstChunk f ^ expVal
+finalExponentiation f = pow (finalExponentiationFirstChunk f) expVal
   where
-    expVal = (_q ^ 4 - _q ^ 2 + 1) `div` _r
+    expVal = div (_q ^ 4 - _q ^ 2 + 1) _r
 
 finalExponentiationFirstChunk :: Fq12 -> GT
 finalExponentiationFirstChunk f
