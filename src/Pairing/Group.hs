@@ -23,6 +23,7 @@ module Pairing.Group
 import Protolude
 
 import Control.Monad.Random (MonadRandom)
+import Data.Semigroup ((<>))
 import ExtensionField (fromList)
 import GaloisField (GaloisField(..))
 import PrimeField (toInt)
