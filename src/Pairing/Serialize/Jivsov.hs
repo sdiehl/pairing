@@ -79,7 +79,7 @@ toUncompressedForm (Point x y) = do
     putByteString ry
 toUncompressedForm Infinity = pure $ runPut (putCompressionType 1)
 
-toCompressedForm :: (ByteRepr a, FromX a, Eq a, Ord a) => Point a -> Maybe LByteString
+toCompressedForm :: (ByteRepr a, FromX a, Ord a) => Point a -> Maybe LByteString
 toCompressedForm (Point x y) = do
   ny <- yFromX x max
   let yform = if ny == y then 3 else 2
