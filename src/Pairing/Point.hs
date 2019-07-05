@@ -1,20 +1,19 @@
-{-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE DeriveAnyClass, DeriveGeneric #-}
---
 -- | Affine point arithmetic defining the group operation on an
 -- elliptic curve E(F), for some field F. In our case the field F is
 -- given as some type t with Num and Fractional instances.
-module Pairing.Point (
-  Point(..),
-  gDouble,
-  gAdd,
-  gNeg,
-  gMul,
-) where
+module Pairing.Point
+  ( Point(..)
+  , gDouble
+  , gAdd
+  , gNeg
+  , gMul
+  ) where
 
 import Protolude
-import Pairing.Fq (Fq)
-import Pairing.Fq2 (Fq2)
+
+import GaloisField (GaloisField(..))
+
+import Pairing.Fq (Fq, Fq2)
 
 -- | Points on a curve over a field @a@ represented as either affine
 -- coordinates or as a point at infinity.
@@ -37,11 +36,7 @@ data Point a
 
 -- | Point addition, provides a group structure on an elliptic curve
 -- with the point at infinity as its unit.
-gAdd
-  :: (Fractional t, Eq t)
-  => Point t
-  -> Point t
-  -> Point t
+gAdd :: GaloisField k => Point k -> Point k -> Point k
 gAdd Infinity a = a
 gAdd a Infinity = a
 gAdd (Point x1 y1) (Point x2 y2)
@@ -49,38 +44,30 @@ gAdd (Point x1 y1) (Point x2 y2)
   | x2 == x1             = Infinity
   | otherwise            = Point x' y'
   where
-    l = (y2 - y1) / (x2 - x1)
-    x' = l^2 - x1 - x2
+    l  = (y2 - y1) / (x2 - x1)
+    x' = pow l 2 - x1 - x2
     y' = -l * x' + l * x1 - y1
 
 -- | Point doubling
-gDouble :: (Fractional t, Eq t) => Point t -> Point t
+gDouble :: GaloisField k => Point k -> Point k
 gDouble Infinity = Infinity
 gDouble (Point _ 0) = Infinity
 gDouble (Point x y) = Point x' y'
   where
-    l = 3*x^2 / (2*y)
-    x' = l^2 - 2*x
+    l  = 3 * pow x 2 / (2 * y)
+    x' = pow l 2 - 2 * x
     y' = -l * x' + l * x - y
 
 -- | Negation (flipping the y component)
-gNeg
-  :: (Fractional t, Eq t)
-  => Point t
-  -> Point t
-gNeg Infinity = Infinity
+gNeg :: GaloisField k => Point k -> Point k
+gNeg Infinity    = Infinity
 gNeg (Point x y) = Point x (-y)
 
-
 -- | Multiplication by a scalar
-gMul
-  :: (Eq t, Integral a, Fractional t)
-  => Point t
-  -> a
-  -> Point t
-gMul _ 0 = Infinity
-gMul pt 1 = pt
+gMul :: (Integral a, GaloisField k) => Point k -> a -> Point k
+gMul _ 0      = Infinity
+gMul pt 1     = pt
 gMul pt n
   | n < 0     = panic "gMul: negative scalar not supported"
-  | even n    = gMul (gDouble pt) (n `div` 2)
-  | otherwise = gAdd (gMul (gDouble pt) (n `div` 2)) pt
+  | even n    = gMul (gDouble pt) (div n 2)
+  | otherwise = gAdd (gMul (gDouble pt) (div n 2)) pt

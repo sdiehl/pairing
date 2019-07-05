@@ -1,24 +1,21 @@
-{-# LANGUAGE FlexibleInstances #-}
-
 module TestGroups where
 
 import Protolude
 
-import Pairing.Fq as Fq
-import Pairing.Fr as Fr
-import Pairing.Fq2
-import Pairing.Fq12
-import Pairing.Point
-import Pairing.Group as G
-import Pairing.Params
-import Pairing.Serialize
+import Data.ByteString as BS (null, dropWhile)
+import Pairing.Fq
+import Pairing.Fr
+import Pairing.Group
 import Pairing.Pairing
+import Pairing.Params
+import Pairing.Point
+import Pairing.Serialize
+import Test.QuickCheck.Instances
 import Test.Tasty
-import Test.Tasty.QuickCheck
 import Test.Tasty.HUnit
 import qualified Test.QuickCheck.Monadic as TQM (monadicIO, assert, run)
-import Test.QuickCheck.Instances ()
-import Data.ByteString as BS (null, dropWhile)
+import Test.Tasty.QuickCheck
+
 import TestCommon
 
 -------------------------------------------------------------------------------
@@ -54,7 +51,7 @@ serializeTest pt compFunc testFunc = do
 g1FromXTest :: G1 -> Assertion
 g1FromXTest Infinity = pure ()
 g1FromXTest pt@(Point x y) = do
-  let ysq = fqPow y 2
+  let ysq = y ^ 2
   let (Just lysqrt) = fqSqrt True ysq
   let (Just sysqrt) = fqSqrt False ysq
   let egly = groupFromX True x
@@ -98,10 +95,10 @@ prop_g1FromX g = TQM.monadicIO $ do
   TQM.run $ g1FromXTest g
 
 prop_g1SerializeUncomp :: G1 -> Property
-prop_g1SerializeUncomp g = TQM.monadicIO $ TQM.run $ serializeTest g serializeUncompressed G.fromByteStringG1
+prop_g1SerializeUncomp g = TQM.monadicIO $ TQM.run $ serializeTest g serializeUncompressed fromByteStringG1
 
 prop_g1SerializeComp :: G1 -> Property
-prop_g1SerializeComp g = TQM.monadicIO $ TQM.run $ serializeTest g serializeCompressed G.fromByteStringG1
+prop_g1SerializeComp g = TQM.monadicIO $ TQM.run $ serializeTest g serializeCompressed fromByteStringG1
 
 -------------------------------------------------------------------------------
 -- G2
@@ -125,7 +122,7 @@ unit_order_g2_valid
 g2FromXTest :: G2 -> Assertion
 g2FromXTest Infinity = pure ()
 g2FromXTest pt@(Point x y) = do
-  let ysq = fq2pow y 2
+  let ysq = y ^ 2
   let (Just ny) = fq2YforX x True
   if (ny /= y) then (Point x y) @=? (Point x (negate ny)) else (Point x y) @=? (Point x ny)
 
@@ -134,10 +131,10 @@ prop_g2FromX g = TQM.monadicIO $ do
   TQM.run $ g2FromXTest g
 
 prop_g2SerializeUncomp :: G2 -> Property
-prop_g2SerializeUncomp g = TQM.monadicIO $ TQM.run $ serializeTest g serializeUncompressed G.fromByteStringG2
+prop_g2SerializeUncomp g = TQM.monadicIO $ TQM.run $ serializeTest g serializeUncompressed fromByteStringG2
 
 prop_g2SerializeComp :: G2 -> Property
-prop_g2SerializeComp g = TQM.monadicIO $ TQM.run $ serializeTest g serializeUncompressed G.fromByteStringG2
+prop_g2SerializeComp g = TQM.monadicIO $ TQM.run $ serializeTest g serializeCompressed fromByteStringG2
 
 -------------------------------------------------------------------------------
 -- GT
@@ -146,9 +143,7 @@ prop_g2SerializeComp g = TQM.monadicIO $ TQM.run $ serializeTest g serializeUnco
 -- The group laws for GT are implied by the field tests for Fq12.
 
 gtSerializeTest :: G1 -> G2 -> Assertion
-gtSerializeTest g1 g2 = do
-  let gt = reducedPairing g1 g2
-  serializeTest gt serializeUncompressed fromByteStringGT
+gtSerializeTest g1 g2 = serializeTest (reducedPairing g1 g2) serializeUncompressed fromByteStringGT
 
 prop_gtSerializeUncomp :: G1 -> G2 -> Property
 prop_gtSerializeUncomp g1 g2 = TQM.monadicIO $ TQM.run $ gtSerializeTest g1 g2

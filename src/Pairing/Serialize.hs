@@ -1,21 +1,23 @@
-module Pairing.Serialize (
-  ToCompressedForm(..),
-  ToUncompressedForm(..),
-  header,
-  toCompressedForm,
-  toUncompressedForm,
-  elementToUncompressedForm,
-  pointFromByteString,
-  elementReadUncompressed,
-) where
+module Pairing.Serialize
+  ( ToCompressedForm(..)
+  , ToUncompressedForm(..)
+  , elementReadUncompressed
+  , elementToUncompressedForm
+  , pointFromByteString
+  , putCompressionType
+  , toCompressedForm
+  , toUncompressedForm
+  ) where
 
 import Protolude hiding (putByteString)
-import Pairing.Point
-import Data.ByteString.Builder
-import Data.ByteString as B
-import Data.Binary.Get
-import Data.Binary.Put (Put, putWord8, runPut, putByteString)
+
 import Control.Error
+import Data.Binary.Get
+import Data.Binary.Put (Put, putWord8, putWord16le, runPut, putByteString)
+import qualified Data.ByteString as B
+import Data.ByteString.Builder
+
+import Pairing.Point
 import Pairing.ByteRepr
 import Pairing.CyclicGroup
 
@@ -33,32 +35,44 @@ class ToUncompressedForm a where
 -- 03 - Compressed repr i.e. x only but use largest y on decode
 -- 04 -- Uncompressed repr i.e. x & y
 
-header :: Word8 -> Put
-header n = putWord8 0 >> putWord8 n
+putCompressionType :: Word8 -> Put
+putCompressionType n = putWord8 0 >> putWord8 n
+
+getCompressionType :: Get Word8
+getCompressionType = getWord8 >> getWord8
 
 elementToUncompressedForm :: (ByteRepr a) => a -> Maybe LByteString
 elementToUncompressedForm a = do
   repr <- mkRepr a
   pure $ runPut $ do
-    header 4
+    putCompressionType 4
+    putWord16le (fromIntegral $ B.length repr)
     putByteString repr
 
 toUncompressedForm :: (ByteRepr a) => Point a -> Maybe LByteString
 toUncompressedForm (Point x y) = do
+  let rxLen = fromIntegral $ reprLength x
+      ryLen = fromIntegral $ reprLength y
   rx <- mkRepr x
   ry <- mkRepr y
   pure $ runPut $ do
-    header 4
+    putCompressionType 4
+    putWord16le rxLen
     putByteString rx
+    putWord16le ryLen
     putByteString ry
-toUncompressedForm Infinity = pure $ runPut (header 1)
+toUncompressedForm Infinity = pure $ runPut (putCompressionType 1)
 
 toCompressedForm :: (ByteRepr a, FromX a, Eq a) => Point a -> Maybe LByteString
 toCompressedForm (Point x y) = do
   ny <- yFromX x True
   let yform = if ny == y then 3 else 2
+  let rxLen = fromIntegral $ reprLength x
   rx <- mkRepr x
-  pure (runPut $ header yform >> putByteString rx)
+  pure (runPut $ do
+           putCompressionType yform
+           putWord16le rxLen
+           putByteString rx)
 toCompressedForm Infinity = Just (toLazyByteString (word8 0 <> word8 1))
 
 pointFromByteString :: (Show a, Validate (Point a), ByteRepr a, FromX a) => a -> LByteString -> Either Text (Point a)
@@ -71,17 +85,19 @@ pointFromByteString a = parseBS fromByteStringGet
 processCompressed :: forall a . (ByteRepr a, FromX a) => a -> Word8 -> Get (Maybe (Point a))
 processCompressed one ct
   | ct == 4 = do
-      xbs <- getByteString rlen
-      ybs <- getByteString rlen
+      xlen <- fromIntegral <$> getWord16le
+      xbs <- getByteString xlen
+      ylen <- fromIntegral <$> getWord16le
+      ybs <- getByteString ylen
       pure (buildPoint one xbs ybs)
   | ct == 2 = fromCompressed False
   | ct == 3 = fromCompressed True
   | ct == 1 = pure (Just Infinity)
   | otherwise = pure Nothing
   where
-    rlen = reprLength one
     fromCompressed largestY = runMaybeT $ do
-      xbs <- lift $ getByteString rlen
+      xlen <- lift $ fromIntegral <$> getWord16le
+      xbs <- lift $ getByteString xlen
       x <- hoistMaybe $ fromRepr one xbs
       y <- hoistMaybe $ yFromX x largestY
       pure (Point x y)
@@ -92,8 +108,6 @@ buildPoint one xbs ybs = do
   y <- fromRepr one ybs
   pure (Point x y)
 
-getCompressionType :: Get Word8
-getCompressionType = getWord8 >> getWord8
 
 elementReadUncompressed :: (Validate a, Show a, ByteRepr a) =>  a -> LByteString -> Either Text a
 elementReadUncompressed ele = parseBS runc
@@ -101,7 +115,8 @@ elementReadUncompressed ele = parseBS runc
     runc = do
       ctype <- getCompressionType
       if ctype == 4 then do
-        bs <- getByteString (reprLength ele)
+        xlen <- fromIntegral <$> getWord16le
+        bs <- getByteString xlen
         pure (fromRepr ele bs)
       else
         pure Nothing

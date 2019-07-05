@@ -1,43 +1,40 @@
-{-# LANGUAGE FlexibleInstances #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 -- | Definitions of the groups the pairing is defined on
-module Pairing.Group (
-  CyclicGroup(..),
-  G1,
-  G2,
-  GT,
-  isOnCurveG1,
-  isOnCurveG2,
-  isInGT,
-  g1,
-  g2,
-  b1,
-  b2,
-  hashToG1,
-  groupFromX,
-  fromByteStringG1,
-  fromByteStringG2,
-  fromByteStringGT
-) where
+module Pairing.Group
+  ( CyclicGroup(..)
+  , G1
+  , G2
+  , GT
+  , b1
+  , b2
+  , g1
+  , g2
+  , groupFromX
+  , hashToG1
+  , isInGT
+  , isOnCurveG1
+  , isOnCurveG2
+  , fromByteStringG1
+  , fromByteStringG2
+  , fromByteStringGT
+  ) where
 
 import Protolude
-import Data.Semigroup
 
-import Pairing.Fq as Fq
-import Pairing.Fq2 as Fq2
-import Pairing.Fq12 as Fq12
-import Pairing.Fr as Fr
-import Pairing.Point
-import Pairing.Params
+import Control.Monad.Random (MonadRandom)
+import Data.Semigroup ((<>))
+import ExtensionField (fromList)
+import GaloisField (GaloisField(..))
+import PrimeField (toInt)
+import Test.QuickCheck (Arbitrary(..), Gen)
+
 import Pairing.CyclicGroup
-import Test.QuickCheck
+import Pairing.Fq
 import Pairing.Hash
-import Crypto.Random (MonadRandom)
-import Pairing.Modular
-import System.Random
+import Pairing.Params
+import Pairing.Point
 import Pairing.Serialize
-import Pairing.ByteRepr
 
 -- | G1 is E(Fq) defined by y^2 = x^3 + b
 type G1 = Point Fq
@@ -67,7 +64,7 @@ instance CyclicGroup G1 where
   order _ = _r
   expn a b = gMul a (asInteger b)
   inverse = gNeg
-  random _ = randomG1
+  random = randomG1
 
 instance Validate G1 where
   isValidElement = isOnCurveG1
@@ -87,7 +84,7 @@ instance CyclicGroup G2 where
   order _ = _r
   expn a b = gMul a (asInteger b)
   inverse = gNeg
-  random _ = randomG2
+  random = randomG2
 
 instance Validate G2 where
   isValidElement = isOnCurveG2
@@ -103,11 +100,11 @@ instance Monoid GT where
   mempty = 1
 
 instance CyclicGroup GT where
-  generator = notImplemented -- this should be the _r-th primitive root of unity
-  order = notImplemented -- should be a factor of _r
-  expn a b = a ^ asInteger b
+  generator = panic "not implemented." -- this should be the _r-th primitive root of unity
+  order = panic "not implemented." -- should be a factor of _r
+  expn a b = pow a (asInteger b)
   inverse = recip
-  random _ = Fq12.random
+  random = rnd
 
 instance ToUncompressedForm GT where
   serializeUncompressed = fmap toS . elementToUncompressedForm
@@ -123,67 +120,56 @@ g1 = Point 1 2
 g2 :: G2
 g2 = Point x y
   where
-    x = Fq2
-      10857046999023057135944570762232829481370756359578518086990519993285655852781
-      11559732032986387107991004021392285783925812861821192530917403151452391805634
+    x = fromList
+      [ 10857046999023057135944570762232829481370756359578518086990519993285655852781
+      , 11559732032986387107991004021392285783925812861821192530917403151452391805634 ]
 
-    y = Fq2
-      8495653923123431417604973247489272438418190587263600148770280649306958101930
-      4082367875863433681332203403145435568316851327593401208105741076214120093531
+    y = fromList
+      [ 8495653923123431417604973247489272438418190587263600148770280649306958101930
+      , 4082367875863433681332203403145435568316851327593401208105741076214120093531 ]
 
 -- | Test whether a value in G1 satisfies the corresponding curve
 -- equation
 isOnCurveG1 :: G1 -> Bool
-isOnCurveG1 Infinity
-  = True
-isOnCurveG1 (Point x y)
-  = (y `fqPow` 2 == x `fqPow` 3 + Fq _b)
+isOnCurveG1 Infinity    = True
+isOnCurveG1 (Point x y) = pow y 2 == pow x 3 + fromInteger _b
 
 -- | Test whether a value in G2 satisfies the corresponding curve
 -- equation
 isOnCurveG2 :: G2 -> Bool
-isOnCurveG2 Infinity
-  = True
-isOnCurveG2 (Point x y)
-  = y `fq2pow` 2 == x `fq2pow` 3 + Fq2 (b * inv_xi_a) (b * inv_xi_b)
-  where
-    (Fq2 inv_xi_a inv_xi_b) = Fq2.fq2inv Fq2.xi
-    b = Fq _b
+isOnCurveG2 Infinity    = True
+isOnCurveG2 (Point x y) = pow y 2 == pow x 3 + fromList [fromInteger _b] / xi
 
 -- | Test whether a value is an _r-th root of unity
 isInGT :: GT -> Bool
-isInGT f =  f ^ _r == Fq12.fq12one
+isInGT f = pow f _r == 1
 
 -- | Parameter for curve on Fq
 b1 :: Fq
-b1 = Fq.new _b
+b1 = fromInteger _b
 
 -- | Parameter for twisted curve over Fq2
 b2 :: Fq2
-b2 = Fq2 b1 0 / Fq2.xi
+b2 = fromList [b1] / xi
 
 -------------------------------------------------------------------------------
 -- Generators
 -------------------------------------------------------------------------------
 
-instance Arbitrary (Point Fq) where -- G1
+instance Arbitrary G1 where
   arbitrary = gMul g1 . abs <$> (arbitrary :: Gen Integer)
 
-instance Arbitrary (Point Fq2) where -- G2
+instance Arbitrary G2 where
   arbitrary = gMul g2 . abs <$> (arbitrary :: Gen Integer)
 
 hashToG1 :: MonadRandom m => ByteString -> m (Maybe G1)
 hashToG1 = swEncBN
 
-randomG1 :: (MonadRandom m) => m G1
-randomG1 = do
-  Fq r <- Fq.random
-  pure (gMul g1 r)
+randomG1 :: forall m . MonadRandom m => m G1
+randomG1 = expn generator <$> (rnd :: m Fq)
 
-randomG2 :: (MonadRandom m) => m G2
-randomG2 = do
-  Fq r <- Fq.random
-  pure (gMul g2 r)
+randomG2 :: forall m . MonadRandom m => m G2
+randomG2 = expn generator <$> (rnd :: m Fq)
 
 groupFromX :: (Validate (Point a), FromX a) => Bool -> a -> Maybe (Point a)
 groupFromX largestY x = do
@@ -191,11 +177,10 @@ groupFromX largestY x = do
   if isValidElement (Point x y) then Just (Point x y) else Nothing
 
 fromByteStringG1 :: ByteString -> Either Text G1
-fromByteStringG1 = pointFromByteString fqOne . toSL
+fromByteStringG1 = pointFromByteString 1 . toSL
 
 fromByteStringG2 :: ByteString -> Either Text G2
-fromByteStringG2 = pointFromByteString fq2one . toSL
+fromByteStringG2 = pointFromByteString 1 . toSL
 
 fromByteStringGT :: ByteString -> Either Text GT
-fromByteStringGT = elementReadUncompressed fq12one . toSL
-
+fromByteStringGT = elementReadUncompressed 1 . toSL
