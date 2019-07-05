@@ -19,7 +19,7 @@ dependencies:
   - binary
   - bytestring
   - errors
-  - galois-field
+  - galois-field >= 0.2
   - integer-logarithms
   - memory
   - MonadRandom
