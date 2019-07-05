@@ -1,5 +1,9 @@
 # Changelog for pairing
 
+## 0.4
+
+* Use `galois-field` for tower field underlying BN128 curve.
+
 ## 0.3.1
 
 * Use `MonadRandom` typeclass constraints for curve hashing functions.
