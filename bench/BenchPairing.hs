@@ -2,8 +2,6 @@ module BenchPairing (benchmarks) where
 
 import Protolude
 
-import ExtensionField
-
 import Criterion.Main
 import ExtensionField
 import GaloisField
