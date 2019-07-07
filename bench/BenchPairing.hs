@@ -2,6 +2,8 @@ module BenchPairing (benchmarks) where
 
 import Protolude
 
+import ExtensionField
+
 import Criterion.Main
 import ExtensionField
 import GaloisField
@@ -163,7 +165,7 @@ benchmarks =
     , bench "inversion"
       $ whnf recip testFq_1
     , bench "fqFromX"
-      $ whnf (Fq.fqYforX testFq_1) True
+      $ whnf (Fq.fqYforX testFq_1) max
     ]
   , bgroup "Fr"
     [ bench "multiplication"
@@ -197,7 +199,7 @@ benchmarks =
     , bench "square root"
       $ whnf Fq.fq2Sqrt testFq2_1
     , bench "fq2FromX"
-      $ whnf (Fq.fq2YforX testFq2_1) True 
+      $ whnf (Fq.fq2YforX testFq2_1) max 
     ]
   , bgroup "Fq6"
     [ bench "multiplication"

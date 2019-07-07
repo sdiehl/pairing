@@ -1,18 +1,26 @@
-module Pairing.ByteRepr
-  ( ByteRepr(..)
-  , fromBytesToInteger
-  , toBytes
-  , toPaddedBytes
-  ) where
+module Pairing.ByteRepr (
+  ByteRepr(..),
+  toBytes,
+  toPaddedBytes,
+  fromBytesToInteger,
+  ByteOrder(..),
+  ByteOrderLength(..)
+) where
 
 import Protolude
 
 import Data.ByteString as B
 
+data ByteOrder = MostSignificantFirst | LeastSignificantFirst
+
+type ElementLength = Int
+
+data ByteOrderLength = ByteOrderLength { byteOrder :: ByteOrder, lenPerElement :: ElementLength }
+
 class ByteRepr a where
-  mkRepr :: a -> Maybe ByteString
-  fromRepr :: a -> ByteString -> Maybe a
-  reprLength :: a -> Int
+  mkRepr :: ByteOrderLength -> a -> Maybe ByteString
+  fromRepr :: ByteOrderLength -> a -> ByteString -> Maybe a
+  calcReprLength :: a -> ElementLength -> Int
 
 toBytes :: Integer -> ByteString
 toBytes x = B.reverse . B.unfoldr (fmap go) . Just $ changeSign x
@@ -27,13 +35,18 @@ toBytes x = B.reverse . B.unfoldr (fmap go) . Just $ changeSign x
         i | x >= 128  = Just (x `shiftR` 8)
           | otherwise = Nothing
 
-toPaddedBytes :: Int -> Integer -> Maybe ByteString
-toPaddedBytes len a = if B.length bs > len then Nothing
-  else Just (B.append (B.replicate (len - B.length bs) 0x0) bs)
+toPaddedBytes :: ByteOrderLength -> Integer -> Maybe ByteString
+toPaddedBytes bo a = case byteOrder bo of 
+  LeastSignificantFirst -> B.reverse <$> mkbs (toBytes a)
+  MostSignificantFirst -> mkbs (toBytes a)
   where
-    bs = toBytes a
+    mkbs bs
+      | B.length bs > lenPerElement bo = Nothing 
+      | B.length bs == lenPerElement bo = Just bs
+      | otherwise = Just (B.append (B.replicate (lenPerElement bo - B.length bs) 0x0)  bs)
 
-fromBytesToInteger :: ByteString -> Integer
-fromBytesToInteger = B.foldl' f 0
+fromBytesToInteger :: ByteOrder -> ByteString -> Integer
+fromBytesToInteger MostSignificantFirst = B.foldl' f 0
   where
     f a b = a `shiftL` 8 .|. fromIntegral b
+fromBytesToInteger LeastSignificantFirst = (fromBytesToInteger MostSignificantFirst) . B.reverse

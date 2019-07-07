@@ -6,9 +6,11 @@ import GaloisField
 import ExtensionField
 import Pairing.Fq
 import Pairing.Fr
+import Pairing.ByteRepr
 import Test.Tasty
 import Test.Tasty.HUnit
 import Test.Tasty.QuickCheck
+import qualified Test.QuickCheck.Monadic as TQM (monadicIO, assert, run)
 
 import TestCommon
 
@@ -112,3 +114,44 @@ unit_wRoot = w^2 @=? v
 
 test_fieldLaws_Fr :: TestTree
 test_fieldLaws_Fr = testFieldLaws (Proxy :: Proxy Fr) "Fr"
+
+-------------------------------------------------------------------------------
+-- Byte Representation
+-------------------------------------------------------------------------------
+
+primeFieldByteRepresentationTest :: Fq -> Assertion
+primeFieldByteRepresentationTest f = do
+  byteReprTest f MostSignificantFirst 32
+  byteReprTest f LeastSignificantFirst 32
+  byteReprTest f MostSignificantFirst 64
+  byteReprTest f LeastSignificantFirst 64
+
+extensionFieldByteRepresentationTest :: (Show a, Eq a, ByteRepr (ExtensionField a b)) => ExtensionField a b -> Assertion
+extensionFieldByteRepresentationTest f = case fromField f of
+  [] -> pure ()
+  _ -> do
+    byteReprTest f MostSignificantFirst 32
+    byteReprTest f LeastSignificantFirst 32
+    byteReprTest f MostSignificantFirst 64
+    byteReprTest f LeastSignificantFirst 64
+
+byteReprTest :: (Show a, Eq a, ByteRepr a) => a -> Pairing.ByteRepr.ByteOrder -> Int -> Assertion
+byteReprTest f bo sz = do 
+  let t = mkRepr (ByteOrderLength bo sz) f
+  assertBool ("mkRepr " <> show f) (isJust t)
+  let Just bs = t
+  let d = fromRepr (ByteOrderLength bo sz) f bs
+  assertBool ("fromRepr " <> show f) (isJust d)
+  (Just f) @=? d
+
+prop_fqByteRepr :: Fq -> Property
+prop_fqByteRepr a = TQM.monadicIO $ TQM.run $ primeFieldByteRepresentationTest a
+
+prop_fq2ByteRepr :: Fq2 -> Property
+prop_fq2ByteRepr a = TQM.monadicIO $ TQM.run $ extensionFieldByteRepresentationTest a
+
+prop_fq6ByteRepr :: Fq6 -> Property
+prop_fq6ByteRepr a = TQM.monadicIO $ TQM.run $ extensionFieldByteRepresentationTest a
+
+prop_fq12ByteRepr :: Fq12 -> Property
+prop_fq12ByteRepr a = TQM.monadicIO $ TQM.run $ extensionFieldByteRepresentationTest a

@@ -7,6 +7,7 @@
 --   * Fq2 := Fq[u]/u^2 + 1
 --   * Fq6 := Fq2[v]/v^3 - (9 + u)
 --   * Fq12 := Fq6[w]/w^2 - v
+{-# LANGUAGE ViewPatterns #-}
 
 module Pairing.Fq
   ( Fq
@@ -30,7 +31,7 @@ module Pairing.Fq
 
 import Protolude
 
-import Data.ByteString as B (splitAt)
+import Data.ByteString as B (splitAt, length)
 import ExtensionField (ExtensionField, IrreducibleMonic(..), fromField, fromList, t, x)
 import GaloisField (GaloisField(..))
 import Math.NumberTheory.Moduli.Class (powMod)
@@ -84,57 +85,68 @@ instance Ord Fq2 where
 
 instance FromX Fq where
   yFromX = fqYforX
-  isLargestY y = y > negate y
+  isOdd y = odd (toInt y)
 
 instance FromX Fq2 where
   yFromX = fq2YforX
-  isLargestY y = y > negate y
+  isOdd a = case fromField a of -- This is generalised from the MCL implementation where in Fq2 oddness is based on the first element
+    (x : xs) -> isOdd x
+    [] -> False -- Assume zero
 
 instance ByteRepr Fq where
-  mkRepr = toPaddedBytes <$> reprLength <*> toInt
-  fromRepr _ bs = Just (fromInteger (fromBytesToInteger bs))
-  reprLength _ = 32
+  mkRepr bo = toPaddedBytes bo <$> toInt
+  fromRepr bo _ bs = Just (fromInteger (fromBytesToInteger (byteOrder bo) bs))
+  calcReprLength _ n = n
 
 instance ByteRepr Fq2 where
-  mkRepr = foldl' (<>) mempty . map mkRepr . fromField
-  fromRepr fq2 bs = do
-    let x          = fromMaybe 0 (head (fq2Bytes fq2))
-        (xbs, ybs) = B.splitAt (reprLength x) bs
-    x <- fromRepr (1 :: Fq) xbs
-    y <- fromRepr (1 :: Fq) ybs
+  mkRepr bo f2 = do
+    bites <- fq2Bytes f2
+    (foldl' (<>) mempty . map (mkRepr bo)) bites
+  fromRepr bo fq2 bs = do
+    let 
+      blen = calcReprLength (1 :: Fq) $ lenPerElement bo
+      (xbs, ybs) = B.splitAt blen bs
+    x <- fromRepr bo (1 :: Fq) xbs
+    y <- fromRepr bo (1 :: Fq) ybs
     return (fromList [x, y])
-  reprLength = sum . map reprLength . fq2Bytes
+  calcReprLength _ n = 2 * calcReprLength (1 :: Fq) n
 
 instance ByteRepr Fq6 where
-  mkRepr = foldl' (<>) mempty . map mkRepr . fromField
-  fromRepr fq6 bs = do
-    let x           = fromMaybe 0 (head (fq6Bytes fq6))
-        (xbs, yzbs) = B.splitAt (reprLength x) bs
-        (ybs, zbs)  = B.splitAt (reprLength x) yzbs
-    x <- fromRepr (1 :: Fq2) xbs
-    y <- fromRepr (1 :: Fq2) ybs
-    z <- fromRepr (1 :: Fq2) zbs
+  mkRepr bo f6 = do
+    bites <- fq6Bytes f6
+    (foldl' (<>) mempty . map (mkRepr bo)) bites
+  fromRepr bo fq6 bs = do
+    let 
+      blen = calcReprLength (1 :: Fq2) $ lenPerElement bo
+      (xbs, yzbs) = B.splitAt blen bs
+      (ybs, zbs) = B.splitAt blen yzbs
+    x <- fromRepr bo (1 :: Fq2) xbs
+    y <- fromRepr bo (1 :: Fq2) ybs
+    z <- fromRepr bo (1 :: Fq2) zbs
     return (fromList [x, y, z])
-  reprLength = sum . map reprLength . fq6Bytes
+  calcReprLength _ n = 3 * calcReprLength (1 :: Fq2) n
 
 instance ByteRepr Fq12 where
-  mkRepr = foldl' (<>) mempty . map mkRepr . fromField
-  fromRepr fq12 bs = do
-    let x          = fromMaybe 0 (head (fq12Bytes fq12))
-        (xbs, ybs) = B.splitAt (reprLength x) bs
-    x <- fromRepr (1 :: Fq6) xbs
-    y <- fromRepr (1 :: Fq6) ybs
+  mkRepr bo f12= do
+    bites <- fq12Bytes f12
+    (foldl' (<>) mempty . map (mkRepr bo)) bites
+  fromRepr bo fq12 bs = do
+    let
+      blen = calcReprLength (1 :: Fq6) $ lenPerElement bo
+      (xbs, ybs) = B.splitAt blen bs
+    x <- fromRepr bo (1 :: Fq6) xbs
+    y <- fromRepr bo (1 :: Fq6) ybs
     return (fromList [x, y])
-  reprLength = sum . map reprLength . fq12Bytes
+  calcReprLength _ n = 2 * calcReprLength (1 :: Fq6) n
 
 -------------------------------------------------------------------------------
 -- Y for X
 -------------------------------------------------------------------------------
 
-fqSqrt :: Bool -> Fq -> Maybe Fq
-fqSqrt largestY a = do
-  (y1, y2) <- withQM (modUnOpMTup (toInt a) bothSqrtOf)
-  return (fromInteger ((if largestY then max else min) y1 y2))
+fqSqrt :: (Fq -> Fq -> Fq) -> Fq -> Maybe Fq
+fqSqrt ysel a = case withQM (modUnOpMTup (toInt a) bothSqrtOf) of
+  Just (y1, y2) -> Just (ysel (fromInteger y1) (fromInteger y2))
+  Nothing -> Nothing
 
 -- | Square root of Fq2 are specified by https://eprint.iacr.org/2012/685.pdf,
 -- Algorithm 9 with lots of help from https://docs.rs/pairing/0.14.1/src/pairing/bls12_381/fq2.rs.html#162-222
@@ -154,14 +166,14 @@ fq2Sqrt a = do
     qm3by4 = withQ (modBinOp (_q -3) 4 (/))
     qm1by2 = withQ (modBinOp (_q -1) 2 (/))
 
-fqYforX :: Fq -> Bool -> Maybe Fq
-fqYforX x largestY = fqSqrt largestY (pow x 3 + fromInteger _b)
+fqYforX :: Fq -> (Fq -> Fq -> Fq) -> Maybe Fq
+fqYforX x ysel = fqSqrt ysel (pow x 3 + fromInteger _b)
 
 -- https://docs.rs/pairing/0.14.1/src/pairing/bls12_381/ec.rs.html#102-124
-fq2YforX :: Fq2 -> Bool -> Maybe Fq2
-fq2YforX x ly 
-  | ly = newy
-  | otherwise = negate <$> newy
+fq2YforX :: Fq2 -> (Fq2 -> Fq2 -> Fq2) -> Maybe Fq2
+fq2YforX x ly = do
+  y <- newy
+  pure (ly y (negate y))
   where
     newy = fq2Sqrt (pow x 3 + fromInteger _b / xi)
 
@@ -192,27 +204,27 @@ mulXi w = case fromField w of
 -- Byte lists
 -------------------------------------------------------------------------------
 
-fq2Bytes :: Fq2 -> [Fq]
+fq2Bytes :: Fq2 -> Maybe [Fq]
 fq2Bytes w = case fromField w of
-  [x, y] -> [x, y]
-  [x]    -> [x, 0]
-  []     -> [0, 0]
-  _      -> panic "fq2Bytes not exhaustive."
+  [x, y] -> Just [x, y]
+  [x]    -> Just [x, 0]
+  []     -> Just [0, 0]
+  _      -> Nothing
 
-fq6Bytes :: Fq6 -> [Fq2]
+fq6Bytes :: Fq6 -> Maybe [Fq2]
 fq6Bytes w = case fromField w of
-  [x, y, z] -> [x, y, z]
-  [x, y]    -> [x, y, 0]
-  [x]       -> [x, 0, 0]
-  []        -> [0, 0, 0]
-  _         -> panic "fq6Bytes not exhaustive."
+  [x, y, z] -> Just [x, y, z]
+  [x, y]    -> Just [x, y, 0]
+  [x]       -> Just [x, 0, 0]
+  []        -> Just [0, 0, 0]
+  _         -> Nothing
 
-fq12Bytes :: Fq12 -> [Fq6]
+fq12Bytes :: Fq12 -> Maybe [Fq6]
 fq12Bytes w = case fromField w of
-  [x, y] -> [x, y]
-  [x]    -> [x, 0]
-  []     -> [0, 0]
-  _      -> panic "fq12Bytes not exhaustive."
+  [x, y] -> Just [x, y]
+  [x]    -> Just [x, 0]
+  []     -> Just [0, 0]
+  _      -> Nothing
 
 -------------------------------------------------------------------------------
 -- Fq2 and Fq12

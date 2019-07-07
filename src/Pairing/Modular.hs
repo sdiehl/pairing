@@ -95,5 +95,5 @@ legendre a = if conv > 1 then (-1) else conv
 randomMod :: forall n m. (MonadRandom m, KnownNat n) => Proxy n -> m (Mod n)
 randomMod n = fromInteger <$> getRandomR (0, natVal n - 1)
 
-fromBytes :: forall n. (KnownNat n) => ByteString -> Proxy n -> Mod n
-fromBytes bs mn = newMod (fromBytesToInteger bs) mn
+fromBytes :: forall n. (KnownNat n) => ByteOrder -> ByteString -> Proxy n -> Mod n
+fromBytes bo bs = newMod (fromBytesToInteger bo bs)
