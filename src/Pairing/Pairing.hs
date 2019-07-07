@@ -11,6 +11,8 @@ module Pairing.Pairing
 
 import Protolude
 
+import ExtensionField (fromList)
+
 import Data.List ((!!))
 import ExtensionField (fromList)
 import GaloisField (GaloisField(..))
@@ -18,6 +20,7 @@ import GaloisField (GaloisField(..))
 import Pairing.Fq
 import Pairing.Group
 import Pairing.Jacobian
+import Pairing.Fq
 import Pairing.Params
 import Pairing.Point
 
@@ -118,6 +121,7 @@ mulByQ (x, y, z)
 -- xi ^ ((_q - 1) `div` 3)
 twistMulX :: Fq2
 twistMulX = pow xi ((_q - 1) `div` 3) -- Fq2
+
 --  21575463638280843010398324269430826099269044274347216827212613867836435027261
 --  10307601595873709700152284273816112264069230130616436755625194854815875713954
 
