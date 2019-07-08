@@ -1,5 +1,10 @@
 # Changelog for pairing
 
+## 0.5
+
+* Add mclwasm compatible serialisation
+* Add efficient storage representation of an elliptic curve point over prime fields
+
 ## 0.4
 
 * Use `galois-field` for tower field underlying BN128 curve.

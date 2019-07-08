@@ -1,7 +1,7 @@
 name:        pairing
-version:     0.4
-synopsis:    Optimal ate pairing over Barreto-Naehrig curves
-description: Optimal ate pairing over Barreto-Naehrig curves
+version:     0.5
+synopsis:    Bilinear pairings
+description: Optimal Ate pairing over Barreto-Naehrig curves
 maintainer:  Adjoint Inc (info@adjoint.io)
 license:     MIT
 github:      adjoint-io/pairing
