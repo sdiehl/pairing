@@ -1,6 +1,6 @@
 # Changelog for pairing
 
-## 0.5
+## 0.4.1
 
 * Add mclwasm compatible serialisation
 * Add efficient storage representation of an elliptic curve point over prime fields
