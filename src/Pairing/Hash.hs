@@ -13,6 +13,7 @@ import Pairing.Params
 import Pairing.Point
 import Pairing.Modular as M
 import Pairing.Fq as Fq
+import Pairing.ByteRepr (ByteOrder(..))
 
 sqrtOfMinusThree :: forall m . KnownNat m => Proxy m -> Maybe (Mod m)
 sqrtOfMinusThree _ = sqrtOf (-3)
@@ -61,7 +62,7 @@ swy mn pr3 pt pxi pb = (ch *) <$>  y
 --
 swEncBN :: MonadRandom m => ByteString -> m (Maybe (Point Fq))
 swEncBN bs = runMaybeT $ withQM $ \mn -> do
-  let t = M.fromBytes bs mn
+  let t = M.fromBytes MostSignificantFirst bs mn
   sq3 <- hoistMaybe (sqrtOfMinusThree mn)
   let w' = w mn sq3 t
   x1' <- hoistMaybe (x1 mn t w')

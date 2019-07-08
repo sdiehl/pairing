@@ -66,6 +66,7 @@ library:
     - FlexibleContexts
     - ScopedTypeVariables
     - RankNTypes
+    - BangPatterns
     - DataKinds
     - DeriveAnyClass
     - DeriveFunctor
@@ -84,7 +85,9 @@ library:
     - Pairing.Jacobian
     - Pairing.CyclicGroup
     - Pairing.Hash
-    - Pairing.Serialize
+    - Pairing.Serialize.Types
+    - Pairing.Serialize.Jivsov
+    - Pairing.Serialize.MCLWasm
     - Pairing.ByteRepr
     - Pairing.Modular
 
@@ -101,6 +104,9 @@ tests:
       - tasty-discover
       - tasty-hunit
       - tasty-quickcheck
+      - quickcheck-instances
+      - QuickCheck
+      - hexstring
     default-extensions:
       - LambdaCase
       - RecordWildCards
@@ -124,6 +130,8 @@ benchmarks:
     source-dirs:
       - src
       - bench
+    other-modules:
+      - BenchPairing
     dependencies:
       - criterion
       - QuickCheck
@@ -132,10 +140,8 @@ benchmarks:
       - tasty-hunit
       - tasty-quickcheck
     default-extensions:
-      - LambdaCase
-      - RecordWildCards
-      - OverloadedStrings
       - NoImplicitPrelude
+      - OverloadedStrings
       - FlexibleInstances
       - FlexibleContexts
       - ScopedTypeVariables

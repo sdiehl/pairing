@@ -40,8 +40,8 @@ instance AsInteger (PrimeField p) where
   asInteger = toInt
 
 class FromX a where
-  yFromX :: a -> LargestY -> Maybe a
-  isLargestY :: a -> Bool
+  yFromX :: a -> (a -> a -> a) -> Maybe a
+  isOdd :: a -> Bool
 
 class Validate a where
   isValidElement :: a -> Bool
