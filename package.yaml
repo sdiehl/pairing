@@ -18,6 +18,7 @@ dependencies:
   - arithmoi >= 0.8
   - binary
   - bytestring
+  - elliptic-curve >= 0.1
   - errors
   - galois-field >= 0.2
   - integer-logarithms
@@ -76,20 +77,15 @@ library:
     - TypeApplications
 
   exposed-modules:
-    - Pairing.Params
-    - Pairing.Fq
-    - Pairing.Fr
-    - Pairing.Point
-    - Pairing.Group
-    - Pairing.Pairing
-    - Pairing.Jacobian
-    - Pairing.CyclicGroup
-    - Pairing.Hash
-    - Pairing.Serialize.Types
-    - Pairing.Serialize.Jivsov
-    - Pairing.Serialize.MCLWasm
     - Pairing.ByteRepr
+    - Pairing.Curve
+    - Pairing.Hash
     - Pairing.Modular
+    - Pairing.Params
+    - Pairing.Pairing
+    # - Pairing.Serialize.Types
+    # - Pairing.Serialize.Jivsov
+    # - Pairing.Serialize.MCLWasm
 
 tests:
   pairing-tests:
@@ -130,8 +126,6 @@ benchmarks:
     source-dirs:
       - src
       - bench
-    other-modules:
-      - BenchPairing
     dependencies:
       - criterion
       - QuickCheck

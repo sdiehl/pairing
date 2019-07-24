@@ -3,43 +3,43 @@ module BenchPairing (benchmarks) where
 import Protolude
 
 import Criterion.Main
+import Curve
+import Curve.Weierstrass
 import ExtensionField
 import GaloisField
-import Pairing.CyclicGroup (asInteger)
-import qualified Pairing.Fq as Fq
-import qualified Pairing.Fr as Fr
-import qualified Pairing.Group as Group
-import qualified Pairing.Pairing as Pairing
-import qualified Pairing.Point as Point
+import Pairing.Curve
+import Pairing.Pairing
+import Pairing.Params
+import PrimeField
 
 -------------------------------------------------------------------------------
 -- Benchmark Suite
 -------------------------------------------------------------------------------
 
-testFq_1:: Fq.Fq
-testFq_1 = 5216004179354450092383934373463611881445186046129513844852096383579774061693
+testFp_1:: Fp
+testFp_1 = 5216004179354450092383934373463611881445186046129513844852096383579774061693
 
-testFq_2 :: Fq.Fq
-testFq_2 = 10757805228921058098980668000791497318123219899766237205512608761387909753942
+testFp_2 :: Fp
+testFp_2 = 10757805228921058098980668000791497318123219899766237205512608761387909753942
 
-testFr_1 :: Fr.Fr
+testFr_1 :: Fr
 testFr_1 = 2695867032484221784304381330654541950835516252740416091986521990446187260192
 
-testFr_2 :: Fr.Fr
+testFr_2 :: Fr
 testFr_2 = 18361718052247311177607809961708721447660708684581683997732416822928487385039
 
-testFq2_1 :: Fq.Fq2
-testFq2_1 = fromList
+testFp2_1 :: Fp2
+testFp2_1 = fromList
   [ 19908898611787582971615951530393785823319364696376311494770162270472288380562
   , 2444690988583914246674870181013910409542697083717824402984851238236041783759 ]
 
-testFq2_2 :: Fq.Fq2
-testFq2_2 = fromList
+testFp2_2 :: Fp2
+testFp2_2 = fromList
   [ 176307305890807650390915550856467756101144733976249050387177647283239486934
   , 9913547941088878400547309488585076816688958962210000330808066250849942240036 ]
 
-testFq6_1 :: Fq.Fq6
-testFq6_1 = fromList
+testFp6_1 :: Fp6
+testFp6_1 = fromList
   [ fromList
     [ 8727269669017421992537561450387212506711577304101544328736696625792447584819
     , 14548604791762199086915107662335514800873255588931510951007415299299859294564 ]
@@ -51,8 +51,8 @@ testFq6_1 = fromList
     , 21634580953983557175729336703450663797341055784728343534694506874757389871868 ]
   ]
 
-testFq6_2 :: Fq.Fq6
-testFq6_2 = fromList
+testFp6_2 :: Fp6
+testFp6_2 = fromList
   [ fromList
     [ 21427158918811764040959407626476119248515601360702754918240300689672054041331
     , 12750457256357562507331331307761996193149796736574153338180573114576232473092 ]
@@ -64,8 +64,8 @@ testFq6_2 = fromList
     , 10563739714379631354612735346769824530666877338817980746884577737330686430079 ]
   ]
 
-testFq12_1 :: Fq.Fq12
-testFq12_1 = Fq.construct
+testFp12_1 :: Fp12
+testFp12_1 = construct
   [ 4025484419428246835913352650763180341703148406593523188761836807196412398582
   , 5087667423921547416057913184603782240965080921431854177822601074227980319916
   , 8868355606921194740459469119392835913522089996670570126495590065213716724895
@@ -80,8 +80,8 @@ testFq12_1 = Fq.construct
   , 1205855382909824928004884982625565310515751070464736233368671939944606335817
   ]
 
-testFq12_2 :: Fq.Fq12
-testFq12_2 = Fq.construct
+testFp12_2 :: Fp12
+testFp12_2 = construct
   [ 495492586688946756331205475947141303903957329539236899715542920513774223311
   , 9283314577619389303419433707421707208215462819919253486023883680690371740600
   , 11142072730721162663710262820927009044232748085260948776285443777221023820448
@@ -96,36 +96,40 @@ testFq12_2 = Fq.construct
   , 20666848762667934776817320505559846916719041700736383328805334359135638079015
   ]
 
-test_g1_1 :: Group.G1
-test_g1_1 = Point.Point
+test_g1_1 :: G1
+test_g1_1 = A
   4312786488925573964619847916436127219510912864504589785209181363209026354996
   16161347681839669251864665467703281411292235435048747094987907712909939880451
 
-test_g1_2 :: Group.G1
-test_g1_2 = Point.Point
+test_g1_2 :: G1
+test_g1_2 = A
   19726521232578388179442373599749745040559336202710626280058164737015167983668
   8916054282623787320277288879860012889871960646705282620719014698393441239502
 
-test_g2_1 :: Group.G2
-test_g2_1 = Point.Point
-  (fromList
+test_g2_1 :: G2
+test_g2_1 = A
+  ( fromList
     [ 7883069657575422103991939149663123175414599384626279795595310520790051448551
-    , 8346649071297262948544714173736482699128410021416543801035997871711276407441 ]
+    , 8346649071297262948544714173736482699128410021416543801035997871711276407441
+    ]
   )
-  (fromList
+  ( fromList
     [ 3343323372806643151863786479815504460125163176086666838570580800830972412274
-    , 16795962876692295166012804782785252840345796645199573986777498170046508450267 ]
+    , 16795962876692295166012804782785252840345796645199573986777498170046508450267
+    ]
   )
 
-test_g2_2 :: Group.G2
-test_g2_2 = Point.Point
-  (fromList
+test_g2_2 :: G2
+test_g2_2 = A
+  ( fromList
     [ 3243608945627071355385114622932133122087974401138668305336804137033580208808
-    , 2403320200938270623472619242963887735471304641554649101656774729615146397552 ]
+    , 2403320200938270623472619242963887735471304641554649101656774729615146397552
+    ]
   )
-  (fromList
+  ( fromList
     [ 7590136428571280465598215063146990078553196689176860926896020586846726844869
-    , 8036135660414384292776446470327730948618639044617118659780848199544099832559 ]
+    , 8036135660414384292776446470327730948618639044617118659780848199544099832559
+    ]
   )
 
 test_hash :: ByteString
@@ -133,37 +137,37 @@ test_hash = "TyqIPUBYojDVOnDPacfMGrGOzpaQDWD3KZCpqzLhpE4A3kRUCQFUx040Ok139J8WDVV
 
 benchmarks :: [Benchmark]
 benchmarks =
-  [ bgroup "Frobenius in Fq12"
+  [ bgroup "Frobenius in Fp12"
     [ bench "naive"
-      $ whnf (Pairing.frobeniusNaive 1) testFq12_1
+      $ whnf (frobeniusNaive 1) testFp12_1
     , bench "fast"
-      $ whnf (Fq.fq12Frobenius 1) testFq12_1
+      $ whnf (fp12Frobenius 1) testFp12_1
     ]
   , bgroup "Final exponentiation"
     [ bench "naive"
-      $ whnf Pairing.finalExponentiationNaive testFq12_1
+      $ whnf finalExponentiationNaive testFp12_1
     , bench "fast"
-      $ whnf Pairing.finalExponentiation testFq12_1
+      $ whnf finalExponentiation testFp12_1
     ]
   , bgroup "Pairing"
     [ bench "without final exponentiation"
-      $ whnf (uncurry Pairing.atePairing) (Group.g1, Group.g2)
+      $ whnf (uncurry atePairing) (gG1, gG2)
     , bench "with final exponentiation"
-      $ whnf (uncurry Pairing.reducedPairing) (Group.g1, Group.g2)
+      $ whnf (uncurry reducedPairing) (gG1, gG2)
     ]
-  , bgroup "Fq"
+  , bgroup "Fp"
     [ bench "multiplication"
-      $ whnf (uncurry (*)) (testFq_1, testFq_2)
+      $ whnf (uncurry (*)) (testFp_1, testFp_2)
     , bench "addition"
-      $ whnf (uncurry (+)) (testFq_1, testFq_2)
+      $ whnf (uncurry (+)) (testFp_1, testFp_2)
     , bench "division"
-      $ whnf (uncurry (/)) (testFq_1, testFq_2)
+      $ whnf (uncurry (/)) (testFp_1, testFp_2)
     , bench "pow"
-      $ whnf (testFq_1 `pow`) (asInteger testFr_1)
+      $ whnf (pow testFp_1) (toInt testFr_1)
     , bench "inversion"
-      $ whnf recip testFq_1
-    , bench "fqFromX"
-      $ whnf (Fq.fqYforX testFq_1) max
+      $ whnf recip testFp_1
+    , bench "fpFromX"
+      $ whnf (fpYforX testFp_1) max
     ]
   , bgroup "Fr"
     [ bench "multiplication"
@@ -175,74 +179,74 @@ benchmarks =
     , bench "inversion"
       $ whnf recip testFr_1
     , bench "pow"
-      $ whnf (testFr_1 ^) (asInteger testFr_2)
+      $ whnf (pow testFr_1) (toInt testFr_2)
     ]
-  , bgroup "Fq2"
+  , bgroup "Fp2"
     [ bench "multiplication"
-      $ whnf (uncurry (*)) (testFq2_1, testFq2_2)
+      $ whnf (uncurry (*)) (testFp2_1, testFp2_2)
     , bench "addition"
-      $ whnf (uncurry (+)) (testFq2_1, testFq2_2)
+      $ whnf (uncurry (+)) (testFp2_1, testFp2_2)
     , bench "division"
-      $ whnf (uncurry (/)) (testFq2_1, testFq2_2)
+      $ whnf (uncurry (/)) (testFp2_1, testFp2_2)
     , bench "squaring"
-      $ whnf (^ 2) testFq2_1
+      $ whnf (^ 2) testFp2_1
     , bench "pow"
-      $ whnf (testFq2_1 `pow`) (asInteger testFr_1)
+      $ whnf (pow testFp2_1) (toInt testFr_1)
     , bench "negation"
-      $ whnf negate testFq2_1
+      $ whnf negate testFp2_1
     , bench "inversion"
-      $ whnf recip testFq2_1
+      $ whnf recip testFp2_1
     , bench "conjugation"
-      $ whnf Fq.fq2Conj testFq2_1
+      $ whnf fp2Conj testFp2_1
     , bench "square root"
-      $ whnf Fq.fq2Sqrt testFq2_1
-    , bench "fq2FromX"
-      $ whnf (Fq.fq2YforX testFq2_1) max 
+      $ whnf fp2Sqrt testFp2_1
+    , bench "fp2FromX"
+      $ whnf (fp2YforX testFp2_1) max 
     ]
-  , bgroup "Fq6"
+  , bgroup "Fp6"
     [ bench "multiplication"
-      $ whnf (uncurry (*)) (testFq6_1, testFq6_2)
+      $ whnf (uncurry (*)) (testFp6_1, testFp6_2)
     , bench "addition"
-      $ whnf (uncurry (+)) (testFq6_1, testFq6_2)
+      $ whnf (uncurry (+)) (testFp6_1, testFp6_2)
     , bench "division"
-      $ whnf (uncurry (/)) (testFq6_1, testFq6_2)
+      $ whnf (uncurry (/)) (testFp6_1, testFp6_2)
     , bench "squaring"
-      $ whnf (^ 2) testFq6_1
+      $ whnf (^ 2) testFp6_1
     , bench "negation"
-      $ whnf negate testFq6_1
+      $ whnf negate testFp6_1
     , bench "inversion"
-      $ whnf recip testFq6_1
+      $ whnf recip testFp6_1
     ]
-  , bgroup "Fq12"
+  , bgroup "Fp12"
     [ bench "multiplication"
-      $ whnf (uncurry (*)) (testFq12_1, testFq12_2)
+      $ whnf (uncurry (*)) (testFp12_1, testFp12_2)
     , bench "addition"
-      $ whnf (uncurry (+)) (testFq12_1, testFq12_2)
+      $ whnf (uncurry (+)) (testFp12_1, testFp12_2)
     , bench "division"
-      $ whnf (uncurry (/)) (testFq12_1, testFq12_2)
+      $ whnf (uncurry (/)) (testFp12_1, testFp12_2)
     , bench "negation"
-      $ whnf negate testFq12_1
+      $ whnf negate testFp12_1
     , bench "inversion"
-      $ whnf recip testFq12_1
+      $ whnf recip testFp12_1
     , bench "conjugation"
-      $ whnf Fq.fq12Conj testFq12_1
+      $ whnf fp12Conj testFp12_1
     ]
   , bgroup "G1"
     [ bench "double"
-      $ whnf Point.gDouble test_g1_1
+      $ whnf double test_g1_1
     , bench "add"
-      $ whnf (uncurry Point.gAdd) (test_g1_1, test_g1_2)
+      $ whnf (uncurry (<>)) (test_g1_1, test_g1_2)
     , bench "multiply"
-      $ whnf (uncurry Point.gMul) (test_g1_1, 42)
-    , bench "hashToG1"
-      $ whnfIO (Group.hashToG1 test_hash)
+      $ whnf (uncurry mul) (test_g1_1, 42)
+    -- , bench "hashToG1"
+    --   $ whnfIO (Group.hashToG1 test_hash)
     ]
   , bgroup "G2"
     [ bench "double"
-      $ whnf Point.gDouble test_g2_1
+      $ whnf double test_g2_1
     , bench "add"
-      $ whnf (uncurry Point.gAdd) (test_g2_1, test_g2_2)
+      $ whnf (uncurry (<>)) (test_g2_1, test_g2_2)
     , bench "multiply"
-      $ whnf (uncurry Point.gMul) (test_g2_1, 42)
+      $ whnf (uncurry mul) (test_g2_1, 42)
     ]
   ]
