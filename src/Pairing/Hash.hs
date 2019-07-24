@@ -1,9 +1,10 @@
 module Pairing.Hash
-  (
+  ( swEncBN
   ) where
 
 import Protolude
 
+import Curve (Curve(..))
 import Control.Error (runMaybeT, hoistMaybe)
 import Control.Monad.Random (MonadRandom)
 import Data.List (genericIndex)
@@ -58,25 +59,28 @@ swy mn pr3 pt pxi pb = (ch *) <$>  y
 -- by Pierre-Alain Fouque and Mehdi Tibouchi.
 -- This function evaluates an empty bytestring or one that contains \NUL to zero
 -- which according to Definiton 2 of the paper is sent to an arbitrary point on the curve
---
--- swEncBN :: (Curve r c k, MonadRandom m) => ByteString -> m (Maybe (Point r c k))
--- swEncBN bs = runMaybeT $ withQM $ \mn -> do
---   let t = M.fromBytes MostSignificantFirst bs mn
---   sq3 <- hoistMaybe (sqrtOfMinusThree mn)
---   let w' = w mn sq3 t
---   x1' <- hoistMaybe (x1 mn t w')
---   if (t == 0) then do
---     onebmn <- hoistMaybe (sqrtOf (1 + (b mn)))
---     pure $ (point (fromInteger (getVal x1')) (fromInteger (getVal $ onebmn)))
---   else do
---     let x2' = x2 mn x1'
---     let x3' = x3 mn w'
---     let lst = [x1', x2', x3']
---     r1 <- lift $ randomMod mn
---     r2 <- lift $ randomMod mn
---     r3 <- lift $ randomMod mn
---     let al = alphaBeta mn r1 x1'
---     let bet = alphaBeta mn r2 x2'
---     let i' = i al bet
---     swy' <- hoistMaybe (swy mn r3 t (genericIndex lst (i' -  1)) (b mn))
---     pure $ (point (fromInteger (getVal $ genericIndex lst (i' - 1))) (fromInteger swy'))
+swEncBN :: (Curve r c k, MonadRandom m) => ByteString -> m (Maybe (Point r c k))
+swEncBN bs = runMaybeT $ withQM $ \mn -> do
+  let t = M.fromBytes MostSignificantFirst bs mn
+  sq3 <- hoistMaybe (sqrtOfMinusThree mn)
+  let w' = w mn sq3 t
+  x1' <- hoistMaybe (x1 mn t w')
+  if (t == 0) then do
+    onebmn <- hoistMaybe (sqrtOf (1 + (b mn)))
+    p      <- hoistMaybe (point (fromInteger (getVal $ x1'))
+                                (fromInteger (getVal $ onebmn)))
+    return p
+  else do
+    let x2' = x2 mn x1'
+    let x3' = x3 mn w'
+    let lst = [x1', x2', x3']
+    r1 <- lift $ randomMod mn
+    r2 <- lift $ randomMod mn
+    r3 <- lift $ randomMod mn
+    let al = alphaBeta mn r1 x1'
+    let bet = alphaBeta mn r2 x2'
+    let i' = i al bet
+    swy' <- hoistMaybe (swy mn r3 t (genericIndex lst (i' -  1)) (b mn))
+    p    <- hoistMaybe (point (fromInteger (getVal $ genericIndex lst (i' - 1)))
+                              (fromInteger swy'))
+    return p

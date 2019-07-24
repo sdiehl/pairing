@@ -7,6 +7,7 @@ import Data.ByteString as BS (null, dropWhile)
 import Data.HexString as H
 import ExtensionField (fromList)
 import Pairing.ByteRepr
+import Pairing.Curve
 import Pairing.Pairing
 import Pairing.Params
 import Pairing.Serialize.Types
@@ -88,12 +89,12 @@ unit_g1_valid = assertBool "generator g1 does not satisfy curve equation" $ def 
 unit_order_g1_valid :: Assertion
 unit_order_g1_valid = mul gen _r @=? (mempty :: G1)
 
--- prop_hashToG1 :: ByteString -> Property
--- prop_hashToG1 bs = TQM.monadicIO $ do
---   toCurveMay <- TQM.run (hashToG1 bs)
---   TQM.assert (isJust toCurveMay)
---   let Just toCurve = toCurveMay
---   TQM.assert (isOnCurveG1 toCurve)
+prop_hashToG1 :: ByteString -> Property
+prop_hashToG1 bs = TQM.monadicIO $ do
+  toCurveMay <- TQM.run (hashToG1 bs)
+  TQM.assert (isJust toCurveMay)
+  let Just toCurve = toCurveMay
+  TQM.assert (def toCurve)
 
 -- prop_g1FromX :: G1 -> Property
 -- prop_g1FromX g = TQM.monadicIO $ do

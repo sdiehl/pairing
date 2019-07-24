@@ -21,7 +21,7 @@ module Pairing.Curve
   -- , fromByteStringG1
   -- , fromByteStringG2
   -- , fromByteStringGT
-  -- , hashToG1
+  , hashToG1
   ) where
 
 import Protolude
@@ -35,7 +35,7 @@ import PrimeField (PrimeField, toInt)
 import ExtensionField (fromField, fromList)
 
 import Pairing.ByteRepr
--- import Pairing.Hash
+import Pairing.Hash
 import Pairing.Modular
 import Pairing.Params
 -- import Pairing.Serialize.Types
@@ -249,8 +249,8 @@ mulXi w = case fromField w of
   _         -> panic "mulXi not exhaustive."
 {-# INLINE mulXi #-}
 
--- hashToG1 :: MonadRandom m => ByteString -> m (Maybe G1)
--- hashToG1 = swEncBN
+hashToG1 :: MonadRandom m => ByteString -> m (Maybe G1)
+hashToG1 = swEncBN
 
 -- fromByteStringG1 :: FromSerialisedForm u => u -> LByteString -> Either Text G1
 -- fromByteStringG1 unser = unserializePoint unser generatorG1 . toSL

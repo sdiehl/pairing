@@ -238,8 +238,8 @@ benchmarks =
       $ whnf (uncurry (<>)) (test_g1_1, test_g1_2)
     , bench "multiply"
       $ whnf (uncurry mul) (test_g1_1, 42)
-    -- , bench "hashToG1"
-    --   $ whnfIO (Group.hashToG1 test_hash)
+    , bench "hashToG1"
+      $ whnfIO (hashToG1 test_hash)
     ]
   , bgroup "G2"
     [ bench "double"
