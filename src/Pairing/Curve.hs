@@ -1,19 +1,16 @@
 module Pairing.Curve
   ( Fr
-  , JPoint
-  , fromJacobian
-  , toJacobian
-  , fpSqrt
-  , fp2Sqrt
-  , fpYforX
-  , fp2YforX
+  , fqSqrt
+  , fq2Sqrt
+  , fqYforX
+  , fq2YforX
   , mulXi
-  , fp2Conj
-  , fp2ScalarMul
+  , fq2Conj
+  , fq2ScalarMul
   , construct
   , deconstruct
-  , fp12Conj
-  , fp12Frobenius
+  , fq12Conj
+  , fq12Frobenius
   , isRootOfUnity
   , isPrimitiveRootOfUnity
   , primitiveRootOfUnity
@@ -27,14 +24,11 @@ module Pairing.Curve
 import Protolude
 
 import Control.Monad.Random (MonadRandom)
-import Curve.Weierstrass (Point(..), WCurve, WPoint)
-import Data.ByteString as B (splitAt, length)
-import Data.Semigroup ((<>))
-import GaloisField (GaloisField(..))
-import PrimeField (PrimeField, toInt)
+import GaloisField (GaloisField(pow))
+import PrimeField (toInt)
 import ExtensionField (fromField, fromList)
 
-import Pairing.ByteRepr
+import Pairing.ByteRepr ()
 import Pairing.Hash
 import Pairing.Modular
 import Pairing.Params
@@ -44,62 +38,32 @@ import Pairing.Params
 -- Orphan instances (temporary)
 -------------------------------------------------------------------------------
 
-instance Ord Fp where
-  compare = on compare toInt
-
-instance Ord Fp2 where
-  compare = on compare fromField
-
--- instance FromX Fp where
---   yFromX = fpYforX
+-- instance FromX Fq where
+--   yFromX = fqYforX
 --   isOdd y = odd (toInt y)
 
--- instance FromX Fp2 where
---   yFromX = fp2YforX
--- -- This is generalised from the MCL implementation where in Fp2 oddness is based on the first element
+-- instance FromX Fq2 where
+--   yFromX = fq2YforX
+-- -- This is generalised from the MCL implementation where in Fq2 oddness is based on the first element
 --   isOdd a = case fromField a of
 --     (x : xs) -> isOdd x
 --     []       -> False -- Assume zero
 
 -------------------------------------------------------------------------------
--- Jacobian coordinates (temporary)
--------------------------------------------------------------------------------
-
--- | Jacobian representation of points on an elliptic curve.
---
--- In Jacobian coordinates the triple @(x, y, z)@ represents the affine point
--- @(X / Z^2, Y / Z^3)@.  Curve operations are more optimal in Jacobian
--- coordinates when the time complexity for underlying field inversions is
--- significantly higher than field multiplications.
-
--- | Jacobian coordinates for points on an elliptic curve over a field @k@.
-type JPoint k = (k, k, k)
-
--- | Convert affine coordinates to Jacobian coordinates.
-toJacobian :: GaloisField k => WPoint c k -> JPoint k
-toJacobian O       = (1, 1, 0)
-toJacobian (A x y) = (x, y, 1)
-
--- | Convert Jacobian coordinates to affine coordinates.
-fromJacobian :: (GaloisField k, WCurve c k) => JPoint k -> WPoint c k
-fromJacobian (_, _, 0) = O
-fromJacobian (x, y, z) = A (x * pow z (-2)) (y * pow z (-3))
-
--------------------------------------------------------------------------------
 -- Square roots (temporary)
 -------------------------------------------------------------------------------
 
-fpSqrt :: (Fp -> Fp -> Fp) -> Fp -> Maybe Fp
-fpSqrt ysel a = case withQM (modUnOpMTup (toInt a) bothSqrtOf) of
+fqSqrt :: (Fq -> Fq -> Fq) -> Fq -> Maybe Fq
+fqSqrt ysel a = case withQM (modUnOpMTup (toInt a) bothSqrtOf) of
   Just (y1, y2) -> Just (ysel (fromInteger y1) (fromInteger y2))
   Nothing -> Nothing
 
--- | Square root of Fp2 are specified by https://eprint.iacr.org/2012/685.pdf,
--- Algorithm 9 with lots of help from https://docs.rs/pairing/0.14.1/src/pairing/bls12_381/fp2.rs.html#162-222
+-- | Square root of Fq2 are specified by https://eprint.iacr.org/2012/685.pdf,
+-- Algorithm 9 with lots of help from https://docs.rs/pairing/0.14.1/src/pairing/bls12_381/fq2.rs.html#162-222
 -- This implementation appears to return the larger square root so check the
 -- return value and negate as necessary
-fp2Sqrt :: Fp2 -> Maybe Fp2
-fp2Sqrt a = do
+fq2Sqrt :: Fq2 -> Maybe Fq2
+fq2Sqrt a = do
   let a1 = pow a qm3by4
   let alpha = pow a1 2 * a
   let a0 = pow alpha _q * alpha
@@ -112,26 +76,20 @@ fp2Sqrt a = do
     qm3by4 = withQ (modBinOp (_q -3) 4 (/))
     qm1by2 = withQ (modBinOp (_q -1) 2 (/))
 
-fpYforX :: Fp -> (Fp -> Fp -> Fp) -> Maybe Fp
-fpYforX x ysel = fpSqrt ysel (pow x 3 + _b)
+fqYforX :: Fq -> (Fq -> Fq -> Fq) -> Maybe Fq
+fqYforX x ysel = fqSqrt ysel (pow x 3 + _b)
 
 -- https://docs.rs/pairing/0.14.1/src/pairing/bls12_381/ec.rs.html#102-124
-fp2YforX :: Fp2 -> (Fp2 -> Fp2 -> Fp2) -> Maybe Fp2
-fp2YforX x ly = do
+fq2YforX :: Fq2 -> (Fq2 -> Fq2 -> Fq2) -> Maybe Fq2
+fq2YforX x ly = do
   y <- newy
   pure (ly y (negate y))
   where
-    newy = fp2Sqrt (pow x 3 + _b')
+    newy = fq2Sqrt (pow x 3 + _b')
 
 -------------------------------------------------------------------------------
 -- Fr (temporary)
 -------------------------------------------------------------------------------
-
--- | Prime field @Fr@ with characteristic @_r@
-type Fr = PrimeField 21888242871839275222246405745257275088548364400416034343698204186575808495617
-
-instance Ord Fr where
-  compare = on compare toInt
 
 isRootOfUnity :: Integer -> Fr -> Bool
 isRootOfUnity n x
@@ -184,63 +142,63 @@ precompRootOfUnity 28 = 19103219067921713944291392827692070036145651957329286315
 precompRootOfUnity _ = panic "precompRootOfUnity: exponent too big for Fr / negative"
 
 -------------------------------------------------------------------------------
--- Fp2 and Fp12
+-- Fq2 and Fq12
 -------------------------------------------------------------------------------
 
 -- | Conjugation
-fp2Conj :: Fp2 -> Fp2
-fp2Conj x = case fromField x of
+fq2Conj :: Fq2 -> Fq2
+fq2Conj x = case fromField x of
   [y, z] -> fromList [y, -z]
   [y]    -> fromList [y]
   []     -> 0
   _      -> panic "unreachable."
 
--- | Multiplication by a scalar in @Fp@
-fp2ScalarMul :: Fp -> Fp2 -> Fp2
-fp2ScalarMul a x = fromList [a] * x
+-- | Multiplication by a scalar in @Fq@
+fq2ScalarMul :: Fq -> Fq2 -> Fq2
+fq2ScalarMul a x = fromList [a] * x
 
 -- | Conjugation
-fp12Conj :: Fp12 -> Fp12
-fp12Conj x = case fromField x of
+fq12Conj :: Fq12 -> Fq12
+fq12Conj x = case fromField x of
   [y, z] -> fromList [y, -z]
   [y]    -> fromList [y]
   []     -> 0
   _      -> panic "unreachable."
 
--- | Create a new value in @Fp12@ by providing a list of twelve coefficients
--- in @Fp@, should be used instead of the @Fp12@ constructor.
-construct :: [Fp] -> Fp12
+-- | Create a new value in @Fq12@ by providing a list of twelve coefficients
+-- in @Fq@, should be used instead of the @Fq12@ constructor.
+construct :: [Fq] -> Fq12
 construct [a, b, c, d, e, f, g, h, i, j, k, l] = fromList
   [ fromList [fromList [a, b], fromList [c, d], fromList [e, f]]
   , fromList [fromList [g, h], fromList [i, j], fromList [k, l]] ]
-construct _ = panic "Invalid arguments to fp12"
+construct _ = panic "Invalid arguments to fq12"
 
--- | Deconstruct a value in @Fp12@ into a list of twelve coefficients in @Fp@.
-deconstruct :: Fp12 -> [Fp]
+-- | Deconstruct a value in @Fq12@ into a list of twelve coefficients in @Fq@.
+deconstruct :: Fq12 -> [Fq]
 deconstruct = concatMap fromField . concatMap fromField . fromField
 
 -- | Iterated Frobenius automorphism
-fp12Frobenius :: Int -> Fp12 -> Fp12
-fp12Frobenius i a
+fq12Frobenius :: Int -> Fq12 -> Fq12
+fq12Frobenius i a
   | i == 0 = a
   | i == 1 = fastFrobenius a
-  | i > 1 = let prev = fp12Frobenius (i - 1) a
+  | i > 1 = let prev = fq12Frobenius (i - 1) a
             in fastFrobenius prev
-  | otherwise = panic "fp12Frobenius not defined for negative values of i"
+  | otherwise = panic "fq12Frobenius not defined for negative values of i"
 
 -- | Fast Frobenius automorphism
-fastFrobenius :: Fp12 -> Fp12
+fastFrobenius :: Fq12 -> Fq12
 fastFrobenius = collapse . convert [[0,2,4],[1,3,5]] . conjugate
   where
-    conjugate :: Fp12 -> [[Fp2]]
-    conjugate = map (map fp2Conj . fromField) . fromField
-    convert :: [[Integer]] -> [[Fp2]] -> [[Fp2]]
+    conjugate :: Fq12 -> [[Fq2]]
+    conjugate = map (map fq2Conj . fromField) . fromField
+    convert :: [[Integer]] -> [[Fq2]] -> [[Fq2]]
     convert = zipWith (zipWith (\x y -> pow _xi ((x * (_q - 1)) `div` 6) * y))
-    collapse :: [[Fp2]] -> Fp12
+    collapse :: [[Fq2]] -> Fq12
     collapse = fromList . map fromList
 
--- | Multiply by @_xi@ (cubic nonresidue in @Fp2@) and reorder coefficients
-mulXi :: Fp6 -> Fp6
+-- | Multiply by @_xi@ (cubic nonresidue in @Fq2@) and reorder coefficients
+mulXi :: Fq6 -> Fq6
 mulXi w = case fromField w of
   [x, y, z] -> fromList [z * _xi, x, y]
   [x, y]    -> fromList [0, x, y]

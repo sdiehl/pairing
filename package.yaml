@@ -7,12 +7,27 @@ license:     MIT
 github:      adjoint-io/pairing
 category:    Cryptography
 
-extra-source-files:
-- README.md
-- ChangeLog.md
+default-extensions:
+  - LambdaCase
+  - RecordWildCards
+  - OverloadedStrings
+  - NoImplicitPrelude
+  - FlexibleInstances
+  - FlexibleContexts
+  - ScopedTypeVariables
+  - RankNTypes
+  - BangPatterns
+  - DataKinds
+  - DeriveAnyClass
+  - DeriveFunctor
+  - DeriveGeneric
+  - GeneralizedNewtypeDeriving
+  - MultiParamTypeClasses
+  - PatternSynonyms
+  - TypeApplications
+  - TypeSynonymInstances
 
 dependencies:
-  # Prelude
   - base >= 4.7 && < 5
   - protolude >= 0.2
   - arithmoi >= 0.8
@@ -20,7 +35,7 @@ dependencies:
   - bytestring
   - elliptic-curve >= 0.1
   - errors
-  - galois-field >= 0.2
+  - galois-field >= 0.3
   - integer-logarithms
   - memory
   - MonadRandom
@@ -28,54 +43,15 @@ dependencies:
   - random
   - wl-pprint-text
 
+extra-source-files:
+  - README.md
+  - ChangeLog.md
+
+ghc-options:
+  - -freverse-errors
+  - -Wall
+
 library:
-  source-dirs: src
-
-  ghc-options:
-    -fwarn-tabs
-    -fwarn-incomplete-patterns
-    -fwarn-incomplete-record-updates
-    -fwarn-redundant-constraints
-    -fwarn-implicit-prelude
-    -fwarn-overflowed-literals
-    -fwarn-orphans
-    -fwarn-identities
-    -fwarn-dodgy-exports
-    -fwarn-dodgy-imports
-    -fwarn-duplicate-exports
-    -fwarn-overlapping-patterns
-    -fwarn-missing-fields
-    -fwarn-missing-methods
-    -fwarn-missing-signatures
-    -fwarn-noncanonical-monad-instances
-    -fwarn-unused-pattern-binds
-    -fwarn-unused-type-patterns
-    -fwarn-unrecognised-pragmas
-    -fwarn-wrong-do-bind
-    -fno-warn-name-shadowing
-    -fno-warn-unused-binds
-    -fno-warn-unused-matches
-    -fno-warn-unused-do-bind
-    -Wmissing-export-lists
-
-  default-extensions:
-    - LambdaCase
-    - RecordWildCards
-    - OverloadedStrings
-    - NoImplicitPrelude
-    - FlexibleInstances
-    - FlexibleContexts
-    - ScopedTypeVariables
-    - RankNTypes
-    - BangPatterns
-    - DataKinds
-    - DeriveAnyClass
-    - DeriveFunctor
-    - DeriveGeneric
-    - GeneralizedNewtypeDeriving
-    - MultiParamTypeClasses
-    - TypeApplications
-
   exposed-modules:
     - Pairing.ByteRepr
     - Pairing.Curve
@@ -83,16 +59,15 @@ library:
     - Pairing.Modular
     - Pairing.Params
     - Pairing.Pairing
-    # - Pairing.Serialize.Types
-    # - Pairing.Serialize.Jivsov
-    # - Pairing.Serialize.MCLWasm
+    - Pairing.Serialize.Types
+    - Pairing.Serialize.Jivsov
+    - Pairing.Serialize.MCLWasm
+
+  source-dirs: src
 
 tests:
   pairing-tests:
     main: Driver.hs
-    source-dirs:
-      - src
-      - tests
     dependencies:
       - QuickCheck
       - quickcheck-instances
@@ -103,29 +78,13 @@ tests:
       - quickcheck-instances
       - QuickCheck
       - hexstring
-    default-extensions:
-      - LambdaCase
-      - RecordWildCards
-      - OverloadedStrings
-      - NoImplicitPrelude
-      - FlexibleInstances
-      - FlexibleContexts
-      - ScopedTypeVariables
-      - RankNTypes
-      - DataKinds
-      - DeriveAnyClass
-      - DeriveFunctor
-      - DeriveGeneric
-      - MultiParamTypeClasses
-      - TypeApplications
-      - TypeSynonymInstances
+    source-dirs:
+      - src
+      - tests
 
 benchmarks:
   pairing-benchmarks:
-    main: Main.hs
-    source-dirs:
-      - src
-      - bench
+    main: Main
     dependencies:
       - criterion
       - QuickCheck
@@ -133,16 +92,6 @@ benchmarks:
       - tasty
       - tasty-hunit
       - tasty-quickcheck
-    default-extensions:
-      - NoImplicitPrelude
-      - OverloadedStrings
-      - FlexibleInstances
-      - FlexibleContexts
-      - ScopedTypeVariables
-      - RankNTypes
-      - DataKinds
-      - DeriveAnyClass
-      - DeriveFunctor
-      - DeriveGeneric
-      - MultiParamTypeClasses
-      - TypeApplications
+    source-dirs:
+      - src
+      - bench

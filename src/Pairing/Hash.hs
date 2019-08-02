@@ -19,10 +19,10 @@ sqrtOfMinusThree :: forall m . KnownNat m => Proxy m -> Maybe (Mod m)
 sqrtOfMinusThree _ = sqrtOf (-3)
 
 w ::  forall m . KnownNat m => Proxy m -> Mod m -> Mod m -> Mod m
-w mname sq3 t = (sq3 * t) / (1 + (b mname) + (t `powMod` 2))
+w mName sq3 t = (sq3 * t) / (1 + (b mName) + (t `powMod` 2))
 
 b ::  forall m . KnownNat m => Proxy m -> Mod m
-b mName = fromInteger @(Mod m) (toInt _b)
+b _ = fromInteger @(Mod m) (toInt _b)
 
 x1 :: forall m . KnownNat m => Proxy m -> Mod m -> Mod m -> Maybe (Mod m)
 x1 mName t w = do
@@ -30,10 +30,10 @@ x1 mName t w = do
   pure $ (m3  - 1) / 2 - (t * w)
 
 x2 :: forall m . KnownNat m => Proxy m -> Mod m -> Mod m
-x2 mName x1' = (-1) - x1'
+x2 _ x1' = (-1) - x1'
 
 x3 :: forall m . KnownNat m => Proxy m -> Mod m -> Mod m
-x3 mName w = 1 + (1 / (w `powMod` 2))
+x3 _ w = 1 + (1 / (w `powMod` 2))
 
 chi :: forall m . KnownNat m => Proxy m -> Mod m -> Integer
 chi mName a
@@ -59,7 +59,7 @@ swy mn pr3 pt pxi pb = (ch *) <$>  y
 -- by Pierre-Alain Fouque and Mehdi Tibouchi.
 -- This function evaluates an empty bytestring or one that contains \NUL to zero
 -- which according to Definiton 2 of the paper is sent to an arbitrary point on the curve
-swEncBN :: (Curve r c k, MonadRandom m) => ByteString -> m (Maybe (Point r c k))
+swEncBN :: MonadRandom m => ByteString -> m (Maybe G1)
 swEncBN bs = runMaybeT $ withQM $ \mn -> do
   let t = M.fromBytes MostSignificantFirst bs mn
   sq3 <- hoistMaybe (sqrtOfMinusThree mn)

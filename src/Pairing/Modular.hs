@@ -9,7 +9,6 @@ import Control.Monad.Random (MonadRandom(..))
 
 import Pairing.Params
 import Pairing.ByteRepr
-import qualified Data.ByteString as BS
 
 withMod :: Integer -> (forall m . KnownNat m => Proxy m -> r) -> r
 withMod n cont = case someNatVal n of 
@@ -37,16 +36,16 @@ withRM :: (forall n. KnownNat n => Proxy n -> m r) -> m r
 withRM = withModM _r
 
 newMod :: forall m . KnownNat m => Integer -> Proxy m -> Mod m
-newMod n mName = fromInteger @(Mod m) n
+newMod n _ = fromInteger @(Mod m) n
 
 toInteger :: Mod m -> Integer
 toInteger = getVal
 
 modUnOp :: forall m . KnownNat m => Integer -> (Mod m -> Mod m) -> Proxy m -> Integer
-modUnOp n f mName = getVal $ f (fromInteger @(Mod m) n)
+modUnOp n f _ = getVal $ f (fromInteger @(Mod m) n)
 
 modBinOp :: forall m . KnownNat m => Integer -> Integer -> (Mod m -> Mod m -> Mod m) -> Proxy m -> Integer
-modBinOp r s f mName = getVal $ f (fromInteger @(Mod m) r) (fromInteger @(Mod m) s)
+modBinOp r s f _ = getVal $ f (fromInteger @(Mod m) r) (fromInteger @(Mod m) s)
 
 multInverse :: KnownNat m => Mod m -> Maybe (Mod m)
 multInverse n = do
@@ -55,12 +54,12 @@ multInverse n = do
   pure (multElement mm)  
 
 modUnOpM :: forall m a . (KnownNat m, Monad a) => Integer -> (Mod m -> a (Mod m)) -> Proxy m -> a Integer
-modUnOpM n f mName = do
+modUnOpM n f _ = do
   a <- f (fromInteger @(Mod m) n)
   pure (getVal a)
 
 modUnOpMTup :: forall m a . (KnownNat m, Monad a) => Integer -> (Mod m -> a (Mod m, Mod m)) -> Proxy m -> a (Integer, Integer)
-modUnOpMTup n f mName = do
+modUnOpMTup n f _ = do
   (a, b) <- f (fromInteger @(Mod m) n)
   pure (getVal a, getVal b)
 
@@ -82,7 +81,7 @@ sqrtOf i = fst <$> bothSqrtOf i
 bothSqrtOf :: forall m . KnownNat m => Mod m -> Maybe (Mod m, Mod m)
 bothSqrtOf i = case sqrtsMod i of
   [] -> Nothing
-  (x : x1 : xs) -> Just (x, x1)
+  (x:x1:_) -> Just (x, x1)
   [_] -> Nothing
 
 legendre :: Integer -> Integer

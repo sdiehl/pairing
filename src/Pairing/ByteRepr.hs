@@ -13,7 +13,7 @@ import qualified Data.ByteString as B
 import PrimeField (toInt)
 import ExtensionField (fromField, fromList)
 
-import Pairing.Params (Fp, Fp2, Fp6, Fp12)
+import Pairing.Params (Fq, Fq2, Fq6, Fq12)
 
 -------------------------------------------------------------------------------
 -- Bytes
@@ -41,10 +41,10 @@ toBytes x = B.reverse . B.unfoldr (fmap go) . Just $ changeSign x
     changeSign | x < 0     = subtract 1 . negate
                | otherwise = identity
     go :: Integer -> (Word8, Maybe Integer)
-    go x = (b, i)
+    go y = (b, i)
       where
-        b = changeSign (fromInteger x)
-        i | x >= 128  = Just (x `shiftR` 8)
+        b = changeSign (fromInteger y)
+        i | y >= 128  = Just (y `shiftR` 8)
           | otherwise = Nothing
 
 toPaddedBytes :: ByteOrderLength -> Integer -> Maybe ByteString
@@ -67,61 +67,61 @@ fromBytesToInteger LeastSignificantFirst = (fromBytesToInteger MostSignificantFi
 -- Fields
 -------------------------------------------------------------------------------
 
-instance ByteRepr Fp where
+instance ByteRepr Fq where
   mkRepr bo = toPaddedBytes bo <$> toInt
   fromRepr bo _ bs = Just (fromInteger (fromBytesToInteger (byteOrder bo) bs))
   calcReprLength _ n = n
 
-instance ByteRepr Fp2 where
-  mkRepr bo f2 = foldl' (<>) mempty (map (mkRepr bo) (fp2Bytes f2))
+instance ByteRepr Fq2 where
+  mkRepr bo f2 = foldl' (<>) mempty (map (mkRepr bo) (fq2Bytes f2))
     where
-      fp2Bytes w = case fromField w of
+      fq2Bytes w = case fromField w of
         [x, y] -> [x, y]
         [x]    -> [x, 0]
         []     -> [0, 0]
         _      -> panic "unreachable."
-  fromRepr bo fp2 bs = do
+  fromRepr bo _ bs = do
     let
-      blen = calcReprLength (1 :: Fp) $ lenPerElement bo
+      blen = calcReprLength (1 :: Fq) $ lenPerElement bo
       (xbs, ybs) = B.splitAt blen bs
-    x <- fromRepr bo (1 :: Fp) xbs
-    y <- fromRepr bo (1 :: Fp) ybs
+    x <- fromRepr bo (1 :: Fq) xbs
+    y <- fromRepr bo (1 :: Fq) ybs
     return (fromList [x, y])
-  calcReprLength _ n = 2 * calcReprLength (1 :: Fp) n
+  calcReprLength _ n = 2 * calcReprLength (1 :: Fq) n
 
-instance ByteRepr Fp6 where
-  mkRepr bo f6 = foldl' (<>) mempty (map (mkRepr bo) (fp6Bytes f6))
+instance ByteRepr Fq6 where
+  mkRepr bo f6 = foldl' (<>) mempty (map (mkRepr bo) (fq6Bytes f6))
     where
-      fp6Bytes w = case fromField w of
+      fq6Bytes w = case fromField w of
         [x, y, z] -> [x, y, z]
         [x, y]    -> [x, y, 0]
         [x]       -> [x, 0, 0]
         []        -> [0, 0, 0]
         _         -> panic "unreachable."
-  fromRepr bo fp6 bs = do
+  fromRepr bo _ bs = do
     let
-      blen = calcReprLength (1 :: Fp2) $ lenPerElement bo
+      blen = calcReprLength (1 :: Fq2) $ lenPerElement bo
       (xbs, yzbs) = B.splitAt blen bs
       (ybs, zbs) = B.splitAt blen yzbs
-    x <- fromRepr bo (1 :: Fp2) xbs
-    y <- fromRepr bo (1 :: Fp2) ybs
-    z <- fromRepr bo (1 :: Fp2) zbs
+    x <- fromRepr bo (1 :: Fq2) xbs
+    y <- fromRepr bo (1 :: Fq2) ybs
+    z <- fromRepr bo (1 :: Fq2) zbs
     return (fromList [x, y, z])
-  calcReprLength _ n = 3 * calcReprLength (1 :: Fp2) n
+  calcReprLength _ n = 3 * calcReprLength (1 :: Fq2) n
 
-instance ByteRepr Fp12 where
-  mkRepr bo f12 = foldl' (<>) mempty (map (mkRepr bo) (fp12Bytes f12))
+instance ByteRepr Fq12 where
+  mkRepr bo f12 = foldl' (<>) mempty (map (mkRepr bo) (fq12Bytes f12))
     where
-      fp12Bytes w = case fromField w of
+      fq12Bytes w = case fromField w of
         [x, y] -> [x, y]
         [x]    -> [x, 0]
         []     -> [0, 0]
         _      -> panic "unreachable."
-  fromRepr bo fp12 bs = do
+  fromRepr bo _ bs = do
     let
-      blen = calcReprLength (1 :: Fp6) $ lenPerElement bo
+      blen = calcReprLength (1 :: Fq6) $ lenPerElement bo
       (xbs, ybs) = B.splitAt blen bs
-    x <- fromRepr bo (1 :: Fp6) xbs
-    y <- fromRepr bo (1 :: Fp6) ybs
+    x <- fromRepr bo (1 :: Fq6) xbs
+    y <- fromRepr bo (1 :: Fq6) ybs
     return (fromList [x, y])
-  calcReprLength _ n = 2 * calcReprLength (1 :: Fp6) n
+  calcReprLength _ n = 2 * calcReprLength (1 :: Fq6) n

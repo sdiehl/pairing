@@ -3,9 +3,9 @@ module TestPairing where
 import Protolude
 
 import Curve
-import Curve.Field
 import Curve.Weierstrass
 import ExtensionField
+import Group.Field
 import Pairing.Curve
 import Pairing.Pairing
 import Pairing.Params
@@ -87,8 +87,8 @@ prop_pairingBilinear = withMaxSuccess pairingTestCount prop
   where
     prop :: G1 -> G2 -> Integer -> Integer -> Bool
     prop e1 e2 preExp1 preExp2
-      = reducedPairing (mul e1 exp1) (mul e2 exp2)
-        == mul (reducedPairing e1 e2) (exp1 * exp2)
+      = reducedPairing (mul' e1 exp1) (mul' e2 exp2)
+        == mul' (reducedPairing e1 e2) (exp1 * exp2)
       where
         -- Quickcheck might give us negative integers or 0, so we
         -- take the absolute values instead and add one.
@@ -111,11 +111,11 @@ prop_pairingPowerTest = withMaxSuccess pairingTestCount prop
     prop :: G1 -> G2 -> Bool
     prop e1 e2 = def (reducedPairing e1 e2)
 
-prop_frobeniusFp12Correct :: Fp12 -> Bool
-prop_frobeniusFp12Correct f = frobeniusNaive 1 f == fp12Frobenius 1 f
+prop_frobeniusFq12Correct :: Fq12 -> Bool
+prop_frobeniusFq12Correct f = frobeniusNaive 1 f == fq12Frobenius 1 f
 
 prop_finalExponentiationCorrect :: Property
 prop_finalExponentiationCorrect = withMaxSuccess 10 prop
   where
-    prop :: Fp12 -> Bool
+    prop :: Fq12 -> Bool
     prop f = finalExponentiation f == finalExponentiationNaive f

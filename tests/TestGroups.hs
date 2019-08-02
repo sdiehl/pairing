@@ -3,17 +3,12 @@ module TestGroups where
 import Protolude
 
 import Curve
-import Data.ByteString as BS (null, dropWhile)
-import Data.HexString as H
-import ExtensionField (fromList)
-import Pairing.ByteRepr
 import Pairing.Curve
-import Pairing.Pairing
 import Pairing.Params
-import Pairing.Serialize.Types
-import Pairing.Serialize.Jivsov
-import Pairing.Serialize.MCLWasm
-import Test.QuickCheck.Instances
+-- import Pairing.Serialize.Types
+-- import Pairing.Serialize.Jivsov
+-- import Pairing.Serialize.MCLWasm
+import Test.QuickCheck.Instances ()
 import qualified Test.QuickCheck.Monadic as TQM (monadicIO, assert, run)
 import Test.Tasty
 import Test.Tasty.HUnit
@@ -77,7 +72,7 @@ testAbelianGroupLaws binOp neg ident descr
 -------------------------------------------------------------------------------
 
 prop_g1Double :: G1 -> Bool
-prop_g1Double a = double a == a <> a
+prop_g1Double a = dbl a == a <> a
 
 test_groupLaws_G1 :: TestTree
 test_groupLaws_G1 = testAbelianGroupLaws (<>) inv (mempty :: G1) "G1"
@@ -87,7 +82,7 @@ unit_g1_valid :: Assertion
 unit_g1_valid = assertBool "generator g1 does not satisfy curve equation" $ def (gen :: G1)
 
 unit_order_g1_valid :: Assertion
-unit_order_g1_valid = mul gen _r @=? (mempty :: G1)
+unit_order_g1_valid = mul' gen _r @=? (mempty :: G1)
 
 prop_hashToG1 :: ByteString -> Property
 prop_hashToG1 bs = TQM.monadicIO $ do
@@ -102,7 +97,7 @@ prop_hashToG1 bs = TQM.monadicIO $ do
 
 -- unit_g1SerializeCompMCLWasm :: Assertion
 -- unit_g1SerializeCompMCLWasm = do
---   let g1pt = Point (9314493114755198232379544958894901330290171903936264295471737527783061073337 :: Fp) (3727704492399430267836652969370123320076852948746739702603703543134592597527 :: Fp)
+--   let g1pt = Point (9314493114755198232379544958894901330290171903936264295471737527783061073337 :: Fq) (3727704492399430267836652969370123320076852948746739702603703543134592597527 :: Fq)
 --   let hs = hexString "b92db2fcfcba5ad9f6b676de13a5488b54dfd537ae5c96291f399284f7d09794"
 --   let Right np = unserializePoint MCLWASM g1 (toSL $ H.toBytes hs)
 --   np @=? g1pt
@@ -121,7 +116,7 @@ prop_hashToG1 bs = TQM.monadicIO $ do
 -------------------------------------------------------------------------------
 
 prop_g2Double :: G2 -> Bool
-prop_g2Double a = double a == a <> a
+prop_g2Double a = dbl a == a <> a
 
 test_groupLaws_G2 :: TestTree
 test_groupLaws_G2 = testAbelianGroupLaws (<>) inv (mempty :: G2) "G2"
@@ -130,7 +125,7 @@ unit_g2_valid :: Assertion
 unit_g2_valid = assertBool "generator g2 does not satisfy curve equation" $ def (gen :: G2)
 
 unit_order_g2_valid :: Assertion
-unit_order_g2_valid = mul gen _r @=? (mempty :: G2)
+unit_order_g2_valid = mul' gen _r @=? (mempty :: G2)
 
 -- g2FromXTest :: G2 -> Assertion
 -- g2FromXTest Infinity = pure ()
@@ -145,8 +140,8 @@ unit_order_g2_valid = mul gen _r @=? (mempty :: G2)
 
 -- unit_g2SerializeCompMCLWasm :: Assertion
 -- unit_g2SerializeCompMCLWasm = do
---   let fq2x = fromList ([6544947162799133903546594463061476713923884516504213524167597810128866380952,  1440920261338086273401746857890494196693993714596389710801111883382590011446] :: [Fp]) :: Fp2
---   let fq2y = fromList ([7927561822697823059695659663409507948904771679743888257723485312240532833493, 2189896469972867352153851473169755334250894385106289486234761879693772655721] :: [Fp]) :: Fp2
+--   let fq2x = fromList ([6544947162799133903546594463061476713923884516504213524167597810128866380952,  1440920261338086273401746857890494196693993714596389710801111883382590011446] :: [Fq]) :: Fq2
+--   let fq2y = fromList ([7927561822697823059695659663409507948904771679743888257723485312240532833493, 2189896469972867352153851473169755334250894385106289486234761879693772655721] :: [Fq]) :: Fq2
 --   let g2pt = Point fq2x fq2y
 --   let hs = hexString "980cf2acdb1645247a512f91cbbbbb1f4fa2328c979ae26d550ec7b80e4f780e36f82f7090c4d516a2257fcee804df8421af857b2f80ffccfc11c6f52e882f83"
 --   let Right np = unserializePoint MCLWASM g2 (toSL $ H.toBytes hs)
@@ -165,7 +160,7 @@ unit_order_g2_valid = mul gen _r @=? (mempty :: G2)
 -- GT
 -------------------------------------------------------------------------------
 
--- The group laws for GT are implied by the field tests for Fp12.
+-- The group laws for GT are implied by the field tests for Fq12.
 
 -- gtSerializeTest :: G1 -> G2 -> Assertion
 -- gtSerializeTest g1 g2 = serializeTest (reducedPairing g1 g2) (serializeUncompressed Jivsov) (fromByteStringGT Jivsov)
