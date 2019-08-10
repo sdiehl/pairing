@@ -32,7 +32,8 @@ module Pairing.Fq
 import Protolude
 
 import Data.ByteString as B (splitAt, length)
-import ExtensionField (ExtensionField, IrreducibleMonic(..), fromField, fromList, t, x)
+import ExtensionField (ExtensionField, IrreducibleMonic(..), fromField, toField,
+                       pattern X, pattern X2, pattern X3, pattern Y)
 import GaloisField (GaloisField(..))
 import Math.NumberTheory.Moduli.Class (powMod)
 import PrimeField (PrimeField, toInt)
@@ -52,7 +53,7 @@ type Fq = PrimeField 21888242871839275222246405745257275088696311157297823662689
 -- | Quadratic irreducible monic polynomial @f(u) = u^2 + 1@
 data PolynomialU
 instance IrreducibleMonic Fq PolynomialU where
-  split _ = x^2 + 1
+  split _ = X2 + 1
 
 -- | Quadratic extension field of @Fq@ defined as @Fq2 = Fq[u]/<f(u)>@
 type Fq2 = ExtensionField Fq PolynomialU
@@ -60,7 +61,7 @@ type Fq2 = ExtensionField Fq PolynomialU
 -- | Cubic irreducible monic polynomial @g(v) = v^3 - (9 + u)@
 data PolynomialV
 instance IrreducibleMonic Fq2 PolynomialV where
-  split _ = x^3 - (9 + t x)
+  split _ = X3 - (9 + Y X)
 
 -- | Cubic extension field of @Fq2@ defined as @Fq6 = Fq2[v]/<g(v)>@
 type Fq6 = ExtensionField Fq2 PolynomialV
@@ -68,7 +69,7 @@ type Fq6 = ExtensionField Fq2 PolynomialV
 -- | Quadratic irreducible monic polynomial @h(w) = w^2 - v@
 data PolynomialW
 instance IrreducibleMonic Fq6 PolynomialW where
-  split _ = x^2 - t x
+  split _ = X2 - Y X
 
 -- | Quadratic extension field of @Fq6@ defined as @Fq12 = Fq6[w]/<h(w)>@
 type Fq12 = ExtensionField Fq6 PolynomialW
@@ -76,12 +77,6 @@ type Fq12 = ExtensionField Fq6 PolynomialW
 -------------------------------------------------------------------------------
 -- Instances
 -------------------------------------------------------------------------------
-
-instance Ord Fq where
-  compare = on compare toInt
-
-instance Ord Fq2 where
-  compare = on compare fromField
 
 instance FromX Fq where
   yFromX = fqYforX
@@ -108,7 +103,7 @@ instance ByteRepr Fq2 where
       (xbs, ybs) = B.splitAt blen bs
     x <- fromRepr bo (1 :: Fq) xbs
     y <- fromRepr bo (1 :: Fq) ybs
-    return (fromList [x, y])
+    return (toField [x, y])
   calcReprLength _ n = 2 * calcReprLength (1 :: Fq) n
 
 instance ByteRepr Fq6 where
@@ -123,7 +118,7 @@ instance ByteRepr Fq6 where
     x <- fromRepr bo (1 :: Fq2) xbs
     y <- fromRepr bo (1 :: Fq2) ybs
     z <- fromRepr bo (1 :: Fq2) zbs
-    return (fromList [x, y, z])
+    return (toField [x, y, z])
   calcReprLength _ n = 3 * calcReprLength (1 :: Fq2) n
 
 instance ByteRepr Fq12 where
@@ -136,7 +131,7 @@ instance ByteRepr Fq12 where
       (xbs, ybs) = B.splitAt blen bs
     x <- fromRepr bo (1 :: Fq6) xbs
     y <- fromRepr bo (1 :: Fq6) ybs
-    return (fromList [x, y])
+    return (toField [x, y])
   calcReprLength _ n = 2 * calcReprLength (1 :: Fq6) n
 
 -------------------------------------------------------------------------------
@@ -159,7 +154,7 @@ fq2Sqrt a = do
   let a0 = pow alpha _q * alpha
   if a0 == -1 then Nothing else do
     let x0 = a1 * a
-    if alpha == -1 then Just (a1 * fromList [0, 1]) else do
+    if alpha == -1 then Just (a1 * toField [0, 1]) else do
       let b = pow (alpha + 1) qm1by2
       Just (b * x0)
   where
@@ -188,15 +183,15 @@ fqNqr = fromInteger _nqr
 
 -- | Cubic non-residue in @Fq2@
 xi :: Fq2
-xi = fromList [fromInteger _xiA, fromInteger _xiB]
+xi = toField [fromInteger _xiA, fromInteger _xiB]
 
 -- | Multiply by @xi@ (cubic nonresidue in @Fq2@) and reorder coefficients
 mulXi :: Fq6 -> Fq6
 mulXi w = case fromField w of
-  [x, y, z] -> fromList [z * xi, x, y]
-  [x, y]    -> fromList [0, x, y]
-  [x]       -> fromList [0, x]
-  []        -> fromList []
+  [x, y, z] -> toField [z * xi, x, y]
+  [x, y]    -> toField [0, x, y]
+  [x]       -> toField [0, x]
+  []        -> toField []
   _         -> panic "mulXi not exhaustive."
 {-# INLINE mulXi #-}
 
@@ -233,29 +228,29 @@ fq12Bytes w = case fromField w of
 -- | Conjugation
 fq2Conj :: Fq2 -> Fq2
 fq2Conj x = case fromField x of
-  [y, z] -> fromList [y, -z]
-  [y]    -> fromList [y]
+  [y, z] -> toField [y, -z]
+  [y]    -> toField [y]
   []     -> 0
   _      -> panic "fq2Conj not exhaustive."
 
 -- | Multiplication by a scalar in @Fq@
 fq2ScalarMul :: Fq -> Fq2 -> Fq2
-fq2ScalarMul a x = fromList [a] * x
+fq2ScalarMul a x = toField [a] * x
 
 -- | Conjugation
 fq12Conj :: Fq12 -> Fq12
 fq12Conj x = case fromField x of
-  [y, z] -> fromList [y, -z]
-  [y]    -> fromList [y]
+  [y, z] -> toField [y, -z]
+  [y]    -> toField [y]
   []     -> 0
   _      -> panic "fq12Conj not exhaustive."
 
 -- | Create a new value in @Fq12@ by providing a list of twelve coefficients
 -- in @Fq@, should be used instead of the @Fq12@ constructor.
 construct :: [Fq] -> Fq12
-construct [a, b, c, d, e, f, g, h, i, j, k, l] = fromList
-  [ fromList [fromList [a, b], fromList [c, d], fromList [e, f]]
-  , fromList [fromList [g, h], fromList [i, j], fromList [k, l]] ]
+construct [a, b, c, d, e, f, g, h, i, j, k, l] = toField
+  [ toField [toField [a, b], toField [c, d], toField [e, f]]
+  , toField [toField [g, h], toField [i, j], toField [k, l]] ]
 construct _ = panic "Invalid arguments to fq12"
 
 -- | Deconstruct a value in @Fq12@ into a list of twelve coefficients in @Fq@.
@@ -280,4 +275,4 @@ fastFrobenius = collapse . convert [[0,2,4],[1,3,5]] . conjugate
     convert :: [[Integer]] -> [[Fq2]] -> [[Fq2]]
     convert = zipWith (zipWith (\x y -> pow xi ((x * (_q - 1)) `div` 6) * y))
     collapse :: [[Fq2]] -> Fq12
-    collapse = fromList . map fromList
+    collapse = toField . map toField

@@ -25,9 +25,6 @@ import Pairing.Params
 -- | Prime field @Fr@ with characteristic @_r@
 type Fr = PrimeField 21888242871839275222246405745257275088548364400416034343698204186575808495617
 
-instance Ord Fr where
-  compare = on compare toInt
-
 -------------------------------------------------------------------------------
 -- Roots of unity
 -------------------------------------------------------------------------------
