@@ -12,7 +12,7 @@ module Pairing.Pairing
 import Protolude
 
 import Data.List ((!!))
-import ExtensionField (fromList)
+import ExtensionField (toField)
 import GaloisField (GaloisField(..))
 
 import Pairing.Fq
@@ -89,7 +89,7 @@ prepareCoeffs coeffs (Point px py) ix =
 {-# INLINEABLE mulBy024 #-}
 mulBy024 :: Fq12 -> EllCoeffs -> Fq12
 mulBy024 this (EllCoeffs ell0 ellVW ellVV)
-  = let a = fromList [fromList [ell0, 0, ellVV], fromList [0, ellVW, 0]]
+  = let a = toField [toField [ell0, 0, ellVV], toField [0, ellVW, 0]]
     in this * a
 
 -------------------------------------------------------------------------------

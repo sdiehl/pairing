@@ -63,7 +63,7 @@ test_fieldLaws_Fq2 = testFieldLaws (Proxy :: Proxy Fq2) "Fq2"
 unit_uRoot :: Assertion
 unit_uRoot = u^2 @=? -1
   where
-    u = fromList [0, 1] :: Fq2
+    u = toField [0, 1] :: Fq2
 
 unit_fq2Pow :: Assertion
 unit_fq2Pow = do
@@ -91,8 +91,8 @@ test_fieldLaws_Fq6 = testFieldLaws (Proxy :: Proxy Fq6) "Fq6"
 unit_vRoot :: Assertion
 unit_vRoot = v^3 @=? 9 + u
   where
-    v = fromList [0, 1] :: Fq6
-    u = fromList [fromList [0, 1]]
+    v = toField [0, 1] :: Fq6
+    u = toField [toField [0, 1]]
 
 -------------------------------------------------------------------------------
 -- Fq12
@@ -105,8 +105,8 @@ test_fieldLaws_Fq12 = testFieldLaws (Proxy :: Proxy Fq12) "Fq12"
 unit_wRoot :: Assertion
 unit_wRoot = w^2 @=? v
   where
-    w = fromList [0, 1] :: Fq12
-    v = fromList [fromList [0, 1]]
+    w = toField [0, 1] :: Fq12
+    v = toField [toField [0, 1]]
 
 -------------------------------------------------------------------------------
 -- Fr

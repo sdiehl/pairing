@@ -24,7 +24,7 @@ import Protolude
 
 import Control.Monad.Random (MonadRandom)
 import Data.Semigroup ((<>))
-import ExtensionField (fromList)
+import ExtensionField (toField)
 import GaloisField (GaloisField(..))
 import PrimeField (toInt)
 import Test.QuickCheck (Arbitrary(..), Gen)
@@ -104,11 +104,11 @@ g1 = Point 1 2
 g2 :: G2
 g2 = Point x y
   where
-    x = fromList
+    x = toField
       [ 10857046999023057135944570762232829481370756359578518086990519993285655852781
       , 11559732032986387107991004021392285783925812861821192530917403151452391805634 ]
 
-    y = fromList
+    y = toField
       [ 8495653923123431417604973247489272438418190587263600148770280649306958101930
       , 4082367875863433681332203403145435568316851327593401208105741076214120093531 ]
 
@@ -122,7 +122,7 @@ isOnCurveG1 (Point x y) = pow y 2 == pow x 3 + fromInteger _b
 -- equation
 isOnCurveG2 :: G2 -> Bool
 isOnCurveG2 Infinity    = True
-isOnCurveG2 (Point x y) = pow y 2 == pow x 3 + fromList [fromInteger _b] / xi
+isOnCurveG2 (Point x y) = pow y 2 == pow x 3 + toField [fromInteger _b] / xi
 
 -- | Test whether a value is an _r-th root of unity
 isInGT :: GT -> Bool
@@ -134,7 +134,7 @@ b1 = fromInteger _b
 
 -- | Parameter for twisted curve over Fq2
 b2 :: Fq2
-b2 = fromList [b1] / xi
+b2 = toField [b1] / xi
 
 -------------------------------------------------------------------------------
 -- Generators

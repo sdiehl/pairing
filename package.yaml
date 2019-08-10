@@ -1,5 +1,5 @@
 name:        pairing
-version:     0.4.1
+version:     0.4.2
 synopsis:    Bilinear pairings
 description: Optimal Ate pairing over Barreto-Naehrig curves
 maintainer:  Adjoint Inc (info@adjoint.io)
@@ -19,7 +19,7 @@ dependencies:
   - binary
   - bytestring
   - errors
-  - galois-field >= 0.2
+  - galois-field == 0.4.0
   - integer-logarithms
   - memory
   - MonadRandom
@@ -73,6 +73,7 @@ library:
     - DeriveGeneric
     - GeneralizedNewtypeDeriving
     - MultiParamTypeClasses
+    - PatternSynonyms
     - TypeApplications
 
   exposed-modules:
@@ -121,6 +122,7 @@ tests:
       - DeriveFunctor
       - DeriveGeneric
       - MultiParamTypeClasses
+      - PatternSynonyms
       - TypeApplications
       - TypeSynonymInstances
 
@@ -151,4 +153,5 @@ benchmarks:
       - DeriveFunctor
       - DeriveGeneric
       - MultiParamTypeClasses
+      - PatternSynonyms
       - TypeApplications
