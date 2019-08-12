@@ -28,14 +28,14 @@ default-extensions:
   - TypeSynonymInstances
 
 dependencies:
-  - base >= 4.7 && < 5
+  - base >= 4.10 && < 5
   - protolude >= 0.2
   - arithmoi >= 0.8
   - binary
   - bytestring
-  - elliptic-curve >= 0.1
+  - elliptic-curve >= 0.2 && < 0.3
   - errors
-  - galois-field >= 0.3
+  - galois-field >= 0.4 && < 0.5
   - integer-logarithms
   - memory
   - MonadRandom

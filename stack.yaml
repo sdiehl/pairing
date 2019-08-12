@@ -39,10 +39,11 @@ packages:
 # using the same syntax as the packages field.
 # (e.g., acme-missiles-0.3)
 extra-deps:
-  - git: git@github.com:adjoint-io/galois-field.git
-    commit: 2fe9d4da678772545ce1204ce872028d1f1dc22f
-  - git: git@github.com:adjoint-io/elliptic-curve.git
-    commit: 444f98a21bafc7cc23ae861b38f44e7441628012
+- galois-field-0.4.1
+- git: git@github.com:adjoint-io/elliptic-curve.git
+  commit: 702332bdf2f78c6ddb7b7c44000b398e1361a15f
+- poly-0.3.1.0
+- semirings-0.4.2
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

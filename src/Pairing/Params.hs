@@ -14,9 +14,9 @@ module Pairing.Params
   , gG1
   , gG2
   , gGT
-  , oG1
-  , oG2
-  , oGT
+  , rG1
+  , rG2
+  , rGT
   , _a
   , _a'
   , _b
@@ -33,7 +33,7 @@ import Protolude
 
 import qualified Curve.Weierstrass.BN254 as BN254
 import qualified Curve.Weierstrass.BN254T as BN254T
-import ExtensionField (fromList)
+import ExtensionField (toField)
 import qualified Group.Field.BN254TF as BN254TF
 
 -------------------------------------------------------------------------------
@@ -81,19 +81,19 @@ gG2 = BN254T.gA
 
 -- | Generator of GT.
 gGT :: GT
-gGT = BN254TF.g_ -- this should be the _r-th primitive root of unity
+gGT = BN254TF.g_
 
 -- | Order of G1.
-oG1 :: Integer
-oG1 = BN254._r
+rG1 :: Integer
+rG1 = BN254._r
 
 -- | Order of G2.
-oG2 :: Integer
-oG2 = BN254T._r
+rG2 :: Integer
+rG2 = BN254T._r
 
 -- | Order of GT.
-oGT :: Integer
-oGT = BN254TF._r -- should be a factor of _r
+rGT :: Integer
+rGT = BN254TF._r
 
 -------------------------------------------------------------------------------
 -- Parameters
@@ -137,4 +137,4 @@ _t = 4965661367192848881
 
 -- | Parameter of twisted curve over @Fq@.
 _xi :: Fq2
-_xi = fromList [9, 1]
+_xi = toField [9, 1]

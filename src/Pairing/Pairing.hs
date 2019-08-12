@@ -11,9 +11,9 @@ module Pairing.Pairing
 
 import Protolude
 
-import Curve.Weierstrass (Group(..), Point(..), fromAtoJ)
+import Curve.Weierstrass (Curve(..), Group(..), Point(..))
 import Data.List ((!!))
-import ExtensionField (fromList)
+import ExtensionField (toField)
 import GaloisField (GaloisField(..))
 import Group.Field (Element(..))
 
@@ -80,7 +80,7 @@ prepareCoeffs _ _ _ = panic "prepareCoeffs: received trivial point"
 {-# INLINEABLE mulBy024 #-}
 mulBy024 :: GT -> EllCoeffs -> GT
 mulBy024 (F this) (EllCoeffs ell0 ellVW ellVV)
-  = let a = fromList [fromList [ell0, 0, ellVV], fromList [0, ellVW, 0]]
+  = let a = toField [toField [ell0, 0, ellVV], toField [0, ellVW, 0]]
     in F (this * a)
 
 -------------------------------------------------------------------------------
@@ -117,7 +117,7 @@ twistMulY = pow _xi ((_q - 1) `div` 2) -- Fq2
 atePrecomputeG2 :: G2 -> [EllCoeffs]
 atePrecomputeG2 origPt@(A _ _)
   = let
-  bigQ = fromAtoJ origPt
+  bigQ = fromA origPt
   (postLoopR, postLoopCoeffs)
     = runLoop bigQ
   bigQ1 = mulByQ bigQ

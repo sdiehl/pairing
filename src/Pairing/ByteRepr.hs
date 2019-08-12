@@ -11,7 +11,7 @@ import Protolude
 
 import qualified Data.ByteString as B
 import PrimeField (toInt)
-import ExtensionField (fromField, fromList)
+import ExtensionField (fromField, toField)
 
 import Pairing.Params (Fq, Fq2, Fq6, Fq12)
 
@@ -86,7 +86,7 @@ instance ByteRepr Fq2 where
       (xbs, ybs) = B.splitAt blen bs
     x <- fromRepr bo (1 :: Fq) xbs
     y <- fromRepr bo (1 :: Fq) ybs
-    return (fromList [x, y])
+    return (toField [x, y])
   calcReprLength _ n = 2 * calcReprLength (1 :: Fq) n
 
 instance ByteRepr Fq6 where
@@ -106,7 +106,7 @@ instance ByteRepr Fq6 where
     x <- fromRepr bo (1 :: Fq2) xbs
     y <- fromRepr bo (1 :: Fq2) ybs
     z <- fromRepr bo (1 :: Fq2) zbs
-    return (fromList [x, y, z])
+    return (toField [x, y, z])
   calcReprLength _ n = 3 * calcReprLength (1 :: Fq2) n
 
 instance ByteRepr Fq12 where
@@ -123,5 +123,5 @@ instance ByteRepr Fq12 where
       (xbs, ybs) = B.splitAt blen bs
     x <- fromRepr bo (1 :: Fq6) xbs
     y <- fromRepr bo (1 :: Fq6) ybs
-    return (fromList [x, y])
+    return (toField [x, y])
   calcReprLength _ n = 2 * calcReprLength (1 :: Fq6) n

@@ -26,7 +26,7 @@ import Protolude
 import Control.Monad.Random (MonadRandom)
 import GaloisField (GaloisField(pow))
 import PrimeField (toInt)
-import ExtensionField (fromField, fromList)
+import ExtensionField (fromField, toField)
 
 import Pairing.ByteRepr ()
 import Pairing.Hash
@@ -69,7 +69,7 @@ fq2Sqrt a = do
   let a0 = pow alpha _q * alpha
   if a0 == -1 then Nothing else do
     let x0 = a1 * a
-    if alpha == -1 then Just (a1 * fromList [0, 1]) else do
+    if alpha == -1 then Just (a1 * toField [0, 1]) else do
       let b = pow (alpha + 1) qm1by2
       Just (b * x0)
   where
@@ -148,29 +148,29 @@ precompRootOfUnity _ = panic "precompRootOfUnity: exponent too big for Fr / nega
 -- | Conjugation
 fq2Conj :: Fq2 -> Fq2
 fq2Conj x = case fromField x of
-  [y, z] -> fromList [y, -z]
-  [y]    -> fromList [y]
+  [y, z] -> toField [y, -z]
+  [y]    -> toField [y]
   []     -> 0
   _      -> panic "unreachable."
 
 -- | Multiplication by a scalar in @Fq@
 fq2ScalarMul :: Fq -> Fq2 -> Fq2
-fq2ScalarMul a x = fromList [a] * x
+fq2ScalarMul a x = toField [a] * x
 
 -- | Conjugation
 fq12Conj :: Fq12 -> Fq12
 fq12Conj x = case fromField x of
-  [y, z] -> fromList [y, -z]
-  [y]    -> fromList [y]
+  [y, z] -> toField [y, -z]
+  [y]    -> toField [y]
   []     -> 0
   _      -> panic "unreachable."
 
 -- | Create a new value in @Fq12@ by providing a list of twelve coefficients
 -- in @Fq@, should be used instead of the @Fq12@ constructor.
 construct :: [Fq] -> Fq12
-construct [a, b, c, d, e, f, g, h, i, j, k, l] = fromList
-  [ fromList [fromList [a, b], fromList [c, d], fromList [e, f]]
-  , fromList [fromList [g, h], fromList [i, j], fromList [k, l]] ]
+construct [a, b, c, d, e, f, g, h, i, j, k, l] = toField
+  [ toField [toField [a, b], toField [c, d], toField [e, f]]
+  , toField [toField [g, h], toField [i, j], toField [k, l]] ]
 construct _ = panic "Invalid arguments to fq12"
 
 -- | Deconstruct a value in @Fq12@ into a list of twelve coefficients in @Fq@.
@@ -195,15 +195,15 @@ fastFrobenius = collapse . convert [[0,2,4],[1,3,5]] . conjugate
     convert :: [[Integer]] -> [[Fq2]] -> [[Fq2]]
     convert = zipWith (zipWith (\x y -> pow _xi ((x * (_q - 1)) `div` 6) * y))
     collapse :: [[Fq2]] -> Fq12
-    collapse = fromList . map fromList
+    collapse = toField . map toField
 
 -- | Multiply by @_xi@ (cubic nonresidue in @Fq2@) and reorder coefficients
 mulXi :: Fq6 -> Fq6
 mulXi w = case fromField w of
-  [x, y, z] -> fromList [z * _xi, x, y]
-  [x, y]    -> fromList [0, x, y]
-  [x]       -> fromList [0, x]
-  []        -> fromList []
+  [x, y, z] -> toField [z * _xi, x, y]
+  [x, y]    -> toField [0, x, y]
+  [x]       -> toField [0, x]
+  []        -> toField []
   _         -> panic "mulXi not exhaustive."
 {-# INLINE mulXi #-}
 
