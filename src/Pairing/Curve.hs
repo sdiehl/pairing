@@ -1,9 +1,6 @@
 module Pairing.Curve
   ( Fr
-  , fqSqrt
-  , fq2Sqrt
-  , fqYforX
-  , fq2YforX
+  , getYfromX
   , mulXi
   , fq2Conj
   , fq2ScalarMul
@@ -24,68 +21,14 @@ module Pairing.Curve
 import Protolude
 
 import Control.Monad.Random (MonadRandom)
-import GaloisField (GaloisField(pow))
-import PrimeField (toInt)
+import GaloisField (GaloisField(..))
+import Curve (Curve(..))
 import ExtensionField (fromField, toField)
 
 import Pairing.ByteRepr ()
 import Pairing.Hash
-import Pairing.Modular
 import Pairing.Params
 -- import Pairing.Serialize.Types
-
--------------------------------------------------------------------------------
--- Orphan instances (temporary)
--------------------------------------------------------------------------------
-
--- instance FromX Fq where
---   yFromX = fqYforX
---   isOdd y = odd (toInt y)
-
--- instance FromX Fq2 where
---   yFromX = fq2YforX
--- -- This is generalised from the MCL implementation where in Fq2 oddness is based on the first element
---   isOdd a = case fromField a of
---     (x : xs) -> isOdd x
---     []       -> False -- Assume zero
-
--------------------------------------------------------------------------------
--- Square roots (temporary)
--------------------------------------------------------------------------------
-
-fqSqrt :: (Fq -> Fq -> Fq) -> Fq -> Maybe Fq
-fqSqrt ysel a = case withQM (modUnOpMTup (toInt a) bothSqrtOf) of
-  Just (y1, y2) -> Just (ysel (fromInteger y1) (fromInteger y2))
-  Nothing -> Nothing
-
--- | Square root of Fq2 are specified by https://eprint.iacr.org/2012/685.pdf,
--- Algorithm 9 with lots of help from https://docs.rs/pairing/0.14.1/src/pairing/bls12_381/fq2.rs.html#162-222
--- This implementation appears to return the larger square root so check the
--- return value and negate as necessary
-fq2Sqrt :: Fq2 -> Maybe Fq2
-fq2Sqrt a = do
-  let a1 = pow a qm3by4
-  let alpha = pow a1 2 * a
-  let a0 = pow alpha _q * alpha
-  if a0 == -1 then Nothing else do
-    let x0 = a1 * a
-    if alpha == -1 then Just (a1 * toField [0, 1]) else do
-      let b = pow (alpha + 1) qm1by2
-      Just (b * x0)
-  where
-    qm3by4 = withQ (modBinOp (_q -3) 4 (/))
-    qm1by2 = withQ (modBinOp (_q -1) 2 (/))
-
-fqYforX :: Fq -> (Fq -> Fq -> Fq) -> Maybe Fq
-fqYforX x ysel = fqSqrt ysel (pow x 3 + _b)
-
--- https://docs.rs/pairing/0.14.1/src/pairing/bls12_381/ec.rs.html#102-124
-fq2YforX :: Fq2 -> (Fq2 -> Fq2 -> Fq2) -> Maybe Fq2
-fq2YforX x ly = do
-  y <- newy
-  pure (ly y (negate y))
-  where
-    newy = fq2Sqrt (pow x 3 + _b')
 
 -------------------------------------------------------------------------------
 -- Fr (temporary)
@@ -145,6 +88,9 @@ precompRootOfUnity _ = panic "precompRootOfUnity: exponent too big for Fr / nega
 -- Fq2 and Fq12
 -------------------------------------------------------------------------------
 
+getYfromX :: Curve f c e q r => Point f c e q r -> q -> (q -> q -> q) -> Maybe q
+getYfromX curve x choose = choose <*> negate <$> yX curve x
+
 -- | Conjugation
 fq2Conj :: Fq2 -> Fq2
 fq2Conj x = case fromField x of
@@ -188,14 +134,14 @@ fq12Frobenius i a
 
 -- | Fast Frobenius automorphism
 fastFrobenius :: Fq12 -> Fq12
-fastFrobenius = collapse . convert [[0,2,4],[1,3,5]] . conjugate
+fastFrobenius = coll . conv [[0,2,4],[1,3,5]] . conj
   where
-    conjugate :: Fq12 -> [[Fq2]]
-    conjugate = map (map fq2Conj . fromField) . fromField
-    convert :: [[Integer]] -> [[Fq2]] -> [[Fq2]]
-    convert = zipWith (zipWith (\x y -> pow _xi ((x * (_q - 1)) `div` 6) * y))
-    collapse :: [[Fq2]] -> Fq12
-    collapse = toField . map toField
+    conj :: Fq12 -> [[Fq2]]
+    conj = map (map fq2Conj . fromField) . fromField
+    conv :: [[Integer]] -> [[Fq2]] -> [[Fq2]]
+    conv = zipWith (zipWith (\x y -> pow _xi ((x * (_q - 1)) `div` 6) * y))
+    coll :: [[Fq2]] -> Fq12
+    coll = toField . map toField
 
 -- | Multiply by @_xi@ (cubic nonresidue in @Fq2@) and reorder coefficients
 mulXi :: Fq6 -> Fq6

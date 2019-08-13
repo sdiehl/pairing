@@ -2,7 +2,6 @@ module TestFields where
 
 import Protolude
 
-import GaloisField
 import ExtensionField
 import Pairing.Curve
 import Pairing.Params
@@ -64,21 +63,6 @@ unit_uRoot :: Assertion
 unit_uRoot = u * u @=? -1
   where
     u = toField [0, 1] :: Fq2
-
-unit_fq2Pow :: Assertion
-unit_fq2Pow = do
-  fq2 :: Fq2 <- rnd
-  let pow5 = (pow (pow fq2 2) 2) * fq2
-  pow5 @=? pow fq2 5
-  let pow10 = ((pow (pow (pow fq2 2) 2) 2) * fq2) * fq2
-  pow10 @=? pow fq2 10
-
-unit_fq2Sqrt :: Assertion
-unit_fq2Sqrt = do
-  fq2 :: Fq2 <- rnd
-  let sq = pow fq2 2
-  let (Just rt) = fq2Sqrt sq
-  sq @=? pow rt 2
 
 -------------------------------------------------------------------------------
 -- Fq6

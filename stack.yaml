@@ -41,7 +41,7 @@ packages:
 extra-deps:
 - galois-field-0.4.1
 - git: git@github.com:adjoint-io/elliptic-curve.git
-  commit: 702332bdf2f78c6ddb7b7c44000b398e1361a15f
+  commit: 149c4b5c8ab3ac356c02aca41da00797f33c5002
 - poly-0.3.1.0
 - semirings-0.4.2
 

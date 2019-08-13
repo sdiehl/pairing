@@ -162,12 +162,14 @@ benchmarks =
       $ whnf (uncurry (+)) (testFq_1, testFq_2)
     , bench "division"
       $ whnf (uncurry (/)) (testFq_1, testFq_2)
-    , bench "pow"
+    , bench "exponentiation"
       $ whnf (pow testFq_1) (toInt testFr_1)
     , bench "inversion"
       $ whnf recip testFq_1
-    , bench "fqFromX"
-      $ whnf (fqYforX testFq_1) max
+    , bench "square root"
+      $ whnf sr testFq_1
+    , bench "Y from X"
+      $ whnf (yX test_g1_1) testFq_1
     ]
   , bgroup "Fr"
     [ bench "multiplication"
@@ -178,7 +180,7 @@ benchmarks =
       $ whnf (uncurry (/)) (testFr_1, testFr_2)
     , bench "inversion"
       $ whnf recip testFr_1
-    , bench "pow"
+    , bench "exponentiation"
       $ whnf (pow testFr_1) (toInt testFr_2)
     ]
   , bgroup "Fq2"
@@ -189,8 +191,8 @@ benchmarks =
     , bench "division"
       $ whnf (uncurry (/)) (testFq2_1, testFq2_2)
     , bench "squaring"
-      $ whnf (^ 2) testFq2_1
-    , bench "pow"
+      $ whnf (join (*)) testFq2_1
+    , bench "exponentiation"
       $ whnf (pow testFq2_1) (toInt testFr_1)
     , bench "negation"
       $ whnf negate testFq2_1
@@ -199,9 +201,9 @@ benchmarks =
     , bench "conjugation"
       $ whnf fq2Conj testFq2_1
     , bench "square root"
-      $ whnf fq2Sqrt testFq2_1
-    , bench "fq2FromX"
-      $ whnf (fq2YforX testFq2_1) max
+      $ whnf sr testFq2_1
+    , bench "Y from X"
+      $ whnf (yX test_g2_1) testFq2_1
     ]
   , bgroup "Fq6"
     [ bench "multiplication"
@@ -211,7 +213,7 @@ benchmarks =
     , bench "division"
       $ whnf (uncurry (/)) (testFq6_1, testFq6_2)
     , bench "squaring"
-      $ whnf (^ 2) testFq6_1
+      $ whnf (join (*)) testFq6_1
     , bench "negation"
       $ whnf negate testFq6_1
     , bench "inversion"
