@@ -17,8 +17,9 @@ import ExtensionField (toField)
 import GaloisField (GaloisField(..))
 import Group.Field (Element(..))
 
+import Pairing.ByteRepr ()
 import Pairing.Curve
-import Pairing.Params
+import Pairing.Hash ()
 
 -- ell0, ellVW, ellVV
 data EllCoeffs
@@ -74,7 +75,7 @@ ateLoopBody p coeffs (oldIx, F oldF) currentBit = let
 prepareCoeffs :: [EllCoeffs] -> G1 -> Int -> EllCoeffs
 prepareCoeffs coeffs (A px py) ix =
   let (EllCoeffs ell0 ellVW ellVV) = coeffs !! ix
-  in EllCoeffs ell0 (fq2ScalarMul py ellVW) (fq2ScalarMul px ellVV)
+  in EllCoeffs ell0 (scale py ellVW) (scale px ellVV)
 prepareCoeffs _ _ _ = panic "prepareCoeffs: received trivial point"
 
 {-# INLINEABLE mulBy024 #-}
@@ -146,20 +147,20 @@ atePrecomputeG2 origPt@(A _ _)
 atePrecomputeG2 _ = []
 
 twistCoeffB :: Fq2
-twistCoeffB = fq2ScalarMul _b (1 / _xi)
+twistCoeffB = scale _b (1 / _xi)
 
 doublingStepForFlippedMillerLoop :: G2' -> (G2', EllCoeffs)
 doublingStepForFlippedMillerLoop (J oldX oldY oldZ)
   = let
   a, b, c, d, e, f, g, h, i, j, eSquared :: Fq2
 
-  a = fq2ScalarMul 0.5 (oldX * oldY)
+  a = scale 0.5 (oldX * oldY)
   b = oldY * oldY
   c = oldZ * oldZ
   d = c + c + c
   e = twistCoeffB * d
   f = e + e + e
-  g = fq2ScalarMul 0.5 (b + f)
+  g = scale 0.5 (b + f)
   h = (oldY + oldZ) * (oldY + oldZ) - (b + c)
   i = e - b
   j = oldX * oldX
@@ -218,7 +219,7 @@ finalExponentiation f = pow (finalExponentiationFirstChunk f) expVal
 finalExponentiationFirstChunk :: Fq12 -> Fq12
 finalExponentiationFirstChunk f
   | f == 0 = 0
-  | otherwise = let f1 = fq12Conj f
+  | otherwise = let f1 = conj f
                     f2 = recip f
                     newf0 = f1 * f2 -- == f^(_q ^6 - 1)
                 in fq12Frobenius 2 newf0 * newf0 -- == f^((_q ^ 6 - 1) * (_q ^ 2 + 1))

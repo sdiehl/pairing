@@ -4,7 +4,6 @@ import Protolude
 
 import ExtensionField
 import Pairing.Curve
-import Pairing.Params
 import Pairing.ByteRepr
 import Test.Tasty
 import Test.Tasty.HUnit

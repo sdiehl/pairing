@@ -7,8 +7,8 @@ import Math.NumberTheory.Moduli.Sqrt
 
 import Control.Monad.Random (MonadRandom(..))
 
-import Pairing.Params
 import Pairing.ByteRepr
+import Pairing.Curve
 
 withMod :: Integer -> (forall m . KnownNat m => Proxy m -> r) -> r
 withMod n cont = case someNatVal n of 

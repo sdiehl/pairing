@@ -11,9 +11,9 @@ import Data.List (genericIndex)
 import Math.NumberTheory.Moduli.Class (Mod, getVal, powMod)
 import PrimeField (toInt)
 
-import Pairing.Params
-import Pairing.Modular as M
 import Pairing.ByteRepr (ByteOrder(..))
+import Pairing.Curve
+import Pairing.Modular as M
 
 sqrtOfMinusThree :: forall m . KnownNat m => Proxy m -> Maybe (Mod m)
 sqrtOfMinusThree _ = sqrtOf (-3)

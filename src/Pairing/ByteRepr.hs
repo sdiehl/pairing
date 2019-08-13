@@ -13,7 +13,7 @@ import qualified Data.ByteString as B
 import PrimeField (toInt)
 import ExtensionField (fromField, toField)
 
-import Pairing.Params (Fq, Fq2, Fq6, Fq12)
+import Pairing.Curve (Fq, Fq2, Fq6, Fq12)
 
 -------------------------------------------------------------------------------
 -- Bytes

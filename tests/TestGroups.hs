@@ -4,7 +4,7 @@ import Protolude
 
 import Curve
 import Pairing.Curve
-import Pairing.Params
+import Pairing.Hash
 -- import Pairing.Serialize.Types
 -- import Pairing.Serialize.Jivsov
 -- import Pairing.Serialize.MCLWasm
@@ -86,7 +86,7 @@ unit_order_g1_valid = mul' gen _r @=? (mempty :: G1)
 
 prop_hashToG1 :: ByteString -> Property
 prop_hashToG1 bs = TQM.monadicIO $ do
-  toCurveMay <- TQM.run (hashToG1 bs)
+  toCurveMay <- TQM.run (swEncBN bs)
   TQM.assert (isJust toCurveMay)
   let Just toCurve = toCurveMay
   TQM.assert (def toCurve)
