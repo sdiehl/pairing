@@ -56,7 +56,6 @@ library:
     - Pairing.ByteRepr
     - Pairing.Curve
     - Pairing.Hash
-    - Pairing.Modular
     - Pairing.Pairing
     - Pairing.Serialize.Types
     - Pairing.Serialize.Jivsov

@@ -4,83 +4,46 @@ module Pairing.Hash
 
 import Protolude
 
-import Curve (Curve(..))
-import Control.Error (runMaybeT, hoistMaybe)
+import Control.Error (hoistMaybe, runMaybeT)
 import Control.Monad.Random (MonadRandom)
-import Data.List (genericIndex)
-import Math.NumberTheory.Moduli.Class (Mod, getVal, powMod)
-import PrimeField (toInt)
+import Curve.Weierstrass (Point(..))
+import Data.List ((!!))
+import GaloisField (GaloisField(..))
 
-import Pairing.ByteRepr (ByteOrder(..))
-import Pairing.Curve
-import Pairing.Modular as M
-
-sqrtOfMinusThree :: forall m . KnownNat m => Proxy m -> Maybe (Mod m)
-sqrtOfMinusThree _ = sqrtOf (-3)
-
-w ::  forall m . KnownNat m => Proxy m -> Mod m -> Mod m -> Mod m
-w mName sq3 t = (sq3 * t) / (1 + (b mName) + (t `powMod` 2))
-
-b ::  forall m . KnownNat m => Proxy m -> Mod m
-b _ = fromInteger @(Mod m) (toInt _b)
-
-x1 :: forall m . KnownNat m => Proxy m -> Mod m -> Mod m -> Maybe (Mod m)
-x1 mName t w = do
-  m3 <- sqrtOfMinusThree mName
-  pure $ (m3  - 1) / 2 - (t * w)
-
-x2 :: forall m . KnownNat m => Proxy m -> Mod m -> Mod m
-x2 _ x1' = (-1) - x1'
-
-x3 :: forall m . KnownNat m => Proxy m -> Mod m -> Mod m
-x3 _ w = 1 + (1 / (w `powMod` 2))
-
-chi :: forall m . KnownNat m => Proxy m -> Mod m -> Integer
-chi mName a
-  | a == 0 = 0
-  | isSquare mName a = 1
-  | otherwise = -1
-
-alphaBeta :: forall m . KnownNat m => Proxy m -> Mod m -> Mod m -> Integer
-alphaBeta mName pr px = chi mName ((pr * pr) * ((px `powMod` 3) + (b mName)))
-
-i :: Integer -> Integer -> Integer
-i pa pb = (((pa - 1) * pb) `mod` 3) + 1
-
-swy :: forall m . KnownNat m => Proxy m -> Mod m -> Mod m -> Mod m -> Mod m -> Maybe Integer
-swy mn pr3 pt pxi pb = (ch *) <$>  y
-  where
-    ch = chi mn ((pr3 `powMod` 2) * pt)
-    y = getVal <$> sqrtOf ((pxi `powMod` 3) + pb)
+import Pairing.ByteRepr (ByteOrder(..), fromBytesToInteger)
+import Pairing.Curve (Fq, G1, _b)
 
 -- | Encodes a given byte string to a point on the BN curve.
--- The implemenation uses the Shallue van de Woestijne encoding to BN curves as specifed
--- in Section 6 of Indifferentiable Hashing to Barreto Naehrig Curves
--- by Pierre-Alain Fouque and Mehdi Tibouchi.
--- This function evaluates an empty bytestring or one that contains \NUL to zero
--- which according to Definiton 2 of the paper is sent to an arbitrary point on the curve
+-- The implementation uses the Shallue-van de Woestijne encoding to BN curves as
+-- specified in Section 6 of Indifferentiable Hashing to Barreto Naehrig Curves
+-- by Pierre-Alain Fouque and Mehdi Tibouchi. This function evaluates an empty
+-- bytestring or one that contains \NUL to zero, which according to Definition 2
+-- of the paper is sent to an arbitrary point on the curve.
 swEncBN :: MonadRandom m => ByteString -> m (Maybe G1)
-swEncBN bs = runMaybeT $ withQM $ \mn -> do
-  let t = M.fromBytes MostSignificantFirst bs mn
-  sq3 <- hoistMaybe (sqrtOfMinusThree mn)
-  let w' = w mn sq3 t
-  x1' <- hoistMaybe (x1 mn t w')
-  if (t == 0) then do
-    onebmn <- hoistMaybe (sqrtOf (1 + (b mn)))
-    p      <- hoistMaybe (point (fromInteger (getVal $ x1'))
-                                (fromInteger (getVal $ onebmn)))
-    return p
-  else do
-    let x2' = x2 mn x1'
-    let x3' = x3 mn w'
-    let lst = [x1', x2', x3']
-    r1 <- lift $ randomMod mn
-    r2 <- lift $ randomMod mn
-    r3 <- lift $ randomMod mn
-    let al = alphaBeta mn r1 x1'
-    let bet = alphaBeta mn r2 x2'
-    let i' = i al bet
-    swy' <- hoistMaybe (swy mn r3 t (genericIndex lst (i' -  1)) (b mn))
-    p    <- hoistMaybe (point (fromInteger (getVal $ genericIndex lst (i' - 1)))
-                              (fromInteger swy'))
-    return p
+swEncBN bs = runMaybeT $ do
+  sqrt3 <- hoistMaybe $ sr (-3)
+  let t  = fromInteger (fromBytesToInteger MostSignificantFirst bs)
+      s1 = (sqrt3 - 1) / 2
+      b1 = 1 + _b
+  guard (b1 + t * t /= 0)
+  if t == 0
+    then
+      A s1 <$> hoistMaybe (sr b1)
+    else do
+      let w  = sqrt3 * t / (b1 + t * t)
+          x1 = s1 - t * w
+          x2 = -1 - x1
+          x3 = 1 + 1 / (w * w)
+      r1 <- rnd
+      r2 <- rnd
+      r3 <- rnd
+      let a = ch $ r1 * r1 * (x1 * x1 * x1 + _b)
+          b = ch $ r2 * r2 * (x2 * x2 * x2 + _b)
+          c = ch $ r3 * r3 * t
+          i = mod ((a - 1) * b) 3
+          x = [x1, x2, x3] !! i
+          y = sr $ x * x * x + _b
+      A x . (fromIntegral c *) <$> hoistMaybe y
+  where
+    ch :: Fq -> Int
+    ch x = if x == 0 then 0 else if qr x then 1 else -1

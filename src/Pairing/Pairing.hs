@@ -17,9 +17,7 @@ import ExtensionField (toField)
 import GaloisField (GaloisField(..))
 import Group.Field (Element(..))
 
-import Pairing.ByteRepr ()
 import Pairing.Curve
-import Pairing.Hash ()
 
 -- ell0, ellVW, ellVV
 data EllCoeffs
