@@ -4,9 +4,9 @@ import Protolude
 
 import Criterion.Main
 
-import qualified BenchPairing as Pairing
+import HashBenchmarks
+import PairingBenchmarks
 
 main :: IO ()
 main = defaultMain
-      [ bgroup "Pairing" Pairing.benchmarks
-      ]
+  [benchmarkHash, benchmarkPairing]

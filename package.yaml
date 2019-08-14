@@ -88,4 +88,4 @@ benchmarks:
       - tasty-quickcheck
     source-dirs:
       - src
-      - bench
+      - benchmarks
