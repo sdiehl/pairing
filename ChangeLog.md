@@ -1,5 +1,11 @@
 # Change log for pairing
 
+## 0.5
+
+* Use `elliptic-curve` for BN254 elliptic curve group operations.
+* Refactor Shallue-van de Woestijne encoding for efficiency.
+* Temporarily remove serialisation.
+
 ## 0.4.2
 
 * Fix overlapping instances of `Ord`.
@@ -11,7 +17,7 @@
 
 ## 0.4
 
-* Use `galois-field` for tower field underlying BN128 curve.
+* Use `galois-field` for tower field underlying BN254 curve.
 
 ## 0.3.1
 
@@ -25,7 +31,7 @@
 
 ## 0.2
 
-* Add Shallue van de Woestijne encoding for curve hashing.
+* Add Shallue-van de Woestijne encoding for curve hashing.
 
 ## 0.1
 

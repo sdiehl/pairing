@@ -1,5 +1,5 @@
 name:        pairing
-version:     0.4.2
+version:     0.5.0
 synopsis:    Bilinear pairings
 description: Optimal Ate pairing over Barreto-Naehrig curves
 maintainer:  Adjoint Inc (info@adjoint.io)
@@ -30,17 +30,12 @@ default-extensions:
 dependencies:
   - base >= 4.10 && < 5
   - protolude >= 0.2
-  - arithmoi >= 0.8
-  - binary
   - bytestring
   - elliptic-curve >= 0.2 && < 0.3
   - errors
   - galois-field >= 0.4 && < 0.5
-  - integer-logarithms
-  - memory
   - MonadRandom
   - QuickCheck
-  - random
   - wl-pprint-text
 
 extra-source-files:
