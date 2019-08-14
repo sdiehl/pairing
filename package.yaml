@@ -66,17 +66,12 @@ library:
 
 tests:
   pairing-tests:
-    main: Driver.hs
+    main: Main
     dependencies:
-      - QuickCheck
       - quickcheck-instances
       - tasty
-      - tasty-discover
       - tasty-hunit
       - tasty-quickcheck
-      - quickcheck-instances
-      - QuickCheck
-      - hexstring
     source-dirs:
       - src
       - tests

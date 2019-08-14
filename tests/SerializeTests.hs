@@ -1,43 +1,11 @@
-module TestGroups where
+module SerializeTests where
 
-import Protolude
-
-import Curve
-import Pairing.Curve
-import Pairing.Hash
--- import Pairing.Serialize.Types
--- import Pairing.Serialize.Jivsov
--- import Pairing.Serialize.MCLWasm
-import Test.QuickCheck.Instances ()
-import qualified Test.QuickCheck.Monadic as TQM (monadicIO, assert, run)
 import Test.Tasty
-import Test.Tasty.HUnit
-import Test.Tasty.QuickCheck
 
-import TestCommon
-
--------------------------------------------------------------------------------
--- Laws of group operations
--------------------------------------------------------------------------------
-
-testAbelianGroupLaws
-  :: (Eq a, Arbitrary a, Show a)
-  => (a -> a -> a)
-  -> (a -> a)
-  -> a
-  -> TestName
-  -> TestTree
-testAbelianGroupLaws binOp neg ident descr
-  = testGroup ("Test Abelian group laws of " <> descr)
-    [ testProperty "commutativity of addition"
-      $ commutes binOp
-    , testProperty "associavity of addition"
-      $ associates binOp
-    , testProperty "additive identity"
-      $ isIdentity binOp ident
-    , testProperty "additive inverse"
-      $ isInverse binOp neg ident
-    ]
+testSerialize :: TestTree
+testSerialize = testGroup "Serialize"
+  [
+  ]
 
 -- serializeTest pt compFunc testFunc = do
 --   let (Just cbs) = compFunc pt
@@ -62,38 +30,14 @@ testAbelianGroupLaws binOp neg ident descr
 --   (Point x sysqrt) @=? syg
 
 -- serializeUncompProp :: (Ord b, Show b, MkUncompressedForm a, ByteRepr b, FromX b) => (a -> LByteString -> Either Text (Point b)) -> a -> Point b -> Property
--- serializeUncompProp f a g = TQM.monadicIO $ TQM.run $ serializeTest g (serializePointUncompressed a) (f a)
+-- serializeUncompProp f a g = monadicIO $ run $ serializeTest g (serializePointUncompressed a) (f a)
 
 -- serializeCompProp :: (Ord b, Show b, MkCompressedForm a, ByteRepr b, FromX b) => (a -> LByteString -> Either Text (Point b)) -> a -> Point b -> Property
--- serializeCompProp f a g = TQM.monadicIO $ TQM.run $ serializeTest g (serializeCompressed a) (f a)
-
--------------------------------------------------------------------------------
--- G1
--------------------------------------------------------------------------------
-
-prop_g1Double :: G1 -> Bool
-prop_g1Double a = dbl a == a <> a
-
-test_groupLaws_G1 :: TestTree
-test_groupLaws_G1 = testAbelianGroupLaws (<>) inv (mempty :: G1) "G1"
-
--- Sanity check our generators/inputs
-unit_g1_valid :: Assertion
-unit_g1_valid = assertBool "generator g1 does not satisfy curve equation" $ def (gen :: G1)
-
-unit_order_g1_valid :: Assertion
-unit_order_g1_valid = mul' gen _r @=? (mempty :: G1)
-
-prop_hashToG1 :: ByteString -> Property
-prop_hashToG1 bs = TQM.monadicIO $ do
-  toCurveMay <- TQM.run (swEncBN bs)
-  TQM.assert (isJust toCurveMay)
-  let Just toCurve = toCurveMay
-  TQM.assert (def toCurve)
+-- serializeCompProp f a g = monadicIO $ run $ serializeTest g (serializeCompressed a) (f a)
 
 -- prop_g1FromX :: G1 -> Property
--- prop_g1FromX g = TQM.monadicIO $ do
---   TQM.run $ g1FromXTest g
+-- prop_g1FromX g = monadicIO $ do
+--   run $ g1FromXTest g
 
 -- unit_g1SerializeCompMCLWasm :: Assertion
 -- unit_g1SerializeCompMCLWasm = do
@@ -111,22 +55,6 @@ prop_hashToG1 bs = TQM.monadicIO $ do
 -- prop_g1SerializeCompMCLWasm :: G1 -> Property
 -- prop_g1SerializeCompMCLWasm g = serializeCompProp fromByteStringG1 MCLWASM g
 
--------------------------------------------------------------------------------
--- G2
--------------------------------------------------------------------------------
-
-prop_g2Double :: G2 -> Bool
-prop_g2Double a = dbl a == a <> a
-
-test_groupLaws_G2 :: TestTree
-test_groupLaws_G2 = testAbelianGroupLaws (<>) inv (mempty :: G2) "G2"
-
-unit_g2_valid :: Assertion
-unit_g2_valid = assertBool "generator g2 does not satisfy curve equation" $ def (gen :: G2)
-
-unit_order_g2_valid :: Assertion
-unit_order_g2_valid = mul' gen _r @=? (mempty :: G2)
-
 -- g2FromXTest :: G2 -> Assertion
 -- g2FromXTest Infinity = pure ()
 -- g2FromXTest pt@(Point x y) = do
@@ -135,8 +63,8 @@ unit_order_g2_valid = mul' gen _r @=? (mempty :: G2)
 --   if (ny /= y) then (Point x y) @=? (Point x (negate ny)) else (Point x y) @=? (Point x ny)
 
 -- prop_g2FromX :: G2 -> Property
--- prop_g2FromX g = TQM.monadicIO $ do
---   TQM.run $ g2FromXTest g
+-- prop_g2FromX g = monadicIO $ do
+--   run $ g2FromXTest g
 
 -- unit_g2SerializeCompMCLWasm :: Assertion
 -- unit_g2SerializeCompMCLWasm = do
@@ -156,14 +84,57 @@ unit_order_g2_valid = mul' gen _r @=? (mempty :: G2)
 -- prop_g2SerializeCompMCLWasm :: G2 -> Property
 -- prop_g2SerializeCompMCLWasm g = serializeCompProp fromByteStringG2 MCLWASM g
 
--------------------------------------------------------------------------------
--- GT
--------------------------------------------------------------------------------
+-- gtSerializeTest :: G1 -> G2 -> Assertion-- prop_g1FromX :: G1 -> Property
+-- prop_g1FromX g = monadicIO $ do
+--   run $ g1FromXTest g
 
--- The group laws for GT are implied by the field tests for Fq12.
+-- unit_g1SerializeCompMCLWasm :: Assertion
+-- unit_g1SerializeCompMCLWasm = do
+--   let g1pt = Point (9314493114755198232379544958894901330290171903936264295471737527783061073337 :: Fq) (3727704492399430267836652969370123320076852948746739702603703543134592597527 :: Fq)
+--   let hs = hexString "b92db2fcfcba5ad9f6b676de13a5488b54dfd537ae5c96291f399284f7d09794"
+--   let Right np = unserializePoint MCLWASM g1 (toSL $ H.toBytes hs)
+--   np @=? g1pt
+
+-- prop_g1SerializeUncompJivsov :: G1 -> Property
+-- prop_g1SerializeUncompJivsov g = serializeUncompProp fromByteStringG1 Jivsov g
+
+-- prop_g1SerializeCompJivsov :: G1 -> Property
+-- prop_g1SerializeCompJivsov g = serializeCompProp fromByteStringG1 Jivsov g
+
+-- prop_g1SerializeCompMCLWasm :: G1 -> Property
+-- prop_g1SerializeCompMCLWasm g = serializeCompProp fromByteStringG1 MCLWASM g
+
+-- g2FromXTest :: G2 -> Assertion
+-- g2FromXTest Infinity = pure ()
+-- g2FromXTest pt@(Point x y) = do
+--   let ysq = y ^ 2
+--   let (Just ny) = fq2YforX x (\y1 y2 -> if isOdd y1 then y1 else y2)
+--   if (ny /= y) then (Point x y) @=? (Point x (negate ny)) else (Point x y) @=? (Point x ny)
+
+-- prop_g2FromX :: G2 -> Property
+-- prop_g2FromX g = monadicIO $ do
+--   run $ g2FromXTest g
+
+-- unit_g2SerializeCompMCLWasm :: Assertion
+-- unit_g2SerializeCompMCLWasm = do
+--   let fq2x = toField ([6544947162799133903546594463061476713923884516504213524167597810128866380952,  1440920261338086273401746857890494196693993714596389710801111883382590011446] :: [Fq]) :: Fq2
+--   let fq2y = toField ([7927561822697823059695659663409507948904771679743888257723485312240532833493, 2189896469972867352153851473169755334250894385106289486234761879693772655721] :: [Fq]) :: Fq2
+--   let g2pt = Point fq2x fq2y
+--   let hs = hexString "980cf2acdb1645247a512f91cbbbbb1f4fa2328c979ae26d550ec7b80e4f780e36f82f7090c4d516a2257fcee804df8421af857b2f80ffccfc11c6f52e882f83"
+--   let Right np = unserializePoint MCLWASM g2 (toSL $ H.toBytes hs)
+--   np @=? g2pt
+
+-- prop_g2SerializeUncompJivsov :: G2 -> Property
+-- prop_g2SerializeUncompJivsov g = serializeUncompProp fromByteStringG2 Jivsov g
+
+-- prop_g2SerializeCompJivsov :: G2 -> Property
+-- prop_g2SerializeCompJivsov g = serializeCompProp fromByteStringG2 Jivsov g
+
+-- prop_g2SerializeCompMCLWasm :: G2 -> Property
+-- prop_g2SerializeCompMCLWasm g = serializeCompProp fromByteStringG2 MCLWASM g
 
 -- gtSerializeTest :: G1 -> G2 -> Assertion
 -- gtSerializeTest g1 g2 = serializeTest (reducedPairing g1 g2) (serializeUncompressed Jivsov) (fromByteStringGT Jivsov)
 
 -- prop_gtSerializeUncomp :: G1 -> G2 -> Property
--- prop_gtSerializeUncomp g1 g2 = TQM.monadicIO $ TQM.run $ gtSerializeTest g1 g2
+-- prop_gtSerializeUncomp g1 g2 = monadicIO $ TQM.run $ gtSerializeTest g1 g2
