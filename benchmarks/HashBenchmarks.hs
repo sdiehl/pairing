@@ -7,8 +7,8 @@ import Pairing.Hash
 
 benchmarkHash :: Benchmark
 benchmarkHash = bgroup "Hash"
-  [ bgroup "Hash"
-    [ bench "hashToG1"
+  [ bgroup "Hash to G1"
+    [ bench "swEncBN"
       $ whnfIO (swEncBN test_hash)
     ]
   ]
