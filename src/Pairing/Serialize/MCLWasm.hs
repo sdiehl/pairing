@@ -11,39 +11,39 @@
 -- each point
 
 module Pairing.Serialize.MCLWasm where
---  ( MCLWASM(..)
---  ) where
-
+--   ( MCLWASM(..)
+--   ) where
+-- 
 -- import Protolude hiding (putByteString)
-
+-- import Pairing.Serialize.Types
+-- import Pairing.Point
+-- import Pairing.ByteRepr
+-- import Pairing.CyclicGroup
 -- import Data.Binary.Put (Put, putWord8, putWord16le, runPut, putByteString)
 -- import Data.ByteString.Builder
 -- import Data.ByteString as B hiding (length)
 -- import qualified Data.ByteString as B
-
--- import Pairing.Serialize.Types
--- import Pairing.ByteRepr
-
+-- 
 -- data MCLWASM = MCLWASM deriving (Eq, Show)
-
+-- 
 -- instance MkCompressedForm MCLWASM where
 --   serializeCompressed _ = toCompressedForm
-
+-- 
 -- instance FromSerialisedForm MCLWASM where
 --   unserializePoint _ = fromCompressedForm
-
---toCompressedForm :: (ByteRepr a, FromX a) => Point a -> Maybe LByteString
---toCompressedForm (Point x y) = do
---  ny <- yFromX x (\y1 y2 -> if isOdd y1 then y1 else y2)
---  rx <- mkRepr (ByteOrderLength LeastSignificantFirst minReprLength) x
---  bs <- if isOdd y then do
---        k <- toPaddedBytes (ByteOrderLength MostSignificantFirst (calcReprLength x minReprLength)) 0x80
---        pure (B.pack $ B.zipWith (.|.)  rx k)
---      else 
---        pure rx
---  pure (runPut $ putByteString bs)
---toCompressedForm Infinity = Just (toLazyByteString (word8 0))
-
+-- 
+-- toCompressedForm :: (ByteRepr a, FromX a) => Point a -> Maybe LByteString
+-- toCompressedForm (Point x y) = do
+--   ny <- yFromX x (\y1 y2 -> if isOdd y1 then y1 else y2)
+--   rx <- mkRepr (ByteOrderLength LeastSignificantFirst minReprLength) x
+--   bs <- if isOdd y then do
+--         k <- toPaddedBytes (ByteOrderLength MostSignificantFirst (calcReprLength x minReprLength)) 0x80
+--         pure (B.pack $ B.zipWith (.|.)  rx k)
+--       else 
+--         pure rx
+--   pure (runPut $ putByteString bs)
+-- toCompressedForm Infinity = Just (toLazyByteString (word8 0))
+-- 
 -- fromCompressedForm :: (ByteRepr a, FromX a) => Point a -> LByteString -> Either Text (Point a)
 -- fromCompressedForm (Point onex _) bs = if isInfinity then pure Infinity else do
 --   k <- note "Padding failed" (toPaddedBytes (ByteOrderLength MostSignificantFirst (calcReprLength onex minReprLength)) 0x80)
