@@ -275,9 +275,6 @@ precompRootOfUnity 28 = 19103219067921713944291392827692070036145651957329286315
 precompRootOfUnity _  = panic "precompRootOfUnity: exponent too big for Fr / negative"
 {-# INLINABLE precompRootOfUnity #-}
 
--- hashToG1 :: MonadRandom m => ByteString -> m (Maybe G1)
--- hashToG1 = swEncBN
-
 -- fromByteStringG1 :: FromSerialisedForm u => u -> LByteString -> Either Text G1
 -- fromByteStringG1 unser = unserializePoint unser generatorG1 . toSL
 
