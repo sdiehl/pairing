@@ -5,10 +5,10 @@ module Pairing
 import Group (Group)
 
 -------------------------------------------------------------------------------
--- Types
+-- Pairings
 -------------------------------------------------------------------------------
 
--- | Pairing of cryptographic groups.
+-- | Pairings of cryptographic groups.
 class (Group g1, Group g2, Group gt) => Pairing g1 g2 gt where
   {-# MINIMAL pairing #-}
 
