@@ -4,8 +4,8 @@ import Protolude
 
 import Criterion.Main
 
+import AteBenchmarks
 import HashBenchmarks
-import PairingBenchmarks
 
 main :: IO ()
 main = defaultMain

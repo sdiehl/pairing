@@ -1,12 +1,12 @@
-module PairingTests where
+module AteTests where
 
 import Protolude
 
 import Curve.Weierstrass
 import ExtensionField
 import Group.Field
+import Pairing.Ate
 import Pairing.Curve
-import Pairing.Pairing
 import Test.Tasty
 import Test.Tasty.HUnit
 import Test.Tasty.QuickCheck

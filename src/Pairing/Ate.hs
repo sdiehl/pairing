@@ -1,6 +1,6 @@
 -- | Implementation of the optimal Ate pairing on the curve BN128
 
-module Pairing.Pairing
+module Pairing.Ate
   ( reducedPairing
   , atePairing
   , finalExponentiation

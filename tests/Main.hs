@@ -4,9 +4,9 @@ import Protolude
 
 import Test.Tasty
 
+import AteTests
 import ByteTests
 import HashTests
-import PairingTests
 import SerializeTests
 
 main :: IO ()

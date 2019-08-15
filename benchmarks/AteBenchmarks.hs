@@ -1,12 +1,12 @@
-module PairingBenchmarks where
+module AteBenchmarks where
 
 import Protolude
 
 import Control.Monad.Random
 import Criterion.Main
 import GaloisField
+import Pairing.Ate
 import Pairing.Curve
-import Pairing.Pairing
 
 benchmarkPairing :: Benchmark
 benchmarkPairing = bgroup "Pairing"
