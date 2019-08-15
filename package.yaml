@@ -1,5 +1,5 @@
 name:        pairing
-version:     0.4.2
+version:     0.5.0
 synopsis:    Bilinear pairings
 description: Optimal Ate pairing over Barreto-Naehrig curves
 maintainer:  Adjoint Inc (info@adjoint.io)
@@ -7,133 +7,72 @@ license:     MIT
 github:      adjoint-io/pairing
 category:    Cryptography
 
-extra-source-files:
-- README.md
-- ChangeLog.md
+default-extensions:
+  - LambdaCase
+  - RecordWildCards
+  - OverloadedStrings
+  - NoImplicitPrelude
+  - FlexibleInstances
+  - FlexibleContexts
+  - ScopedTypeVariables
+  - RankNTypes
+  - BangPatterns
+  - DataKinds
+  - DeriveAnyClass
+  - DeriveFunctor
+  - DeriveGeneric
+  - GeneralizedNewtypeDeriving
+  - MultiParamTypeClasses
+  - PatternSynonyms
+  - TypeApplications
+  - TypeSynonymInstances
 
 dependencies:
-  # Prelude
-  - base >= 4.7 && < 5
+  - base >= 4.10 && < 5
   - protolude >= 0.2
-  - arithmoi >= 0.8
-  - binary
   - bytestring
+  - elliptic-curve >= 0.2 && < 0.3
   - errors
-  - galois-field == 0.4.0
-  - integer-logarithms
-  - memory
+  - galois-field >= 0.4 && < 0.5
   - MonadRandom
   - QuickCheck
-  - random
   - wl-pprint-text
 
+extra-source-files:
+  - README.md
+  - ChangeLog.md
+
+ghc-options:
+  - -freverse-errors
+  - -Wall
+
 library:
-  source-dirs: src
-
-  ghc-options:
-    -fwarn-tabs
-    -fwarn-incomplete-patterns
-    -fwarn-incomplete-record-updates
-    -fwarn-redundant-constraints
-    -fwarn-implicit-prelude
-    -fwarn-overflowed-literals
-    -fwarn-orphans
-    -fwarn-identities
-    -fwarn-dodgy-exports
-    -fwarn-dodgy-imports
-    -fwarn-duplicate-exports
-    -fwarn-overlapping-patterns
-    -fwarn-missing-fields
-    -fwarn-missing-methods
-    -fwarn-missing-signatures
-    -fwarn-noncanonical-monad-instances
-    -fwarn-unused-pattern-binds
-    -fwarn-unused-type-patterns
-    -fwarn-unrecognised-pragmas
-    -fwarn-wrong-do-bind
-    -fno-warn-name-shadowing
-    -fno-warn-unused-binds
-    -fno-warn-unused-matches
-    -fno-warn-unused-do-bind
-    -Wmissing-export-lists
-
-  default-extensions:
-    - LambdaCase
-    - RecordWildCards
-    - OverloadedStrings
-    - NoImplicitPrelude
-    - FlexibleInstances
-    - FlexibleContexts
-    - ScopedTypeVariables
-    - RankNTypes
-    - BangPatterns
-    - DataKinds
-    - DeriveAnyClass
-    - DeriveFunctor
-    - DeriveGeneric
-    - GeneralizedNewtypeDeriving
-    - MultiParamTypeClasses
-    - PatternSynonyms
-    - TypeApplications
-
   exposed-modules:
-    - Pairing.Params
-    - Pairing.Fq
-    - Pairing.Fr
-    - Pairing.Point
-    - Pairing.Group
-    - Pairing.Pairing
-    - Pairing.Jacobian
-    - Pairing.CyclicGroup
+    - Pairing.ByteRepr
+    - Pairing.Curve
     - Pairing.Hash
+    - Pairing.Pairing
     - Pairing.Serialize.Types
     - Pairing.Serialize.Jivsov
     - Pairing.Serialize.MCLWasm
-    - Pairing.ByteRepr
-    - Pairing.Modular
+  source-dirs:
+    - src
 
 tests:
   pairing-tests:
-    main: Driver.hs
+    main: Main
+    dependencies:
+      - quickcheck-instances
+      - tasty
+      - tasty-hunit
+      - tasty-quickcheck
     source-dirs:
       - src
       - tests
-    dependencies:
-      - QuickCheck
-      - quickcheck-instances
-      - tasty
-      - tasty-discover
-      - tasty-hunit
-      - tasty-quickcheck
-      - quickcheck-instances
-      - QuickCheck
-      - hexstring
-    default-extensions:
-      - LambdaCase
-      - RecordWildCards
-      - OverloadedStrings
-      - NoImplicitPrelude
-      - FlexibleInstances
-      - FlexibleContexts
-      - ScopedTypeVariables
-      - RankNTypes
-      - DataKinds
-      - DeriveAnyClass
-      - DeriveFunctor
-      - DeriveGeneric
-      - MultiParamTypeClasses
-      - PatternSynonyms
-      - TypeApplications
-      - TypeSynonymInstances
 
 benchmarks:
   pairing-benchmarks:
-    main: Main.hs
-    source-dirs:
-      - src
-      - bench
-    other-modules:
-      - BenchPairing
+    main: Main
     dependencies:
       - criterion
       - QuickCheck
@@ -141,17 +80,6 @@ benchmarks:
       - tasty
       - tasty-hunit
       - tasty-quickcheck
-    default-extensions:
-      - NoImplicitPrelude
-      - OverloadedStrings
-      - FlexibleInstances
-      - FlexibleContexts
-      - ScopedTypeVariables
-      - RankNTypes
-      - DataKinds
-      - DeriveAnyClass
-      - DeriveFunctor
-      - DeriveGeneric
-      - MultiParamTypeClasses
-      - PatternSynonyms
-      - TypeApplications
+    source-dirs:
+      - src
+      - benchmarks

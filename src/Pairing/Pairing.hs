@@ -11,18 +11,13 @@ module Pairing.Pairing
 
 import Protolude
 
+import Curve.Weierstrass (Curve(..), Group(..), Point(..))
 import Data.List ((!!))
 import ExtensionField (toField)
 import GaloisField (GaloisField(..))
+import Group.Field (Element(..))
 
-import Pairing.Fq
-import Pairing.Group
-import Pairing.Jacobian
-import Pairing.Params
-import Pairing.Point
-
--- G2, but using Jacobian coordinates
-type JG2 = JPoint Fq2
+import Pairing.Curve
 
 -- ell0, ellVW, ellVV
 data EllCoeffs
@@ -31,21 +26,17 @@ data EllCoeffs
 
 -- | Optimal Ate pairing (including final exponentiation step)
 reducedPairing :: G1 -> G2 -> GT
-reducedPairing p@(Point _ _) q@(Point _ _)
-  = finalExponentiation $ atePairing p q
-reducedPairing _ _
-  = 1
+reducedPairing p@(A _ _) q@(A _ _) = finalExponentiation <$> atePairing p q
+reducedPairing _         _         = F 1
 
 -------------------------------------------------------------------------------
 -- Miller loop
 -------------------------------------------------------------------------------
 
 -- | Optimal Ate pairing without the final exponentiation step
-atePairing :: G1 -> G2 -> Fq12
-atePairing p@(Point _ _) q@(Point _ _)
-  = ateMillerLoop p (atePrecomputeG2 q)
-atePairing _ _
-  = 1
+atePairing :: G1 -> G2 -> GT
+atePairing p@(A _ _) q@(A _ _) = ateMillerLoop p (atePrecomputeG2 q)
+atePairing _         _         = F 1
 
 -- | Binary expansion (missing the most-significant bit) representing
 -- the number 6 * _t + 2.
@@ -66,31 +57,30 @@ ateLoopCountBinary
 -- | Miller loop with precomputed values for G2
 ateMillerLoop :: G1 -> [EllCoeffs] -> GT
 ateMillerLoop p coeffs  = let
-  (postLoopIx, postLoopF) = foldl' (ateLoopBody p coeffs) (0, 1) ateLoopCountBinary
+  (postLoopIx, postLoopF) = foldl' (ateLoopBody p coeffs) (0, F 1) ateLoopCountBinary
   almostF = mulBy024 postLoopF (prepareCoeffs coeffs p postLoopIx)
   finalF = mulBy024 almostF (prepareCoeffs coeffs p (postLoopIx + 1))
   in finalF
 
-ateLoopBody :: G1 -> [EllCoeffs] -> (Int, Fq12) -> Bool -> (Int, Fq12)
-ateLoopBody p coeffs (oldIx, oldF) currentBit
-  = let
-  fFirst = mulBy024 (pow oldF 2) (prepareCoeffs coeffs p oldIx)
+ateLoopBody :: G1 -> [EllCoeffs] -> (Int, GT) -> Bool -> (Int, GT)
+ateLoopBody p coeffs (oldIx, F oldF) currentBit = let
+  fFirst = mulBy024 (F (pow oldF 2)) (prepareCoeffs coeffs p oldIx)
   (nextIx, nextF) = if currentBit
-          then (oldIx + 2, mulBy024 fFirst (prepareCoeffs coeffs p (oldIx + 1)))
-          else (oldIx + 1, fFirst)
+                    then (oldIx + 2, mulBy024 fFirst (prepareCoeffs coeffs p (oldIx + 1)))
+                    else (oldIx + 1, fFirst)
   in (nextIx, nextF)
 
 prepareCoeffs :: [EllCoeffs] -> G1 -> Int -> EllCoeffs
-prepareCoeffs _ Infinity _ = panic "prepareCoeffs: received trivial point"
-prepareCoeffs coeffs (Point px py) ix =
+prepareCoeffs coeffs (A px py) ix =
   let (EllCoeffs ell0 ellVW ellVV) = coeffs !! ix
-  in EllCoeffs ell0 (fq2ScalarMul py ellVW) (fq2ScalarMul px ellVV)
+  in EllCoeffs ell0 (scale py ellVW) (scale px ellVV)
+prepareCoeffs _ _ _ = panic "prepareCoeffs: received trivial point"
 
 {-# INLINEABLE mulBy024 #-}
-mulBy024 :: Fq12 -> EllCoeffs -> Fq12
-mulBy024 this (EllCoeffs ell0 ellVW ellVV)
+mulBy024 :: GT -> EllCoeffs -> GT
+mulBy024 (F this) (EllCoeffs ell0 ellVW ellVV)
   = let a = toField [toField [ell0, 0, ellVV], toField [0, ellVW, 0]]
-    in this * a
+    in F (this * a)
 
 -------------------------------------------------------------------------------
 -- Precomputation on G2
@@ -107,38 +97,30 @@ frobeniusNaive i a
             in prev ^ _q
   | otherwise = panic "frobeniusNaive: received negative input"
 
-{-# INLINEABLE mulByQ  #-}
-mulByQ :: JG2 -> JG2
-mulByQ (x, y, z)
-  = ( twistMulX * frobeniusNaive 1 x
-    , twistMulY * frobeniusNaive 1 y
-    , frobeniusNaive 1 z
-    )
+{-# INLINEABLE mulByQ #-}
+mulByQ :: G2' -> G2'
+mulByQ (J x y z) = J (twistMulX * pow x _q) (twistMulY * pow y _q) (pow z _q)
 
 -- xi ^ ((_q - 1) `div` 3)
 twistMulX :: Fq2
-twistMulX = pow xi ((_q - 1) `div` 3) -- Fq2
+twistMulX = pow _xi ((_q - 1) `div` 3) -- Fq2
 --  21575463638280843010398324269430826099269044274347216827212613867836435027261
 --  10307601595873709700152284273816112264069230130616436755625194854815875713954
 
 -- xi ^ ((_q - 1) `div` 2)
 twistMulY :: Fq2
-twistMulY = pow xi ((_q - 1) `div` 2) -- Fq2
+twistMulY = pow _xi ((_q - 1) `div` 2) -- Fq2
 --  2821565182194536844548159561693502659359617185244120367078079554186484126554
 --  3505843767911556378687030309984248845540243509899259641013678093033130930403
 
-mirrorY :: JG2 -> JG2
-mirrorY (x,y,z) = (x,-y,z)
-
 atePrecomputeG2 :: G2 -> [EllCoeffs]
-atePrecomputeG2 Infinity = []
-atePrecomputeG2 origPt@(Point _ _)
+atePrecomputeG2 origPt@(A _ _)
   = let
-  bigQ = toJacobian origPt
+  bigQ = fromA origPt
   (postLoopR, postLoopCoeffs)
     = runLoop bigQ
   bigQ1 = mulByQ bigQ
-  bigQ2 = mirrorY $ mulByQ bigQ1
+  bigQ2 = inv $ mulByQ bigQ1
 
   (newR, coeffs1) = mixedAdditionStepForFlippedMillerLoop bigQ1 postLoopR
   (_, coeffs2) = mixedAdditionStepForFlippedMillerLoop bigQ2 newR
@@ -148,7 +130,7 @@ atePrecomputeG2 origPt@(Point _ _)
       -- Assumes q to have z coordinate to be 1
       runLoop q = foldl' (loopBody q) (q, []) ateLoopCountBinary
 
-      loopBody :: JG2 -> (JG2, [EllCoeffs]) -> Bool -> (JG2, [EllCoeffs])
+      loopBody :: G2' -> (G2', [EllCoeffs]) -> Bool -> (G2', [EllCoeffs])
       loopBody q (oldR, oldCoeffs) currentBit
         = let
         (currentR, currentCoeff) = doublingStepForFlippedMillerLoop oldR
@@ -160,25 +142,23 @@ atePrecomputeG2 origPt@(Point _ _)
                                 in (resultR, currentCoeffs ++ [resultCoeff])
                               else (currentR, currentCoeffs)
         in (nextR, nextCoeffs)
-
-twoInv :: Fq
-twoInv = 0.5
+atePrecomputeG2 _ = []
 
 twistCoeffB :: Fq2
-twistCoeffB = fq2ScalarMul (fromInteger _b) (1 / xi)
+twistCoeffB = scale _b (1 / _xi)
 
-doublingStepForFlippedMillerLoop :: JG2 -> (JG2, EllCoeffs)
-doublingStepForFlippedMillerLoop (oldX, oldY, oldZ)
+doublingStepForFlippedMillerLoop :: G2' -> (G2', EllCoeffs)
+doublingStepForFlippedMillerLoop (J oldX oldY oldZ)
   = let
   a, b, c, d, e, f, g, h, i, j, eSquared :: Fq2
 
-  a = fq2ScalarMul twoInv (oldX * oldY)
+  a = scale 0.5 (oldX * oldY)
   b = oldY * oldY
   c = oldZ * oldZ
   d = c + c + c
   e = twistCoeffB * d
   f = e + e + e
-  g = fq2ScalarMul twoInv (b + f)
+  g = scale 0.5 (b + f)
   h = (oldY + oldZ) * (oldY + oldZ) - (b + c)
   i = e - b
   j = oldX * oldX
@@ -188,16 +168,14 @@ doublingStepForFlippedMillerLoop (oldX, oldY, oldZ)
   newY = g * g - (eSquared + eSquared + eSquared)
   newZ = b * h
 
-  ell0 = xi * i
+  ell0 = _xi * i
   ellVV = j + j + j
   ellVW = - h
 
-  in ( (newX, newY, newZ)
-     , EllCoeffs ell0 ellVW ellVV
-     )
+  in (J newX newY newZ, EllCoeffs ell0 ellVW ellVV)
 
-mixedAdditionStepForFlippedMillerLoop :: JG2 -> JG2 -> (JG2, EllCoeffs)
-mixedAdditionStepForFlippedMillerLoop _base@(x2, y2, _z2) _current@(x1, y1, z1)
+mixedAdditionStepForFlippedMillerLoop :: G2' -> G2' -> (G2', EllCoeffs)
+mixedAdditionStepForFlippedMillerLoop (J x2 y2 _) (J x1 y1 z1)
   = let
   d, e, f, g, h, i, j :: Fq2
   d = x1 - (x2 * z1)
@@ -212,36 +190,34 @@ mixedAdditionStepForFlippedMillerLoop _base@(x2, y2, _z2) _current@(x1, y1, z1)
   newY = e * (i - j) - (h * y1)
   newZ = z1 * h
 
-  ell0 = xi * (e * x2 - d * y2)
+  ell0 = _xi * (e * x2 - d * y2)
   ellVV = - e
   ellVW = d
 
-  in ( (newX, newY, newZ)
-     , EllCoeffs ell0 ellVW ellVV
-     )
+  in (J newX newY newZ, EllCoeffs ell0 ellVW ellVV)
 
 -------------------------------------------------------------------------------
 -- Final exponentiation
 -------------------------------------------------------------------------------
 
 -- | Naive implementation of the final exponentiation step
-finalExponentiationNaive :: Fq12 -> GT
+finalExponentiationNaive :: Fq12 -> Fq12
 finalExponentiationNaive f = pow f expVal
   where
     expVal :: Integer
     expVal = div (_q ^ _k - 1) _r
 
 -- | A faster way of performing the final exponentiation step
-finalExponentiation :: Fq12 -> GT
+finalExponentiation :: Fq12 -> Fq12
 finalExponentiation f = pow (finalExponentiationFirstChunk f) expVal
   where
-    expVal = div (_q ^ 4 - _q ^ 2 + 1) _r
+    expVal = div (qq * (qq - 1) + 1) _r
+    qq = _q * _q
 
-finalExponentiationFirstChunk :: Fq12 -> GT
+finalExponentiationFirstChunk :: Fq12 -> Fq12
 finalExponentiationFirstChunk f
   | f == 0 = 0
-  | otherwise = let
-  f1 = fq12Conj f
-  f2 = recip f
-  newf0 = f1 * f2 -- == f^(_q ^6 - 1)
-  in fq12Frobenius 2 newf0 * newf0 -- == f^((_q ^ 6 - 1) * (_q ^ 2 + 1))
+  | otherwise = let f1 = conj f
+                    f2 = recip f
+                    newf0 = f1 * f2 -- == f^(_q ^6 - 1)
+                in fq12Frobenius 2 newf0 * newf0 -- == f^((_q ^ 6 - 1) * (_q ^ 2 + 1))
