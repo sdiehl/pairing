@@ -1,5 +1,5 @@
-module Pairing
-  ( module Pairing
+module Math.Pairing
+  ( module Math.Pairing
   ) where
 
 import Group (Group)

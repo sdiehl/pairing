@@ -5,7 +5,7 @@
 -- 03 - Compressed repr i.e. x only but use largest y on decode
 -- 04 -- Uncompressed repr i.e. x & y
 
-module Pairing.Serialize.Jivsov where
+module Math.Pairing.Serialize.Jivsov where
 --   ( Jivsov(..)
 --   ) where
 -- 

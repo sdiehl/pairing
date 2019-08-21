@@ -1,6 +1,6 @@
 -- | Implementation of the optimal Ate pairing on the curve BN128
 
-module Pairing.Ate
+module Math.Pairing.Ate
   ( reducedPairing
   , atePairing
   , finalExponentiation
@@ -17,7 +17,7 @@ import ExtensionField (toField)
 import GaloisField (GaloisField(..))
 import Group.Field (Element(..))
 
-import Pairing.Curve
+import Math.Pairing.Curve
 
 -- ell0, ellVW, ellVV
 data EllCoeffs

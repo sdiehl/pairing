@@ -5,8 +5,8 @@ import Protolude
 import Curve.Weierstrass
 import ExtensionField
 import Group.Field
-import Pairing.Ate
-import Pairing.Curve
+import Math.Pairing.Ate
+import Math.Pairing.Curve
 import Test.Tasty
 import Test.Tasty.HUnit
 import Test.Tasty.QuickCheck

@@ -3,7 +3,7 @@ module HashTests where
 import Protolude
 
 import Curve
-import Pairing.Hash
+import Math.Pairing.Hash
 import Test.QuickCheck.Instances ()
 import Test.QuickCheck.Monadic
 import Test.Tasty

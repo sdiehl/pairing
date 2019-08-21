@@ -10,7 +10,7 @@
 -- and appended as a continuous bytestring, using the element length to split 
 -- each point
 
-module Pairing.Serialize.MCLWasm where
+module Math.Pairing.Serialize.MCLWasm where
 --   ( MCLWASM(..)
 --   ) where
 -- 

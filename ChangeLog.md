@@ -1,5 +1,8 @@
 # Change log for pairing
 
+## 0.5.1
+* Prepend `Math` to modules
+
 ## 0.5
 
 * Use `elliptic-curve` for BN254 elliptic curve group operations.

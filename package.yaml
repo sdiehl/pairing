@@ -48,13 +48,13 @@ ghc-options:
 
 library:
   exposed-modules:
-    - Pairing.Ate
-    - Pairing.ByteRepr
-    - Pairing.Curve
-    - Pairing.Hash
-    - Pairing.Serialize.Types
-    - Pairing.Serialize.Jivsov
-    - Pairing.Serialize.MCLWasm
+    - Math.Pairing.Ate
+    - Math.Pairing.ByteRepr
+    - Math.Pairing.Curve
+    - Math.Pairing.Hash
+    - Math.Pairing.Serialize.Types
+    - Math.Pairing.Serialize.Jivsov
+    - Math.Pairing.Serialize.MCLWasm
   source-dirs:
     - src
 

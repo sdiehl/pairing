@@ -4,8 +4,8 @@ import Protolude
 
 import ExtensionField
 import GaloisField
-import Pairing.ByteRepr
-import Pairing.Curve
+import Math.Pairing.ByteRepr
+import Math.Pairing.Curve
 import PrimeField
 import Test.QuickCheck.Monadic
 import Test.Tasty
@@ -21,7 +21,7 @@ testByte = testGroup "Byte"
   ]
 
 byteReprTest :: (ByteRepr k, GaloisField k)
-  => k -> Pairing.ByteRepr.ByteOrder -> Int -> Assertion
+  => k -> ByteOrder -> Int -> Assertion
 byteReprTest f bo sz = do 
   let t = mkRepr (ByteOrderLength bo sz) f
   assertBool ("mkRepr " <> show f) (isJust t)

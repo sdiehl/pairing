@@ -5,12 +5,19 @@
 
 packages:
 - completed:
-    hackage: galois-field-0.4.0@sha256:7f8aed0c11f6afc720685c2ede6bdbea3ce8dbd738dacd8fbf722168863d4dd1,3190
+    hackage: galois-field-0.4.1@sha256:c3a847c545e10e6ed29198f00fd407b0f2a1a399e794f1fbb065fb4332f13360,3175
     pantry-tree:
       size: 1130
-      sha256: e68a2fb1731fc4cdf5f0ae4dd718f8bd2e128eb6285be3d602a209e5430812ba
+      sha256: b1d8c24bc09d317bb7e72bab69dc02b415ebb306c1bc6c4bcbc2e465d245e989
   original:
-    hackage: galois-field-0.4.0
+    hackage: galois-field-0.4.1
+- completed:
+    hackage: elliptic-curve-0.2.2@sha256:f77334e9a9e857ddf231bbb7547ebb931d803558a5471614e1d2c6e2e90bc487,11928
+    pantry-tree:
+      size: 9071
+      sha256: 70783c3c93699ce6da7ca3bd0df694942022f71823c89556b87e28fa087cff17
+  original:
+    hackage: elliptic-curve-0.2.2
 - completed:
     hackage: poly-0.3.1.0@sha256:3e015e84d304c4197a2cff4a78400ed619eb850922d566028edb6c7254f2095f,1875
     pantry-tree:

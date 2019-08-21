@@ -1,12 +1,12 @@
 {-# OPTIONS -fno-warn-orphans #-}
 
-module Pairing.BarretoNaehrig
-  ( module Pairing
+module Math.Pairing.BarretoNaehrig
+  ( module Math.Pairing
   ) where
 
-import Pairing (Pairing(..))
-import Pairing.Ate (reducedPairing)
-import Pairing.Curve (G1, G2, GT)
+import Math.Pairing (Pairing(..))
+import Math.Pairing.Ate (reducedPairing)
+import Math.Pairing.Curve (G1, G2, GT)
 
 -------------------------------------------------------------------------------
 -- Barreto-Naehrig curves.

@@ -1,4 +1,4 @@
-module Pairing.ByteRepr
+module Math.Pairing.ByteRepr
   ( ByteOrder(..)
   , ByteOrderLength(..)
   , ByteRepr(..)
@@ -13,7 +13,7 @@ import qualified Data.ByteString as B
 import PrimeField (toInt)
 import ExtensionField (fromField, toField)
 
-import Pairing.Curve (Fq, Fq2, Fq6, Fq12)
+import Math.Pairing.Curve (Fq, Fq2, Fq6, Fq12)
 
 -------------------------------------------------------------------------------
 -- Bytes
