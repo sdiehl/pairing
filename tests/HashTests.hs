@@ -2,8 +2,8 @@ module HashTests where
 
 import Protolude
 
-import Curve
-import Math.Pairing.Hash
+import Data.Curve
+import Data.Pairing.Hash
 import Test.QuickCheck.Instances ()
 import Test.QuickCheck.Monadic
 import Test.Tasty

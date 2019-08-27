@@ -4,9 +4,9 @@ import Protolude
 
 import Control.Monad.Random
 import Criterion.Main
-import GaloisField
-import Pairing.Ate
-import Pairing.Curve
+import Data.Field.Galois
+import Data.Pairing.Ate
+import Data.Pairing.Curve
 
 benchmarkPairing :: Benchmark
 benchmarkPairing = bgroup "Pairing"
