@@ -6,9 +6,9 @@ import Protolude
 
 import Control.Error (hoistMaybe, runMaybeT)
 import Control.Monad.Random (MonadRandom)
-import Curve.Weierstrass (Point(..))
+import Data.Curve.Weierstrass (Point(..))
+import Data.Field.Galois (qr, rnd, sr)
 import Data.List ((!!))
-import GaloisField (GaloisField(..))
 
 import Math.Pairing.ByteRepr (ByteOrder(..), fromBytesToInteger)
 import Math.Pairing.Curve (Fq, G1, _b)

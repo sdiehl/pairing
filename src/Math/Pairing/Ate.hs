@@ -11,11 +11,10 @@ module Math.Pairing.Ate
 
 import Protolude
 
-import Curve.Weierstrass (Curve(..), Group(..), Point(..))
+import Data.Curve.Weierstrass (Curve(..), Cyclic(..), Point(..))
+import Data.Cyclic.Field (Element(..))
 import Data.List ((!!))
-import ExtensionField (toField)
-import GaloisField (GaloisField(..))
-import Group.Field (Element(..))
+import Data.Field.Galois (GaloisField(..), toE)
 
 import Math.Pairing.Curve
 
@@ -64,7 +63,7 @@ ateMillerLoop p coeffs  = let
 
 ateLoopBody :: G1 -> [EllCoeffs] -> (Int, GT) -> Bool -> (Int, GT)
 ateLoopBody p coeffs (oldIx, F oldF) currentBit = let
-  fFirst = mulBy024 (F (pow oldF 2)) (prepareCoeffs coeffs p oldIx)
+  fFirst = mulBy024 (F (oldF * oldF)) (prepareCoeffs coeffs p oldIx)
   (nextIx, nextF) = if currentBit
                     then (oldIx + 2, mulBy024 fFirst (prepareCoeffs coeffs p (oldIx + 1)))
                     else (oldIx + 1, fFirst)
@@ -79,7 +78,7 @@ prepareCoeffs _ _ _ = panic "prepareCoeffs: received trivial point"
 {-# INLINEABLE mulBy024 #-}
 mulBy024 :: GT -> EllCoeffs -> GT
 mulBy024 (F this) (EllCoeffs ell0 ellVW ellVV)
-  = let a = toField [toField [ell0, 0, ellVV], toField [0, ellVW, 0]]
+  = let a = toE [toE [ell0, 0, ellVV], toE [0, ellVW, 0]]
     in F (this * a)
 
 -------------------------------------------------------------------------------

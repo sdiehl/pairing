@@ -10,8 +10,7 @@ module Math.Pairing.ByteRepr
 import Protolude
 
 import qualified Data.ByteString as B
-import PrimeField (toInt)
-import ExtensionField (fromField, toField)
+import Data.Field.Galois (fromE, fromP, toE)
 
 import Math.Pairing.Curve (Fq, Fq2, Fq6, Fq12)
 
@@ -68,14 +67,15 @@ fromBytesToInteger LeastSignificantFirst = (fromBytesToInteger MostSignificantFi
 -------------------------------------------------------------------------------
 
 instance ByteRepr Fq where
-  mkRepr bo = toPaddedBytes bo <$> toInt
+  mkRepr bo = toPaddedBytes bo <$> fromP
   fromRepr bo _ bs = Just (fromInteger (fromBytesToInteger (byteOrder bo) bs))
   calcReprLength _ n = n
 
 instance ByteRepr Fq2 where
   mkRepr bo f2 = foldl' (<>) mempty (map (mkRepr bo) (fq2Bytes f2))
     where
-      fq2Bytes w = case fromField w of
+      fq2Bytes :: Fq2 -> [Fq]
+      fq2Bytes w = case fromE w of
         [x, y] -> [x, y]
         [x]    -> [x, 0]
         []     -> [0, 0]
@@ -86,13 +86,14 @@ instance ByteRepr Fq2 where
       (xbs, ybs) = B.splitAt blen bs
     x <- fromRepr bo (1 :: Fq) xbs
     y <- fromRepr bo (1 :: Fq) ybs
-    return (toField [x, y])
+    return (toE [x, y])
   calcReprLength _ n = 2 * calcReprLength (1 :: Fq) n
 
 instance ByteRepr Fq6 where
   mkRepr bo f6 = foldl' (<>) mempty (map (mkRepr bo) (fq6Bytes f6))
     where
-      fq6Bytes w = case fromField w of
+      fq6Bytes :: Fq6 -> [Fq2]
+      fq6Bytes w = case fromE w of
         [x, y, z] -> [x, y, z]
         [x, y]    -> [x, y, 0]
         [x]       -> [x, 0, 0]
@@ -106,13 +107,14 @@ instance ByteRepr Fq6 where
     x <- fromRepr bo (1 :: Fq2) xbs
     y <- fromRepr bo (1 :: Fq2) ybs
     z <- fromRepr bo (1 :: Fq2) zbs
-    return (toField [x, y, z])
+    return (toE [x, y, z])
   calcReprLength _ n = 3 * calcReprLength (1 :: Fq2) n
 
 instance ByteRepr Fq12 where
   mkRepr bo f12 = foldl' (<>) mempty (map (mkRepr bo) (fq12Bytes f12))
     where
-      fq12Bytes w = case fromField w of
+      fq12Bytes :: Fq12 -> [Fq6]
+      fq12Bytes w = case fromE w of
         [x, y] -> [x, y]
         [x]    -> [x, 0]
         []     -> [0, 0]
@@ -123,5 +125,5 @@ instance ByteRepr Fq12 where
       (xbs, ybs) = B.splitAt blen bs
     x <- fromRepr bo (1 :: Fq6) xbs
     y <- fromRepr bo (1 :: Fq6) ybs
-    return (toField [x, y])
+    return (toE [x, y])
   calcReprLength _ n = 2 * calcReprLength (1 :: Fq6) n

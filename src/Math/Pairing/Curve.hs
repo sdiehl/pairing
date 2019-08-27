@@ -45,12 +45,11 @@ module Math.Pairing.Curve
 
 import Protolude
 
-import Curve (Curve(..))
-import qualified Curve.Weierstrass.BN254 as BN254
-import qualified Curve.Weierstrass.BN254T as BN254T
-import ExtensionField (ExtensionField, IrreducibleMonic, fromField, toField)
-import GaloisField (GaloisField(..))
-import qualified Group.Field.BN254TF as BN254TF
+import Data.Curve (Curve(..))
+import qualified Data.Curve.Weierstrass.BN254 as BN254
+import qualified Data.Curve.Weierstrass.BN254T as BN254T
+import qualified Data.Cyclic.Field.BN254TF as BN254TF
+import Data.Field.Galois (GaloisField(..), Extension, ExtensionField(..), IrreducibleMonic, fromE, toE)
 
 -- import Pairing.Serialize.Types
 
@@ -155,20 +154,19 @@ _t = 4965661367192848881
 
 -- | Parameter of twisted curve over @Fq@.
 _xi :: Fq2
-_xi = toField [9, 1]
+_xi = toE [9, 1]
 
 -------------------------------------------------------------------------------
 -- Miscellaneous functions
 -------------------------------------------------------------------------------
 
 -- | Conjugation.
-conj :: forall k im . IrreducibleMonic k im
-  => ExtensionField k im -> ExtensionField k im
+conj :: forall k im . IrreducibleMonic k im => Extension k im -> Extension k im
 conj x
   | deg x /= 2 * deg (witness :: k) = panic "conj: extension degree is not two."
-  | otherwise                       = case fromField x of
-    [y, z] -> toField [y, negate z]
-    [y]    -> toField [y]
+  | otherwise                       = case fromE x of
+    [y, z] -> toE [y, negate z]
+    [y]    -> toE [y]
     []     -> 0
     _      -> panic "conj: unreachable."
 {-# INLINABLE conj #-}
@@ -179,8 +177,8 @@ getYfromX curve choose x = choose <*> negate <$> yX curve x
 {-# INLINABLE getYfromX #-}
 
 -- | Scalar multiplication.
-scale :: IrreducibleMonic k im => k -> ExtensionField k im -> ExtensionField k im
-scale = (*) . toField . return
+scale :: IrreducibleMonic k im => k -> Extension k im -> Extension k im
+scale = (*) . toE . return
 {-# INLINABLE scale #-}
 
 -------------------------------------------------------------------------------
@@ -189,11 +187,11 @@ scale = (*) . toField . return
 
 -- | Multiply by @_xi@ (cubic nonresidue in @Fq2@) and reorder coefficients.
 mulXi :: Fq6 -> Fq6
-mulXi w = case fromField w of
-  [x, y, z] -> toField [z * _xi, x, y]
-  [x, y]    -> toField [0, x, y]
-  [x]       -> toField [0, x]
-  []        -> toField []
+mulXi w = case fromE w of
+  [x, y, z] -> toE [z * _xi, x, y]
+  [x, y]    -> toE [0, x, y]
+  [x]       -> toE [0, x]
+  []        -> toE []
   _         -> panic "mulXi: not exhaustive."
 {-# INLINE mulXi #-}
 
@@ -208,14 +206,14 @@ fq12Frobenius i a
 
 -- | Fast Frobenius automorphism in @Fq12@.
 fastFrobenius :: Fq12 -> Fq12
-fastFrobenius = coll . conv [[0,2,4],[1,3,5]] . cong
+fastFrobenius = coll . conv [[0,2,4],[1,3,5]] . map cone . fromE
   where
-    cong :: Fq12 -> [[Fq2]]
-    cong = map (map conj . fromField) . fromField
+    cone :: Fq6 -> [Fq2]
+    cone = map conj . fromE
     conv :: [[Integer]] -> [[Fq2]] -> [[Fq2]]
     conv = zipWith (zipWith (\x y -> pow _xi ((x * (_q - 1)) `div` 6) * y))
     coll :: [[Fq2]] -> Fq12
-    coll = toField . map toField
+    coll = toE . map toE
 {-# INLINABLE fastFrobenius #-}
 
 -- | Check if an element is a root of unity.
