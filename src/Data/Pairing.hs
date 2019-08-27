@@ -1,10 +1,10 @@
 module Data.Pairing
   (
-  -- * Optimal ate pairing on BN254 curves
-    module Data.Pairing.BN254
-  -- * Shallue-van Woestijne encoding function
-  , module Data.Pairing.Hash
+  -- * Pairings
+    module Data.Pairing.Base
+  -- ** BN254 curve
+  , module Data.Pairing.BN254
   ) where
 
+import Data.Pairing.Base
 import Data.Pairing.BN254
-import Data.Pairing.Hash

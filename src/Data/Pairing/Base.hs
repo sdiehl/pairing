@@ -9,17 +9,17 @@ import Data.Group (Group(..))
 -------------------------------------------------------------------------------
 
 -- | Pairings of cryptographic groups.
-class (Group (Left e), Group (Right e), Group (Target e)) => Pairing e where
+class (Group (G1 e), Group (G2 e), Group (GT e)) => Pairing e where
   {-# MINIMAL pairing #-}
 
-  -- | Left group.
-  type Left e :: *
+  -- | Left group @G1@.
+  type G1 e :: *
 
-  -- | Right group.
-  type Right e :: *
+  -- | Right group @G2@.
+  type G2 e :: *
 
-  -- | Target group.
-  type Target e = t | t -> e
+  -- | Target group @GT@.
+  type GT e = t | t -> e
 
   -- | Computable non-degenerate bilinear map.
-  pairing :: Left e -> Right e -> Target e
+  pairing :: G1 e -> G2 e -> GT e

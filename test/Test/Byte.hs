@@ -3,8 +3,8 @@ module Test.Byte where
 import Protolude
 
 import Data.Field.Galois
-import Data.Pairing.ByteRepr
-import Data.Pairing.BN254
+import Data.Pairing
+import Data.Pairing.Byte
 import Test.QuickCheck.Monadic
 import Test.Tasty
 import Test.Tasty.HUnit

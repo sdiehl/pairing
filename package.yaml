@@ -17,7 +17,6 @@ default-extensions:
   - ScopedTypeVariables
   - RankNTypes
   - GeneralizedNewtypeDeriving
-  - TypeFamilies
   - TypeFamilyDependencies
 
 dependencies:
@@ -37,16 +36,24 @@ extra-source-files:
   - ChangeLog.md
 
 ghc-options:
+  - -freverse-errors
   - -Wall
 
 library:
   exposed-modules:
-    - Data.Pairing.ByteRepr
-    - Data.Pairing.Curve
-    - Data.Pairing.Hash
-    - Data.Pairing.Serialize.Types
-    - Data.Pairing.Serialize.Jivsov
-    - Data.Pairing.Serialize.MCLWasm
+    - Data.Pairing
+  other-modules:
+    - Data.Pairing.Base
+    - Data.Pairing.BN254
+    - Data.Pairing.BN254.Ate
+    - Data.Pairing.BN254.Base
+    - Data.Pairing.BN254.Byte
+    - Data.Pairing.BN254.Hash
+    - Data.Pairing.BN254.Unity
+    - Data.Pairing.BN254.Serialize.Jivsov
+    - Data.Pairing.BN254.Serialize.MCLWasm
+    - Data.Pairing.BN254.Serialize.Types
+    - Data.Pairing.Byte
   source-dirs:
     - src
 
@@ -54,13 +61,14 @@ tests:
   pairing-tests:
     main: Main
     dependencies:
+      - pairing
       - quickcheck-instances
       - tasty
       - tasty-hunit
       - tasty-quickcheck
     source-dirs:
-      - src
       - test
+      - src
 
 benchmarks:
   pairing-benchmarks:
@@ -73,5 +81,5 @@ benchmarks:
       - tasty-hunit
       - tasty-quickcheck
     source-dirs:
-      - src
       - bench
+      - src

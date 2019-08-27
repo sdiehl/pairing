@@ -4,8 +4,9 @@ import Protolude
 
 import Control.Monad.Random
 import Criterion.Main
-import Data.Field.Galois
-import Data.Pairing.BN254
+import Data.Curve
+import Data.Field.Galois as GF
+import Data.Pairing
 
 benchmarkPairing :: Benchmark
 benchmarkPairing = bgroup "Pairing"
@@ -23,11 +24,11 @@ benchmarkPairing = bgroup "Pairing"
     ]
   , bgroup "Pairing"
     [ bench "without final exponentiation"
-      $ whnf (uncurry atePairing) (gG1, gG2)
+      $ whnf (uncurry atePairing) (gen, gen)
     , bench "with final exponentiation"
-      $ whnf (uncurry reducedPairing) (gG1, gG2)
+      $ whnf (uncurry reducedPairing) (gen, gen)
     ]
   ]
 
 testFq12 :: Fq12
-testFq12 = evalRand rnd (mkStdGen 0)
+testFq12 = evalRand GF.rnd (mkStdGen 0)

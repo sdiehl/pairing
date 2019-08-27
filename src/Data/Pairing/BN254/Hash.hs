@@ -1,4 +1,4 @@
-module Data.Pairing.Hash
+module Data.Pairing.BN254.Hash
   ( swEncBN
   ) where
 
@@ -10,8 +10,8 @@ import Data.Curve.Weierstrass (Point(..))
 import Data.Field.Galois (qr, rnd, sr)
 import Data.List ((!!))
 
-import Data.Pairing.ByteRepr (ByteOrder(..), fromBytesToInteger)
-import Data.Pairing.BN254 (Fq, G1, _b)
+import Data.Pairing.Byte
+import Data.Pairing.BN254.Base
 
 -- | Encodes a given byte string to a point on the BN curve.
 -- The implementation uses the Shallue-van de Woestijne encoding to BN curves as
