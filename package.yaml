@@ -41,7 +41,6 @@ ghc-options:
 
 library:
   exposed-modules:
-    - Data.Pairing.Ate
     - Data.Pairing.ByteRepr
     - Data.Pairing.Curve
     - Data.Pairing.Hash

@@ -4,7 +4,7 @@ import Protolude
 
 import Data.Field.Galois
 import Data.Pairing.ByteRepr
-import Data.Pairing.Curve
+import Data.Pairing.BN254
 import Test.QuickCheck.Monadic
 import Test.Tasty
 import Test.Tasty.HUnit

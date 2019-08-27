@@ -12,7 +12,7 @@ import Protolude
 import qualified Data.ByteString as B
 import Data.Field.Galois (fromE, fromP, toE)
 
-import Data.Pairing.Curve (Fq, Fq2, Fq6, Fq12)
+import Data.Pairing.BN254 (Fq, Fq2, Fq6, Fq12)
 
 -------------------------------------------------------------------------------
 -- Bytes
