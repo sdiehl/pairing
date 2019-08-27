@@ -16,9 +16,9 @@ default-extensions:
   - FlexibleContexts
   - ScopedTypeVariables
   - RankNTypes
-  - DeriveAnyClass
   - GeneralizedNewtypeDeriving
   - TypeFamilies
+  - TypeFamilyDependencies
 
 dependencies:
   - base >= 4.10 && < 5

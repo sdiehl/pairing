@@ -2,8 +2,6 @@ module Data.Pairing
   ( module Data.Pairing
   ) where
 
-import Protolude
-
 import Data.Group (Group(..))
 import Data.Pairing.Ate (reducedPairing)
 import Data.Pairing.Curve (G1, G2, GT)
@@ -17,13 +15,13 @@ class (Group (Left e), Group (Right e), Group (Target e)) => Pairing e where
   {-# MINIMAL pairing #-}
 
   -- | Left group.
-  data family Left e :: *
+  type Left e :: *
 
   -- | Right group.
-  data family Right e :: *
+  type Right e :: *
 
   -- | Target group.
-  data family Target e :: *
+  type Target e = t | t -> e
 
   -- | Computable non-degenerate bilinear map.
   pairing :: Left e -> Right e -> Target e
@@ -36,38 +34,11 @@ data BN254
 
 instance Pairing BN254 where
 
-  data instance Left BN254 = L G1
+  type Left BN254 = G1
 
-  data instance Right BN254 = R G2
+  type Right BN254 = G2
 
-  data instance Target BN254 = T GT
+  type Target BN254 = GT
 
-  pairing (L g1) (R g2) = T $ reducedPairing g1 g2
+  pairing = reducedPairing
   {-# INLINE pairing #-}
-
-instance Group (Left BN254) where
-  invert (L g) = L (invert g)
-
-instance Group (Right BN254) where
-  invert (R g) = R (invert g)
-
-instance Group (Target BN254) where
-  invert (T g) = T (invert g)
-
-instance Monoid (Left BN254) where
-  mempty = L mempty
-
-instance Monoid (Right BN254) where
-  mempty = R mempty
-
-instance Monoid (Target BN254) where
-  mempty = T mempty
-
-instance Semigroup (Left BN254) where
-  L g <> L g' = L (g <> g')
-
-instance Semigroup (Right BN254) where
-  R g <> R g' = R (g <> g')
-
-instance Semigroup (Target BN254) where
-  T g <> T g' = T (g <> g')
