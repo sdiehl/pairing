@@ -1,4 +1,4 @@
-module AteTests where
+module Test.Ate where
 
 import Protolude
 

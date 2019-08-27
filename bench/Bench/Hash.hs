@@ -1,4 +1,4 @@
-module HashBenchmarks where
+module Bench.Hash where
 
 import Protolude
 

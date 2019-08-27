@@ -1,4 +1,4 @@
-module AteBenchmarks where
+module Bench.Ate where
 
 import Protolude
 

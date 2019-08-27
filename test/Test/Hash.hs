@@ -1,4 +1,4 @@
-module HashTests where
+module Test.Hash where
 
 import Protolude
 

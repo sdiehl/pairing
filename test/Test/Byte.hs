@@ -1,4 +1,4 @@
-module ByteTests where
+module Test.Byte where
 
 import Protolude
 

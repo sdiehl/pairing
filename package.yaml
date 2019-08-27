@@ -41,13 +41,13 @@ ghc-options:
 
 library:
   exposed-modules:
-    - Math.Pairing.Ate
-    - Math.Pairing.ByteRepr
-    - Math.Pairing.Curve
-    - Math.Pairing.Hash
-    - Math.Pairing.Serialize.Types
-    - Math.Pairing.Serialize.Jivsov
-    - Math.Pairing.Serialize.MCLWasm
+    - Data.Pairing.Ate
+    - Data.Pairing.ByteRepr
+    - Data.Pairing.Curve
+    - Data.Pairing.Hash
+    - Data.Pairing.Serialize.Types
+    - Data.Pairing.Serialize.Jivsov
+    - Data.Pairing.Serialize.MCLWasm
   source-dirs:
     - src
 
@@ -61,7 +61,7 @@ tests:
       - tasty-quickcheck
     source-dirs:
       - src
-      - tests
+      - test
 
 benchmarks:
   pairing-benchmarks:
@@ -75,4 +75,4 @@ benchmarks:
       - tasty-quickcheck
     source-dirs:
       - src
-      - benchmarks
+      - bench

@@ -4,10 +4,10 @@ import Protolude
 
 import Test.Tasty
 
-import AteTests
-import ByteTests
-import HashTests
-import SerializeTests
+import Test.Ate
+import Test.Byte
+import Test.Hash
+import Test.Serialize
 
 main :: IO ()
 main = defaultMain $

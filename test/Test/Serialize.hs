@@ -1,4 +1,4 @@
-module SerializeTests where
+module Test.Serialize where
 
 import Test.Tasty
 
