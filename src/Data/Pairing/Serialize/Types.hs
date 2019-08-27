@@ -2,7 +2,7 @@
 Base API for Point serialisation for G1, G2 and GT
 -}
 
-module Math.Pairing.Serialize.Types where
+module Data.Pairing.Serialize.Types where
 --   ( MkCompressedForm(..)
 --   , MkUncompressedForm(..)
 --   , FromSerialisedForm(..)

@@ -1,4 +1,4 @@
-module Math.Pairing.Curve
+module Data.Pairing.Curve
   (
   -- * Galois fields
     Fq

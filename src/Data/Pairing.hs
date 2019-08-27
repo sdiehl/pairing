@@ -1,12 +1,12 @@
-module Math.Pairing
-  ( module Math.Pairing
+module Data.Pairing
+  ( module Data.Pairing
   ) where
 
 import Protolude
 
 import Data.Group (Group(..))
-import Math.Pairing.Ate (reducedPairing)
-import Math.Pairing.Curve (G1, G2, GT)
+import Data.Pairing.Ate (reducedPairing)
+import Data.Pairing.Curve (G1, G2, GT)
 
 -------------------------------------------------------------------------------
 -- Pairings

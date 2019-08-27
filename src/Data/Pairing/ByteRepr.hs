@@ -1,4 +1,4 @@
-module Math.Pairing.ByteRepr
+module Data.Pairing.ByteRepr
   ( ByteOrder(..)
   , ByteOrderLength(..)
   , ByteRepr(..)
@@ -12,7 +12,7 @@ import Protolude
 import qualified Data.ByteString as B
 import Data.Field.Galois (fromE, fromP, toE)
 
-import Math.Pairing.Curve (Fq, Fq2, Fq6, Fq12)
+import Data.Pairing.Curve (Fq, Fq2, Fq6, Fq12)
 
 -------------------------------------------------------------------------------
 -- Bytes
