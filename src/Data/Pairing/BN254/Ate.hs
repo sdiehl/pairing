@@ -206,7 +206,7 @@ mixedAdditionStepForFlippedMillerLoop (J x2 y2 _) (J x1 y1 z1)
 
 -- | Naive implementation of the final exponentiation step
 finalExponentiationNaive :: Fq12 -> Fq12
-finalExponentiationNaive f = pow f $ div (F.order f - 1) $ F.char (witness :: Fr)
+finalExponentiationNaive f = pow f _h''
 
 -- | A faster way of performing the final exponentiation step
 finalExponentiation :: Fq12 -> Fq12
