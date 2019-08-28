@@ -1,7 +1,7 @@
 {-# OPTIONS -fno-warn-orphans #-}
 
 module Data.Pairing.BN254.Byte
-  (
+  ( module Data.Pairing.Byte
   ) where
 
 import Protolude hiding (splitAt)

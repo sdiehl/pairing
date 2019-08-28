@@ -6,7 +6,7 @@ import Control.Monad.Random
 import Criterion.Main
 import Data.Curve
 import Data.Field.Galois as GF
-import Data.Pairing
+import Data.Pairing.BN254
 
 benchmarkPairing :: Benchmark
 benchmarkPairing = bgroup "Pairing"

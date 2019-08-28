@@ -42,17 +42,16 @@ ghc-options:
 library:
   exposed-modules:
     - Data.Pairing
-  other-modules:
-    - Data.Pairing.Base
     - Data.Pairing.BN254
+  other-modules:
     - Data.Pairing.BN254.Ate
     - Data.Pairing.BN254.Base
     - Data.Pairing.BN254.Byte
     - Data.Pairing.BN254.Hash
-    - Data.Pairing.BN254.Unity
     - Data.Pairing.BN254.Serialize.Jivsov
     - Data.Pairing.BN254.Serialize.MCLWasm
     - Data.Pairing.BN254.Serialize.Types
+    - Data.Pairing.BN254.Unity
     - Data.Pairing.Byte
   source-dirs:
     - src

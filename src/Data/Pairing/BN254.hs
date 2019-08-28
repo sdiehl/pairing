@@ -2,8 +2,10 @@
 
 module Data.Pairing.BN254
   (
+  -- * Pairing of curves
+    module Data.Pairing
   -- * BN254 curve
-    B.BN254
+  , B.BN254
   -- ** Domain parameters
   , B.Fq
   , B.Fq2
@@ -12,15 +14,17 @@ module Data.Pairing.BN254
   , B.Fr
   -- ** Optimal ate pairing
   , module Data.Pairing.BN254.Ate
+  -- ** Byte representation
+  , module Data.Pairing.BN254.Byte
   -- ** Hash encoding
   , module Data.Pairing.BN254.Hash
   -- ** Roots of unity
   , module Data.Pairing.BN254.Unity
   ) where
 
-import Data.Pairing.Base (Pairing(..))
+import Data.Pairing (Pairing(..))
 import Data.Pairing.BN254.Ate
-import Data.Pairing.BN254.Byte ()
+import Data.Pairing.BN254.Byte
 import Data.Pairing.BN254.Hash
 import Data.Pairing.BN254.Unity
 import qualified Data.Pairing.BN254.Base as B

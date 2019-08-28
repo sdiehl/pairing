@@ -5,7 +5,7 @@ import Protolude
 import Data.Curve.Weierstrass
 import Data.Cyclic.Field
 import Data.Field.Galois
-import Data.Pairing
+import Data.Pairing.BN254
 import Test.Tasty
 import Test.Tasty.HUnit
 import Test.Tasty.QuickCheck
