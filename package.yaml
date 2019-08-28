@@ -47,8 +47,10 @@ ghc-options:
 library:
   exposed-modules:
     - Data.Pairing
+    - Data.Pairing.BLS12381
     - Data.Pairing.BN254
   other-modules:
+    - Data.Pairing.BLS12381.Base
     - Data.Pairing.BN254.Ate
     - Data.Pairing.BN254.Base
     - Data.Pairing.BN254.Byte
