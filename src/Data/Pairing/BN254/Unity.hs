@@ -1,8 +1,5 @@
 module Data.Pairing.BN254.Unity
-  ( isPrimitiveRootOfUnity
-  , isRootOfUnity
-  , precompRootOfUnity
-  , primitiveRootOfUnity
+  ( precompRootOfUnity
   ) where
 
 import Protolude
@@ -15,30 +12,9 @@ import Data.Pairing.BN254.Base
 -- Roots of unity
 -------------------------------------------------------------------------------
 
--- | Check if an element is a root of unity.
-isRootOfUnity :: Integer -> Fr -> Bool
-isRootOfUnity n x
-  | n > 0     = pow x n == 1
-  | otherwise = panic "isRootOfUnity: negative powers not supported."
-{-# INLINABLE isRootOfUnity #-}
-
--- | Check if an element is a primitive root of unity.
-isPrimitiveRootOfUnity :: Integer -> Fr -> Bool
-isPrimitiveRootOfUnity n x
-  | n > 0     = isRootOfUnity n x && all (\m -> not $ isRootOfUnity m x) [1 .. n - 1]
-  | otherwise = panic "isPrimitiveRootOfUnity: negative powers not supported."
-{-# INLINABLE isPrimitiveRootOfUnity #-}
-
 -- | Compute primitive roots of unity for 2^0, 2^1, ..., 2^28. (2^28
 -- is the largest power of two that divides _r - 1, therefore there
 -- are no primitive roots of unity for higher powers of 2 in Fr.)
-primitiveRootOfUnity :: Int -> Fr
-primitiveRootOfUnity k
-  | 0 <= k && k <= 28 = pow 5 $ char (witness :: Fr) - 1 `div` 2 ^ k
-  | otherwise         = panic "primitiveRootOfUnity: no primitive root for given power of 2."
-{-# INLINABLE primitiveRootOfUnity #-}
-
--- | Precompute roots of unity.
 precompRootOfUnity :: Int -> Fr
 precompRootOfUnity 0  = 1
 precompRootOfUnity 1  = 21888242871839275222246405745257275088548364400416034343698204186575808495616
