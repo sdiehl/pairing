@@ -108,7 +108,7 @@ mulByQ (J x y z) = J (twistMulX * frob x) (twistMulY * frob y) (frob z)
 
 -- xi ^ ((_q - 1) `div` 3)
 twistMulX :: Fq2
-twistMulX = pow _xi (GF.char (witness :: Fq) - 1 `div` 3) -- Fq2
+twistMulX = pow _xi ((GF.char (witness :: Fq) - 1) `div` 3) -- Fq2
 --  21575463638280843010398324269430826099269044274347216827212613867836435027261
 --  10307601595873709700152284273816112264069230130616436755625194854815875713954
 
