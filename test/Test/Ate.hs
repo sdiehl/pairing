@@ -3,7 +3,7 @@ module Test.Ate where
 import Protolude
 
 import Data.Curve.Weierstrass
-import Data.Cyclic.Field
+import Data.Group as G
 import Data.Field.Galois
 import Data.Pairing.BN254
 import Test.Tasty
@@ -41,7 +41,7 @@ inpG2 = A
   )
 
 beforeExponentiation :: GT BN254
-beforeExponentiation = F $
+beforeExponentiation = (<$> (mempty :: GT BN254)) . const $
   toE' [ toE' [ toE' [ 10244919957345566208036224388367387294947954375520342002142038721148536068658
                      , 20520725903107462730350108147804326707908059028221039276493719519842949720531
                      ]
@@ -65,7 +65,7 @@ beforeExponentiation = F $
        ]
 
 afterExponentiation :: GT BN254
-afterExponentiation = F $
+afterExponentiation = (<$> (mempty :: GT BN254)) . const $
   toE' [ toE' [ toE' [ 7297928317524675251652102644847406639091474940444702627333408876432772026640
                      , 18010865284024443253481973710158529446817119443459787454101328040744995455319
                      ]
@@ -113,7 +113,7 @@ prop_pairingBilinear = withMaxSuccess pairingTestCount prop
     prop :: G1 BN254 -> G2 BN254 -> Integer -> Integer -> Bool
     prop e1 e2 preExp1 preExp2
       = reducedPairing (mul' e1 exp1) (mul' e2 exp2)
-        == mul' (reducedPairing e1 e2) (exp1 * exp2)
+        == G.pow (reducedPairing e1 e2) (exp1 * exp2)
       where
         -- Quickcheck might give us negative integers or 0, so we
         -- take the absolute values instead and add one.
@@ -134,7 +134,7 @@ prop_pairingPowerTest :: Property
 prop_pairingPowerTest = withMaxSuccess pairingTestCount prop
   where
     prop :: G1 BN254 -> G2 BN254 -> Bool
-    prop e1 e2 = def (reducedPairing e1 e2)
+    prop e1 e2 = rootOfUnity (reducedPairing e1 e2)
 
 prop_frobeniusFq12Correct :: Fq12 -> Bool
 prop_frobeniusFq12Correct f = frobeniusNaive 1 f == fq12Frobenius 1 f

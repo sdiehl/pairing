@@ -16,7 +16,10 @@ default-extensions:
   - FlexibleContexts
   - ScopedTypeVariables
   - RankNTypes
+  - DataKinds
   - GeneralizedNewtypeDeriving
+  - MultiParamTypeClasses
+  - PatternSynonyms
   - TypeFamilyDependencies
 
 dependencies:
@@ -29,6 +32,7 @@ dependencies:
   - groups
   - MonadRandom
   - QuickCheck
+  - semirings
   - wl-pprint-text
 
 extra-source-files:
@@ -67,13 +71,13 @@ tests:
       - tasty-quickcheck
     source-dirs:
       - test
-      - src
 
 benchmarks:
   pairing-benchmarks:
     main: Main
     dependencies:
       - criterion
+      - pairing
       - QuickCheck
       - quickcheck-instances
       - tasty
@@ -81,4 +85,3 @@ benchmarks:
       - tasty-quickcheck
     source-dirs:
       - bench
-      - src

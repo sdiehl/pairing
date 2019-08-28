@@ -13,8 +13,7 @@ module Data.Pairing.BN254.Ate
 import Protolude
 
 import Data.Curve.Weierstrass (Curve(..), Point(..))
-import Data.Cyclic.Field (Cyclic(..), Element(..))
-import Data.Field.Galois as GF (GaloisField(..), IrreducibleMonic, Extension, fromE, toE)
+import Data.Field.Galois as F
 import Data.List ((!!))
 import GHC.Natural (Natural)
 
@@ -32,7 +31,7 @@ data EllCoeffs
 -- | Optimal Ate pairing (including final exponentiation step)
 reducedPairing :: G1 -> G2 -> GT
 reducedPairing p@(A _ _) q@(A _ _) = finalExponentiation <$> atePairing p q
-reducedPairing _         _         = F 1
+reducedPairing _         _         = mempty
 
 -------------------------------------------------------------------------------
 -- Miller loop
@@ -41,7 +40,7 @@ reducedPairing _         _         = F 1
 -- | Optimal Ate pairing without the final exponentiation step
 atePairing :: G1 -> G2 -> GT
 atePairing p@(A _ _) q@(A _ _) = ateMillerLoop p (atePrecomputeG2 q)
-atePairing _         _         = F 1
+atePairing _         _         = mempty
 
 -- | Binary expansion (missing the most-significant bit) representing
 -- the number 6 * _t + 2.
@@ -62,14 +61,14 @@ ateLoopCountBinary
 -- | Miller loop with precomputed values for G2
 ateMillerLoop :: G1 -> [EllCoeffs] -> GT
 ateMillerLoop p coeffs  = let
-  (postLoopIx, postLoopF) = foldl' (ateLoopBody p coeffs) (0, F 1) ateLoopCountBinary
+  (postLoopIx, postLoopF) = foldl' (ateLoopBody p coeffs) (0, mempty) ateLoopCountBinary
   almostF = mulBy024 postLoopF (prepareCoeffs coeffs p postLoopIx)
   finalF = mulBy024 almostF (prepareCoeffs coeffs p (postLoopIx + 1))
   in finalF
 
 ateLoopBody :: G1 -> [EllCoeffs] -> (Int, GT) -> Bool -> (Int, GT)
-ateLoopBody p coeffs (oldIx, F oldF) currentBit = let
-  fFirst = mulBy024 (F (oldF * oldF)) (prepareCoeffs coeffs p oldIx)
+ateLoopBody p coeffs (oldIx, oldF) currentBit = let
+  fFirst = mulBy024 (join (<>) oldF) (prepareCoeffs coeffs p oldIx)
   (nextIx, nextF) = if currentBit
                     then (oldIx + 2, mulBy024 fFirst (prepareCoeffs coeffs p (oldIx + 1)))
                     else (oldIx + 1, fFirst)
@@ -83,9 +82,9 @@ prepareCoeffs _ _ _ = panic "prepareCoeffs: received trivial point"
 
 {-# INLINEABLE mulBy024 #-}
 mulBy024 :: GT -> EllCoeffs -> GT
-mulBy024 (F this) (EllCoeffs ell0 ellVW ellVV)
+mulBy024 this (EllCoeffs ell0 ellVW ellVV)
   = let a = toE [toE [ell0, 0, ellVV], toE [0, ellVW, 0]]
-    in F (this * a)
+    in (* a) <$> this
 
 -------------------------------------------------------------------------------
 -- Precomputation on G2
@@ -94,12 +93,12 @@ mulBy024 (F this) (EllCoeffs ell0 ellVW ellVV)
 -- | Iterated frobenius morphisms on fields of characteristic _q,
 -- implemented naively
 {-# SPECIALISE frobeniusNaive :: Int -> Fq2 -> Fq2 #-}
-frobeniusNaive :: Num a => Int -> a -> a
+frobeniusNaive :: forall k . GaloisField k => Int -> k -> k
 frobeniusNaive i a
   | i == 0 = a
-  | i == 1 = a ^ GF.char (witness :: Fq)
+  | i == 1 = a ^ F.char (witness :: k)
   | i > 1 = let prev = frobeniusNaive (i - 1) a
-            in prev ^ GF.char (witness :: Fq)
+            in prev ^ F.char (witness :: k)
   | otherwise = panic "frobeniusNaive: received negative input"
 
 {-# INLINEABLE mulByQ #-}
@@ -108,13 +107,13 @@ mulByQ (J x y z) = J (twistMulX * frob x) (twistMulY * frob y) (frob z)
 
 -- xi ^ ((_q - 1) `div` 3)
 twistMulX :: Fq2
-twistMulX = pow _xi ((GF.char (witness :: Fq) - 1) `div` 3) -- Fq2
+twistMulX = pow _xi $ (F.char (witness :: Fq) - 1) `div` 3 -- Fq2
 --  21575463638280843010398324269430826099269044274347216827212613867836435027261
 --  10307601595873709700152284273816112264069230130616436755625194854815875713954
 
 -- xi ^ ((_q - 1) `div` 2)
 twistMulY :: Fq2
-twistMulY = pow _xi (GF.char (witness :: Fq) `div` 2) -- Fq2
+twistMulY = pow _xi $ F.char (witness :: Fq) `div` 2 -- Fq2
 --  2821565182194536844548159561693502659359617185244120367078079554186484126554
 --  3505843767911556378687030309984248845540243509899259641013678093033130930403
 
@@ -207,14 +206,14 @@ mixedAdditionStepForFlippedMillerLoop (J x2 y2 _) (J x1 y1 z1)
 
 -- | Naive implementation of the final exponentiation step
 finalExponentiationNaive :: Fq12 -> Fq12
-finalExponentiationNaive f = pow f $ div (GF.order f - 1) $ GF.char (witness :: Fr)
+finalExponentiationNaive f = pow f $ div (F.order f - 1) $ F.char (witness :: Fr)
 
 -- | A faster way of performing the final exponentiation step
 finalExponentiation :: Fq12 -> Fq12
 finalExponentiation f = pow (finalExponentiationFirstChunk f) expVal
   where
-    expVal = div (qq * (qq - 1) + 1) (GF.char (witness :: Fr))
-    qq = join (*) $ GF.char (witness :: Fq)
+    expVal = div (qq * (qq - 1) + 1) (F.char (witness :: Fr))
+    qq = join (*) $ F.char (witness :: Fq)
 
 finalExponentiationFirstChunk :: Fq12 -> Fq12
 finalExponentiationFirstChunk f
@@ -275,7 +274,7 @@ fastFrobenius = coll . conv [[0,2,4],[1,3,5]] . map cone . fromE
     cone :: Fq6 -> [Fq2]
     cone = map conj . fromE
     conv :: [[Natural]] -> [[Fq2]] -> [[Fq2]]
-    conv = zipWith (zipWith (\x y -> pow _xi ((x * (GF.char (witness :: Fq) - 1)) `div` 6) * y))
+    conv = zipWith (zipWith (\x y -> pow _xi ((x * (F.char (witness :: Fq) - 1)) `div` 6) * y))
     coll :: [[Fq2]] -> Fq12
     coll = toE . map toE
 {-# INLINEABLE fastFrobenius #-}
