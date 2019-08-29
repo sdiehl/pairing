@@ -4,8 +4,6 @@ module Data.Pairing.BN254.Unity
 
 import Protolude
 
-import Data.Field.Galois (GaloisField(..))
-
 import Data.Pairing.BN254.Base
 
 -------------------------------------------------------------------------------

@@ -10,8 +10,8 @@ import Test.Tasty
 import Test.Tasty.HUnit
 import Test.Tasty.QuickCheck
 
-testPairing :: TestTree
-testPairing = testGroup "Pairing"
+testAte :: TestTree
+testAte = testGroup "Ate"
   [ testCase "input G1 valid" unit_inpG1_valid
   , testCase "input G2 valid" unit_inpG2_valid
   , testCase "pairing libff 0" unit_pairingLibff_0
@@ -41,7 +41,7 @@ inpG2 = A
   )
 
 beforeExponentiation :: GT BN254
-beforeExponentiation = (<$> (mempty :: GT BN254)) . const $
+beforeExponentiation = toU' $
   toE' [ toE' [ toE' [ 10244919957345566208036224388367387294947954375520342002142038721148536068658
                      , 20520725903107462730350108147804326707908059028221039276493719519842949720531
                      ]
@@ -65,7 +65,7 @@ beforeExponentiation = (<$> (mempty :: GT BN254)) . const $
        ]
 
 afterExponentiation :: GT BN254
-afterExponentiation = (<$> (mempty :: GT BN254)) . const $
+afterExponentiation = toU $
   toE' [ toE' [ toE' [ 7297928317524675251652102644847406639091474940444702627333408876432772026640
                      , 18010865284024443253481973710158529446817119443459787454101328040744995455319
                      ]
@@ -134,7 +134,7 @@ prop_pairingPowerTest :: Property
 prop_pairingPowerTest = withMaxSuccess pairingTestCount prop
   where
     prop :: G1 BN254 -> G2 BN254 -> Bool
-    prop e1 e2 = rootOfUnity (reducedPairing e1 e2)
+    prop e1 e2 = isRootOfUnity (reducedPairing e1 e2)
 
 prop_frobeniusFq12Correct :: Fq12 -> Bool
 prop_frobeniusFq12Correct f = frobeniusNaive 1 f == fq12Frobenius 1 f

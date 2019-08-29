@@ -5,8 +5,9 @@ import Protolude
 import Criterion.Main
 
 import Bench.Ate
+import Bench.Field
 import Bench.Hash
 
 main :: IO ()
 main = defaultMain
-  [benchmarkHash, benchmarkPairing]
+  [benchmarkAte, benchmarkField, benchmarkHash]

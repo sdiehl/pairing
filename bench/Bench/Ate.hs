@@ -4,12 +4,12 @@ import Protolude
 
 import Control.Monad.Random
 import Criterion.Main
-import Data.Curve
-import Data.Field.Galois as GF
+import Data.Curve as C
+import Data.Field.Galois as F
 import Data.Pairing.BN254
 
-benchmarkPairing :: Benchmark
-benchmarkPairing = bgroup "Pairing"
+benchmarkAte :: Benchmark
+benchmarkAte = bgroup "Ate"
   [ bgroup "Frobenius in Fq12"
     [ bench "naive"
       $ whnf (frobeniusNaive 1) testFq12
@@ -24,11 +24,11 @@ benchmarkPairing = bgroup "Pairing"
     ]
   , bgroup "Pairing"
     [ bench "without final exponentiation"
-      $ whnf (uncurry atePairing) (gen, gen)
+      $ whnf (uncurry atePairing) (C.gen, C.gen)
     , bench "with final exponentiation"
-      $ whnf (uncurry reducedPairing) (gen, gen)
+      $ whnf (uncurry reducedPairing) (C.gen, C.gen)
     ]
   ]
 
 testFq12 :: Fq12
-testFq12 = evalRand GF.rnd (mkStdGen 0)
+testFq12 = evalRand F.rnd $ mkStdGen 0
