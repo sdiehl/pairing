@@ -24,10 +24,10 @@ module Data.Pairing.BN254
 
 import Data.Pairing (Pairing(..))
 import Data.Pairing.BN254.Ate
+import qualified Data.Pairing.BN254.Base as B
 import Data.Pairing.BN254.Byte
 import Data.Pairing.BN254.Hash
 import Data.Pairing.BN254.Unity
-import qualified Data.Pairing.BN254.Base as B
 
 -------------------------------------------------------------------------------
 -- BN254 curve

@@ -50,7 +50,9 @@ library:
     - Data.Pairing.BLS12381
     - Data.Pairing.BN254
   other-modules:
+    - Data.Pairing.BLS12381.Ate
     - Data.Pairing.BLS12381.Base
+    - Data.Pairing.BLS12381.Hash
     - Data.Pairing.BN254.Ate
     - Data.Pairing.BN254.Base
     - Data.Pairing.BN254.Byte
