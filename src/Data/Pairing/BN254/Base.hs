@@ -1,7 +1,5 @@
 module Data.Pairing.BN254.Base
-  (
-  -- * BN254
-    G1.BN254
+  ( G1.BN254
   , G1.Fr
   , G1._q
   , G1._r

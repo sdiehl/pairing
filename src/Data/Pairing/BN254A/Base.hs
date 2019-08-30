@@ -1,5 +1,5 @@
-module Data.Pairing.BLS12381.Base
-  ( G1.BLS12381
+module Data.Pairing.BN254A.Base
+  ( G1.BN254A
   , G1.Fr
   , G1._q
   , G1._r
@@ -28,8 +28,8 @@ module Data.Pairing.BLS12381.Base
 
 import Protolude
 
-import qualified Data.Curve.Weierstrass.BLS12381 as G1
-import qualified Data.Curve.Weierstrass.BLS12381T as G2
+import qualified Data.Curve.Weierstrass.BN254A as G1
+import qualified Data.Curve.Weierstrass.BN254AT as G2
 import Data.Field.Galois
 import GHC.Natural (Natural)
 
@@ -78,10 +78,10 @@ _h' = G2._h
 -- GT
 -------------------------------------------------------------------------------
 
--- | @Fq6 = Fq2[v]/<v^3 - u - 1>@.
+-- | @Fq6 = Fq2[v]/<v^3 - u>@.
 data PolynomialV
 instance IrreducibleMonic G2.Fq2 PolynomialV where
-  split _ = X3 - Y X - 1
+  split _ = X3 - Y X
   {-# INLINE split #-}
 type Fq6 = Extension G2.Fq2 PolynomialV
 
@@ -93,7 +93,7 @@ instance IrreducibleMonic Fq6 PolynomialW where
 type Fq12 = Extension Fq6 PolynomialW
 
 -- | @r@-th roots of unity subgroup of the multiplicative group of @Fq12@.
-type GT = RootsOfUnity 0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001 Fq12
+type GT = RootsOfUnity 0x2370fb049d410fbe4e761a9886e502411dc1af70120000017e80600000000001 Fq12
 
 -- | @r@-th roots of unity cofactor.
 _h'' :: Natural

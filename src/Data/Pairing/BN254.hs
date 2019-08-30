@@ -1,9 +1,7 @@
 {-# OPTIONS -fno-warn-orphans #-}
 
 module Data.Pairing.BN254
-  (
-  -- * Pairing of curves
-    module Data.Pairing
+  ( module Data.Pairing
   -- * BN254 curve
   , B.BN254
   -- ** Domain parameters

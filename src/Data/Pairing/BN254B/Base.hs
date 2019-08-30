@@ -1,5 +1,5 @@
-module Data.Pairing.BLS12381.Base
-  ( G1.BLS12381
+module Data.Pairing.BN254B.Base
+  ( G1.BN254B
   , G1.Fr
   , G1._q
   , G1._r
@@ -28,8 +28,8 @@ module Data.Pairing.BLS12381.Base
 
 import Protolude
 
-import qualified Data.Curve.Weierstrass.BLS12381 as G1
-import qualified Data.Curve.Weierstrass.BLS12381T as G2
+import qualified Data.Curve.Weierstrass.BN254B as G1
+import qualified Data.Curve.Weierstrass.BN254BT as G2
 import Data.Field.Galois
 import GHC.Natural (Natural)
 
@@ -93,7 +93,7 @@ instance IrreducibleMonic Fq6 PolynomialW where
 type Fq12 = Extension Fq6 PolynomialW
 
 -- | @r@-th roots of unity subgroup of the multiplicative group of @Fq12@.
-type GT = RootsOfUnity 0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001 Fq12
+type GT = RootsOfUnity 0x2523648240000001ba344d8000000007ff9f800000000010a10000000000000d Fq12
 
 -- | @r@-th roots of unity cofactor.
 _h'' :: Natural

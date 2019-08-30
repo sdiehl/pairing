@@ -1,9 +1,7 @@
 {-# OPTIONS -fno-warn-orphans #-}
 
 module Data.Pairing.BLS12381
-  (
-  -- * Pairing of curves
-    module Data.Pairing
+  ( module Data.Pairing
   -- * BLS12381 curve
   , B.BLS12381
   -- ** Domain parameters
@@ -17,6 +15,8 @@ module Data.Pairing.BLS12381
   -- ** Hash encoding
   , module Data.Pairing.BLS12381.Hash
   ) where
+
+import Protolude
 
 import Data.Pairing (Pairing(..))
 import Data.Pairing.BLS12381.Ate
@@ -36,5 +36,5 @@ instance Pairing B.BLS12381 where
 
   type GT B.BLS12381 = B.GT
 
-  pairing = reducedPairing
+  pairing = notImplemented
   {-# INLINE pairing #-}

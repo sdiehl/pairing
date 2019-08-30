@@ -5,7 +5,11 @@ import Protolude
 import Data.Field.Galois as F
 import Data.Group
 import qualified Data.Pairing.BLS12381 as BLS12381
+import qualified Data.Pairing.BLS48581 as BLS48581
 import qualified Data.Pairing.BN254 as BN254
+import qualified Data.Pairing.BN254A as BN254A
+import qualified Data.Pairing.BN254B as BN254B
+import qualified Data.Pairing.BN462 as BN462
 import Test.Tasty
 import Test.Tasty.QuickCheck
 
@@ -14,9 +18,21 @@ testField = testGroup "Field"
   [ testGroup "BLS12381"
     [ fieldAxioms (witness :: BLS12381.Fq12)
     ]
+  , testGroup "BLS48581"
+    [ fieldAxioms (witness :: BLS48581.Fq48)
+    ]
   , testGroup "BN254"
     [ fieldAxioms (witness :: BN254.Fq12)
     , groupAxioms (witness :: BN254.GT BN254.BN254)
+    ]
+  , testGroup "BN254A"
+    [ fieldAxioms (witness :: BN254A.Fq12)
+    ]
+  , testGroup "BN254B"
+    [ fieldAxioms (witness :: BN254B.Fq12)
+    ]
+  , testGroup "BN462"
+    [ fieldAxioms (witness :: BN462.Fq12)
     ]
   ]
 
