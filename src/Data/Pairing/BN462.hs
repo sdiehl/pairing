@@ -12,8 +12,6 @@ module Data.Pairing.BN462
   , B.Fr
   ) where
 
-import Protolude
-
 import Data.Pairing (Pairing(..))
 import qualified Data.Pairing.BN462.Base as B
 
@@ -29,6 +27,3 @@ instance Pairing B.BN462 where
   type G2 B.BN462 = B.G2
 
   type GT B.BN462 = B.GT
-
-  pairing = notImplemented
-  {-# INLINE pairing #-}

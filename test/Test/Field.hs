@@ -4,6 +4,7 @@ import Protolude
 
 import Data.Field.Galois as F
 import Data.Group
+import Data.Pairing
 import qualified Data.Pairing.BLS12381 as BLS12381
 import qualified Data.Pairing.BLS48581 as BLS48581
 import qualified Data.Pairing.BN254 as BN254
@@ -23,13 +24,15 @@ testField = testGroup "Field"
     ]
   , testGroup "BN254"
     [ fieldAxioms (witness :: BN254.Fq12)
-    , groupAxioms (witness :: BN254.GT BN254.BN254)
+    , groupAxioms (witness :: GT BN254.BN254)
     ]
   , testGroup "BN254A"
     [ fieldAxioms (witness :: BN254A.Fq12)
+    , groupAxioms (witness :: GT BN254B.BN254B)
     ]
   , testGroup "BN254B"
     [ fieldAxioms (witness :: BN254B.Fq12)
+    , groupAxioms (witness :: GT BN254B.BN254B)
     ]
   , testGroup "BN462"
     [ fieldAxioms (witness :: BN462.Fq12)

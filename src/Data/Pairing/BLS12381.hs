@@ -35,6 +35,3 @@ instance Pairing B.BLS12381 where
   type G2 B.BLS12381 = B.G2
 
   type GT B.BLS12381 = B.GT
-
-  pairing = notImplemented
-  {-# INLINE pairing #-}

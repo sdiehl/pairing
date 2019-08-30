@@ -3,8 +3,6 @@ module Data.Pairing.BN254.Base
   , G1.Fr
   , G1._q
   , G1._r
-  , _t
-  , _xi
   -- * G1
   , G1.Fq
   , G1
@@ -34,20 +32,6 @@ import qualified Data.Curve.Weierstrass.BN254 as G1
 import qualified Data.Curve.Weierstrass.BN254T as G2
 import Data.Field.Galois
 import GHC.Natural (Natural)
-
--------------------------------------------------------------------------------
--- BN254
--------------------------------------------------------------------------------
-
--- | BN parameter that determines the prime @_q@.
-_t :: Integer
-_t = 4965661367192848881
-{-# INLINABLE _t #-}
-
--- | Parameter of twisted curve over @Fq@.
-_xi :: G2.Fq2
-_xi = toE' [9, 1]
-{-# INLINABLE _xi #-}
 
 -------------------------------------------------------------------------------
 -- G1
@@ -98,12 +82,14 @@ _h' = G2._h
 data PolynomialV
 instance IrreducibleMonic G2.Fq2 PolynomialV where
   split _ = X3 - Y X - 9
+  {-# INLINE split #-}
 type Fq6 = Extension G2.Fq2 PolynomialV
 
 -- | @Fq12 = Fq6[w]/<w^2 - v>@.
 data PolynomialW
 instance IrreducibleMonic Fq6 PolynomialW where
   split _ = X2 - Y X
+  {-# INLINE split #-}
 type Fq12 = Extension Fq6 PolynomialW
 
 -- | @r@-th roots of unity subgroup of the multiplicative group of @Fq12@.
@@ -116,7 +102,7 @@ _h'' = cofactor (witness :: GT)
 
 -- @r@-th roots of unity are cyclic subgroups.
 instance CyclicSubgroup GT where
-  gen = toU $
+  gen = toU' $
     toE' [ toE' [ toE' [ 0x12c70e90e12b7874510cd1707e8856f71bf7f61d72631e268fca81000db9a1f5
                        , 0x84f330485b09e866bc2f2ea2b897394deaf3f12aa31f28cb0552990967d4704
                        ]

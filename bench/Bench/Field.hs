@@ -17,6 +17,10 @@ benchmarkField :: Benchmark
 benchmarkField = bgroup "Field"
   [ bench "BN254" $
     nf (flip pow (3 :: Word)) bn254
+  , bench "BN254A" $
+    nf (flip pow (3 :: Word)) bn254a
+  , bench "BN254B" $
+    nf (flip pow (3 :: Word)) bn254b
   ]
 
 bls12381 :: GT BLS12381.BLS12381

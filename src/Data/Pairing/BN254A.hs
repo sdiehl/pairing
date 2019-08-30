@@ -10,11 +10,12 @@ module Data.Pairing.BN254A
   , B.Fq6
   , B.Fq12
   , B.Fr
+  -- ** Optimal ate pairing
+  , module Data.Pairing.BN254A.Ate
   ) where
 
-import Protolude
-
 import Data.Pairing (Pairing(..))
+import Data.Pairing.BN254A.Ate
 import qualified Data.Pairing.BN254A.Base as B
 
 -------------------------------------------------------------------------------
@@ -30,5 +31,5 @@ instance Pairing B.BN254A where
 
   type GT B.BN254A = B.GT
 
-  pairing = notImplemented
+  pairing = reducedPairing
   {-# INLINE pairing #-}
