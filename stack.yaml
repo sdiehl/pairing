@@ -1,9 +1,9 @@
 resolver: lts-13.19
 extra-deps:
   - git: https://github.com/adjoint-io/galois-field.git
-    commit: 93416f2f2022075c8ee91dc67dd59a28c1da39d8
+    commit: a6970f783492e247b3c63e1cd6b1359127b99a2d
   - git: https://github.com/adjoint-io/elliptic-curve.git
-    commit: 8a58e57f69c3d252639704dc4dc8a2248b8c6c43
+    commit: 5342c4e4e07de4b836ee80d76b950c923acd7cac
   - git: https://github.com/chessai/semirings.git
     commit: 8b6c208f3d771fae066fcb637da492e7251a8e50
   - git: https://github.com/adjoint-io/poly.git

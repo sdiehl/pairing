@@ -37,7 +37,7 @@ primeTest f = do
 
 extensionTest :: forall k im . (ByteRepr (Extension k im), IrreducibleMonic k im)
   => Extension k im -> Assertion
-extensionTest f = case fromE f :: [k] of
+extensionTest f = case fromE f of
   [] -> pure ()
   _  -> do
     byteReprTest f MostSignificantFirst 32

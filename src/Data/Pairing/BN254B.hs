@@ -14,7 +14,7 @@ module Data.Pairing.BN254B
   , module Data.Pairing.BN254B.Ate
   ) where
 
-import Data.Pairing (Pairing(..))
+import Data.Pairing
 import Data.Pairing.BN254B.Ate
 import qualified Data.Pairing.BN254B.Base as B
 
@@ -25,11 +25,11 @@ import qualified Data.Pairing.BN254B.Base as B
 -- Pairing of BN254B curve.
 instance Pairing B.BN254B where
 
-  type G1 B.BN254B = B.G1
+  type instance G1 B.BN254B = B.G1
 
-  type G2 B.BN254B = B.G2
+  type instance G2 B.BN254B = B.G2
 
-  type GT B.BN254B = B.GT
+  type instance GT B.BN254B = B.GT
 
   pairing = reducedPairing
   {-# INLINE pairing #-}

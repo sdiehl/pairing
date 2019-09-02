@@ -1,5 +1,7 @@
 module Data.Pairing
-  ( Pairing(..)
+  (
+  -- * Pairings
+    Pairing(..)
   ) where
 
 import Data.Group (Group(..))
@@ -13,13 +15,13 @@ class (Group (G1 e), Group (G2 e), Group (GT e)) => Pairing e where
   {-# MINIMAL pairing #-}
 
   -- | Left group @G1@.
-  type G1 e :: *
+  type family G1 (e :: *) = t | t -> e
 
   -- | Right group @G2@.
-  type G2 e :: *
+  type family G2 (e :: *) = t | t -> e
 
   -- | Target group @GT@.
-  type GT e = t | t -> e
+  type family GT (e :: *) = t | t -> e
 
   -- | Computable non-degenerate bilinear map.
   pairing :: G1 e -> G2 e -> GT e

@@ -16,9 +16,7 @@ module Data.Pairing.BLS12381
   , module Data.Pairing.BLS12381.Hash
   ) where
 
-import Protolude
-
-import Data.Pairing (Pairing(..))
+import Data.Pairing
 import Data.Pairing.BLS12381.Ate
 import qualified Data.Pairing.BLS12381.Base as B
 import Data.Pairing.BLS12381.Hash
@@ -30,8 +28,8 @@ import Data.Pairing.BLS12381.Hash
 -- Pairing of BLS12381 curve.
 instance Pairing B.BLS12381 where
 
-  type G1 B.BLS12381 = B.G1
+  type instance G1 B.BLS12381 = B.G1
 
-  type G2 B.BLS12381 = B.G2
+  type instance G2 B.BLS12381 = B.G2
 
-  type GT B.BLS12381 = B.GT
+  type instance GT B.BLS12381 = B.GT

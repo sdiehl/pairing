@@ -12,9 +12,7 @@ module Data.Pairing.BLS48581
   , B.Fr
   ) where
 
-import Protolude
-
-import Data.Pairing (Pairing(..))
+import Data.Pairing
 import qualified Data.Pairing.BLS48581.Base as B
 
 -------------------------------------------------------------------------------
@@ -24,8 +22,8 @@ import qualified Data.Pairing.BLS48581.Base as B
 -- Pairing of BLS48581 curve.
 instance Pairing B.BLS48581 where
 
-  type G1 B.BLS48581 = B.G1
+  type instance G1 B.BLS48581 = B.G1
 
-  type G2 B.BLS48581 = B.G2
+  type instance G2 B.BLS48581 = B.G2
 
-  type GT B.BLS48581 = B.GT
+  type instance GT B.BLS48581 = B.GT

@@ -12,7 +12,7 @@ module Data.Pairing.BN462
   , B.Fr
   ) where
 
-import Data.Pairing (Pairing(..))
+import Data.Pairing
 import qualified Data.Pairing.BN462.Base as B
 
 -------------------------------------------------------------------------------
@@ -22,8 +22,8 @@ import qualified Data.Pairing.BN462.Base as B
 -- Pairing of BN462 curve.
 instance Pairing B.BN462 where
 
-  type G1 B.BN462 = B.G1
+  type instance G1 B.BN462 = B.G1
 
-  type G2 B.BN462 = B.G2
+  type instance G2 B.BN462 = B.G2
 
-  type GT B.BN462 = B.GT
+  type instance GT B.BN462 = B.GT
