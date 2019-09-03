@@ -103,7 +103,7 @@ frobeniusNaive i a
 
 {-# INLINEABLE mulByQ #-}
 mulByQ :: G2' -> G2'
-mulByQ (J x y z) = J (twistMulX * frob x) (twistMulY * frob y) (frob z)
+mulByQ (J x y z) = J (twistMulX * F.frob x) (twistMulY * F.frob y) (F.frob z)
 
 -- xi ^ ((_q - 1) `div` 3)
 twistMulX :: Fq2

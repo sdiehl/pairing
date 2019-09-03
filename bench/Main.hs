@@ -4,10 +4,10 @@ import Protolude
 
 import Criterion.Main
 
-import Bench.Ate
+import Bench.BN254
 import Bench.Field
 import Bench.Hash
 
 main :: IO ()
 main = defaultMain
-  [benchmarkAte, benchmarkField, benchmarkHash]
+  [benchmarkBN254, benchmarkField, benchmarkHash]

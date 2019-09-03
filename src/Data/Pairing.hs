@@ -4,14 +4,26 @@ module Data.Pairing
     Pairing(..)
   ) where
 
-import Data.Group (Group(..))
+import Protolude
+
+import Control.Monad.Random (Random)
+import Data.Group (Group)
+import Test.Tasty.QuickCheck (Arbitrary)
+import Text.PrettyPrint.Leijen.Text (Pretty)
 
 -------------------------------------------------------------------------------
 -- Pairings
 -------------------------------------------------------------------------------
 
 -- | Pairings of cryptographic groups.
-class (Group (G1 e), Group (G2 e), Group (GT e)) => Pairing e where
+class (Arbitrary (G1 e), Arbitrary (G2 e), Arbitrary (GT e),
+       Eq        (G1 e), Eq        (G2 e), Eq        (GT e),
+       Generic   (G1 e), Generic   (G2 e), Generic   (GT e),
+       Group     (G1 e), Group     (G2 e), Group     (GT e),
+       NFData    (G1 e), NFData    (G2 e), NFData    (GT e),
+       Pretty    (G1 e), Pretty    (G2 e), Pretty    (GT e),
+       Random    (G1 e), Random    (G2 e), Random    (GT e),
+       Show      (G1 e), Show      (G2 e), Show      (GT e)) => Pairing e where
   {-# MINIMAL pairing #-}
 
   -- | Left group @G1@.

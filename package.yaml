@@ -31,8 +31,8 @@ dependencies:
   - galois-field >= 0.4 && < 0.5
   - groups
   - MonadRandom
-  - QuickCheck
   - semirings
+  - tasty-quickcheck
   - wl-pprint-text
 
 extra-source-files:
@@ -80,6 +80,7 @@ tests:
     main: Main
     dependencies:
       - pairing
+      - QuickCheck
       - quickcheck-instances
       - tasty
       - tasty-hunit
