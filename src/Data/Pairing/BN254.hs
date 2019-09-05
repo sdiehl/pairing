@@ -40,5 +40,5 @@ instance Pairing B.BN254 where
 
   type instance GT B.BN254 = B.GT
 
-  pairing = reducedPairing
+  pairing = optimalAte
   {-# INLINE pairing #-}

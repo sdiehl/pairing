@@ -7,17 +7,95 @@ module Data.Pairing.BN254.Ate
   , frobeniusNaive
   , getYfromX
   , mulXi
+  , optimalAte
+  , optimalAte'
   , reducedPairing
   ) where
 
 import Protolude
 
-import Data.Curve.Weierstrass (Curve(..), Point(..))
+import Data.Curve.Weierstrass as C
 import Data.Field.Galois as F
 import Data.List ((!!))
 import GHC.Natural (Natural)
 
 import Data.Pairing.BN254.Base
+
+-- s = 6t + 2>
+s :: [Int]
+s = [ 1, 0, 1, 0, 0,-1, 0, 1, 1, 0, 0, 0,-1, 0, 0, 1
+    , 1, 0, 0,-1, 0, 0, 0, 0, 0, 1, 0, 0,-1, 0, 0, 1
+    , 1, 1, 0, 0, 0, 0,-1, 0, 1, 0, 0,-1, 0, 1, 1, 0
+    , 0, 1, 0, 0,-1, 1, 0, 0,-1, 0, 1, 0, 1, 0, 0, 0
+    ]
+
+-- | Optimal ate pairing final exponentiation.
+optimalAte :: G1 -> G2 -> GT
+optimalAte O _ = mempty
+optimalAte _ O = mempty
+optimalAte p q = finalExponentiation <$> optimalAte' p q
+{-# INLINABLE optimalAte #-}
+
+-- | Optimal ate pairing Miller's algorithm.
+optimalAte' :: G1 -> G2 -> GT
+optimalAte' p q = finalAddition p q $ millerLoop p q s (q, mempty)
+{-# INLINABLE optimalAte' #-}
+
+-- Line 2 to line 10
+millerLoop :: G1 -> G2 -> [Int] -> (G2, GT) -> (G2, GT)
+millerLoop p q = millerLoop'
+  where
+    millerLoop' []     tf = tf
+    millerLoop' (x:xs) tf = case doublingStep p tf of
+      tf2
+        | x == 0    -> millerLoop' xs tf2
+        | x == 1    -> millerLoop' xs $ additionStep p q tf2
+        | otherwise -> millerLoop' xs $ additionStep p (inv q) tf2
+{-# INLINABLE millerLoop #-}
+
+-- Line 4
+doublingStep :: G1 -> (G2, GT) -> (G2, GT)
+doublingStep p (t, f) = (dbl t, (line t t p *) <$> join (<>) f)
+{-# INLINABLE doublingStep #-}
+
+-- Line 6 and line 8
+additionStep :: G1 -> G2 -> (G2, GT) -> (G2, GT)
+additionStep p q (t, f) = (add t q, (line t q p *) <$> f)
+{-# INLINABLE additionStep #-}
+
+-- Line 11 to line 13
+finalAddition :: G1 -> G2 -> (G2, GT) -> GT
+finalAddition p q (t, f) = (*) (line t q1 p * line t' q2 p) <$> f
+  where
+    q1 = twist $ C.frob q
+    q2 = inv . twist $ C.frob q1
+    t' = add t q1
+{-# INLINABLE finalAddition #-}
+
+-------------------------------------------------------------------------------
+-- Auxiliary functions
+-------------------------------------------------------------------------------
+
+-- Line function
+line :: G2 -> G2 -> G1 -> Fq12
+line (A x1 y1) (A x2 y2) (A x y)
+  | x1 /= x2     = toE' [embed (-y), toE' [x *^ l, y1 - l * x1]]
+  | y1 + y2 == 0 = toE' [embed x, embed (-x1)]
+  | otherwise    = toE' [embed (-y), toE' [x *^ m, y1 - m * x1]]
+  where
+    l = (y2 - y1) / (x2 - x1)
+    m = (3 * x1 * x1) / (2 * y1)
+line _ _ _       = panic "Weierstrass.line: point at infinity."
+{-# INLINE line #-}
+
+-- Twist function
+twist :: G2 -> G2
+twist (A x y) = A (x * x') (y * y')
+  where
+    x' = pow _xi $ quot (F.char (witness :: Fq) - 1) 3
+    y' = pow _xi $ shiftR (F.char (witness :: Fq)) 1
+twist _       = O
+{-# INLINE twist #-}
 
 -------------------------------------------------------------------------------
 -- Ate pairing
