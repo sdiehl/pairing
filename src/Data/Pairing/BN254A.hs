@@ -32,4 +32,4 @@ instance Pairing B.BN254A where
   type instance GT B.BN254A = B.GT
 
   pairing = reducedPairing
-  {-# INLINE pairing #-}
+  {-# INLINABLE pairing #-}

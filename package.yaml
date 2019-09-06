@@ -47,6 +47,7 @@ ghc-options:
 library:
   exposed-modules:
     - Data.Pairing
+    - Data.Pairing.BarretoNaehrig
     - Data.Pairing.BLS12381
     - Data.Pairing.BLS48581
     - Data.Pairing.BN254
@@ -54,6 +55,7 @@ library:
     - Data.Pairing.BN254B
     - Data.Pairing.BN462
   other-modules:
+    - Data.Pairing.BarretoNaehrig.Ate
     - Data.Pairing.BLS12381.Ate
     - Data.Pairing.BLS12381.Base
     - Data.Pairing.BLS12381.Hash

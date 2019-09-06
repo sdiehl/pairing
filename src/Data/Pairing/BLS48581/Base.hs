@@ -81,15 +81,15 @@ _h' = G2._h
 -- | @Fq24 = Fq8[z]/<z^3 + w>@.
 data PolynomialZ
 instance IrreducibleMonic G2.Fq8 PolynomialZ where
-  split _ = X3 + Y X
-  {-# INLINE split #-}
+  poly _ = X3 + Y X
+  {-# INLINE poly #-}
 type Fq24 = Extension G2.Fq8 PolynomialZ
 
 -- | @Fq48 = Fq24[s]/<s^2 + z>@.
 data PolynomialS
 instance IrreducibleMonic Fq24 PolynomialS where
-  split _ = X2 + Y X
-  {-# INLINE split #-}
+  poly _ = X2 + Y X
+  {-# INLINE poly #-}
 type Fq48 = Extension Fq24 PolynomialS
 
 -- | @r@-th roots of unity subgroup of the multiplicative group of @Fq48@.

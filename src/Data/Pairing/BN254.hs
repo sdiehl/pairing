@@ -10,8 +10,6 @@ module Data.Pairing.BN254
   , B.Fq6
   , B.Fq12
   , B.Fr
-  -- ** Optimal ate pairing
-  , module Data.Pairing.BN254.Ate
   -- ** Byte representation
   , module Data.Pairing.BN254.Byte
   -- ** Hash encoding
@@ -20,8 +18,13 @@ module Data.Pairing.BN254
   , module Data.Pairing.BN254.Unity
   ) where
 
+import Protolude
+
+import Data.Field.Galois (toE')
+
 import Data.Pairing
-import Data.Pairing.BN254.Ate
+import Data.Pairing.BarretoNaehrig
+import qualified Data.Pairing.BarretoNaehrig.Ate as B
 import qualified Data.Pairing.BN254.Base as B
 import Data.Pairing.BN254.Byte
 import Data.Pairing.BN254.Hash
@@ -40,5 +43,42 @@ instance Pairing B.BN254 where
 
   type instance GT B.BN254 = B.GT
 
-  pairing = optimalAte
-  {-# INLINE pairing #-}
+  pairing = (.) B.finalExponentiation . B.millerAlgorithm
+  {-# INLINABLE pairing #-}
+
+instance BarretoNaehrig B.BN254 where
+
+  type instance Q B.BN254 = B.Q
+
+  type instance Q2 B.BN254 = B.U
+
+  type instance Q6 B.BN254 = B.V
+
+  type instance Q12 B.BN254 = B.W
+
+  type instance R B.BN254 = B.R
+
+  parameter _ = [ 1, 0, 1, 0, 0,-1, 0, 1, 1, 0, 0, 0,-1, 0, 0, 1
+                , 1, 0, 0,-1, 0, 0, 0, 0, 0, 1, 0, 0,-1, 0, 0, 1
+                , 1, 1, 0, 0, 0, 0,-1, 0, 1, 0, 0,-1, 0, 1, 1, 0
+                , 0, 1, 0, 0,-1, 1, 0, 0,-1, 0, 1, 0, 1, 0, 0, 0
+                ]
+  {-# INLINABLE parameter #-}
+
+  beta = -1
+  {-# INLINABLE beta #-}
+
+  xi = toE' [9, 1]
+  {-# INLINABLE xi #-}
+
+  finalExponentiation = B.finalExponentiation
+  {-# INLINABLE finalExponentiation #-}
+
+  lineFunction = B.lineFunction
+  {-# INLINABLE lineFunction #-}
+
+  millerAlgorithm = B.millerAlgorithm
+  {-# INLINABLE millerAlgorithm #-}
+
+  twistFunction = B.twistFunction
+  {-# INLINABLE twistFunction #-}

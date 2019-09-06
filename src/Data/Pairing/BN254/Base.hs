@@ -1,18 +1,21 @@
 module Data.Pairing.BN254.Base
   ( G1.BN254
-  , G1.Fr
-  , G1._q
-  , G1._r
   -- * G1
   , G1.Fq
+  , G1.Fr
+  , G1.Q
+  , G1.R
   , G1
   , G1'
   , G1''
   , G1._a
   , G1._b
   , G1._h
+  , G1._q
+  , G1._r
   -- * G2
   , G2.Fq2
+  , G2.U
   , G2
   , G2'
   , G2''
@@ -23,6 +26,8 @@ module Data.Pairing.BN254.Base
   , Fq6
   , Fq12
   , GT
+  , V
+  , W
   , _h''
   ) where
 
@@ -79,18 +84,18 @@ _h' = G2._h
 -------------------------------------------------------------------------------
 
 -- | @Fq6 = Fq2[v]/<v^3 - u - 9>@.
-data PolynomialV
-instance IrreducibleMonic G2.Fq2 PolynomialV where
-  split _ = X3 - Y X - 9
-  {-# INLINE split #-}
-type Fq6 = Extension G2.Fq2 PolynomialV
+data V
+instance IrreducibleMonic G2.Fq2 V where
+  poly _ = X3 - Y X - 9
+  {-# INLINE poly #-}
+type Fq6 = Extension G2.Fq2 V
 
 -- | @Fq12 = Fq6[w]/<w^2 - v>@.
-data PolynomialW
-instance IrreducibleMonic Fq6 PolynomialW where
-  split _ = X2 - Y X
-  {-# INLINE split #-}
-type Fq12 = Extension Fq6 PolynomialW
+data W
+instance IrreducibleMonic Fq6 W where
+  poly _ = X2 - Y X
+  {-# INLINE poly #-}
+type Fq12 = Extension Fq6 W
 
 -- | @r@-th roots of unity subgroup of the multiplicative group of @Fq12@.
 type GT = RootsOfUnity 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001 Fq12

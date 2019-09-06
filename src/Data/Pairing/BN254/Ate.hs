@@ -2,13 +2,9 @@ module Data.Pairing.BN254.Ate
   ( ateLoopCountBinary
   , atePairing
   , finalExponentiation
-  , finalExponentiationNaive
   , fq12Frobenius
-  , frobeniusNaive
   , getYfromX
   , mulXi
-  , optimalAte
-  , optimalAte'
   , reducedPairing
   ) where
 
@@ -21,82 +17,6 @@ import GHC.Natural (Natural)
 
 import Data.Pairing.BN254.Base
 
--- s = 6t + 2>
-s :: [Int]
-s = [ 1, 0, 1, 0, 0,-1, 0, 1, 1, 0, 0, 0,-1, 0, 0, 1
-    , 1, 0, 0,-1, 0, 0, 0, 0, 0, 1, 0, 0,-1, 0, 0, 1
-    , 1, 1, 0, 0, 0, 0,-1, 0, 1, 0, 0,-1, 0, 1, 1, 0
-    , 0, 1, 0, 0,-1, 1, 0, 0,-1, 0, 1, 0, 1, 0, 0, 0
-    ]
-
--- | Optimal ate pairing final exponentiation.
-optimalAte :: G1 -> G2 -> GT
-optimalAte O _ = mempty
-optimalAte _ O = mempty
-optimalAte p q = finalExponentiation <$> optimalAte' p q
-{-# INLINABLE optimalAte #-}
-
--- | Optimal ate pairing Miller's algorithm.
-optimalAte' :: G1 -> G2 -> GT
-optimalAte' p q = finalAddition p q $ millerLoop p q s (q, mempty)
-{-# INLINABLE optimalAte' #-}
-
--- Line 2 to line 10
-millerLoop :: G1 -> G2 -> [Int] -> (G2, GT) -> (G2, GT)
-millerLoop p q = millerLoop'
-  where
-    millerLoop' []     tf = tf
-    millerLoop' (x:xs) tf = case doublingStep p tf of
-      tf2
-        | x == 0    -> millerLoop' xs tf2
-        | x == 1    -> millerLoop' xs $ additionStep p q tf2
-        | otherwise -> millerLoop' xs $ additionStep p (inv q) tf2
-{-# INLINABLE millerLoop #-}
-
--- Line 4
-doublingStep :: G1 -> (G2, GT) -> (G2, GT)
-doublingStep p (t, f) = (dbl t, (line t t p *) <$> join (<>) f)
-{-# INLINABLE doublingStep #-}
-
--- Line 6 and line 8
-additionStep :: G1 -> G2 -> (G2, GT) -> (G2, GT)
-additionStep p q (t, f) = (add t q, (line t q p *) <$> f)
-{-# INLINABLE additionStep #-}
-
--- Line 11 to line 13
-finalAddition :: G1 -> G2 -> (G2, GT) -> GT
-finalAddition p q (t, f) = (*) (line t q1 p * line t' q2 p) <$> f
-  where
-    q1 = twist $ C.frob q
-    q2 = inv . twist $ C.frob q1
-    t' = add t q1
-{-# INLINABLE finalAddition #-}
-
--------------------------------------------------------------------------------
--- Auxiliary functions
--------------------------------------------------------------------------------
-
--- Line function
-line :: G2 -> G2 -> G1 -> Fq12
-line (A x1 y1) (A x2 y2) (A x y)
-  | x1 /= x2     = toE' [embed (-y), toE' [x *^ l, y1 - l * x1]]
-  | y1 + y2 == 0 = toE' [embed x, embed (-x1)]
-  | otherwise    = toE' [embed (-y), toE' [x *^ m, y1 - m * x1]]
-  where
-    l = (y2 - y1) / (x2 - x1)
-    m = (3 * x1 * x1) / (2 * y1)
-line _ _ _       = panic "Weierstrass.line: point at infinity."
-{-# INLINE line #-}
-
--- Twist function
-twist :: G2 -> G2
-twist (A x y) = A (x * x') (y * y')
-  where
-    x' = pow _xi $ quot (F.char (witness :: Fq) - 1) 3
-    y' = pow _xi $ shiftR (F.char (witness :: Fq)) 1
-twist _       = O
-{-# INLINE twist #-}
-
 -------------------------------------------------------------------------------
 -- Ate pairing
 -------------------------------------------------------------------------------
@@ -108,7 +28,7 @@ data EllCoeffs
 
 -- | Optimal Ate pairing (including final exponentiation step)
 reducedPairing :: G1 -> G2 -> GT
-reducedPairing p@(A _ _) q@(A _ _) = finalExponentiation <$> atePairing p q
+reducedPairing p@(A _ _) q@(A _ _) = finalExponentiation $ atePairing p q
 reducedPairing _         _         = mempty
 
 -------------------------------------------------------------------------------
@@ -155,7 +75,7 @@ ateLoopBody p coeffs (oldIx, oldF) currentBit = let
 prepareCoeffs :: [EllCoeffs] -> G1 -> Int -> EllCoeffs
 prepareCoeffs coeffs (A px py) ix =
   let (EllCoeffs ell0 ellVW ellVV) = coeffs !! ix
-  in EllCoeffs ell0 (scale py ellVW) (scale px ellVV)
+  in EllCoeffs ell0 (py *^ ellVW) (px *^ ellVV)
 prepareCoeffs _ _ _ = panic "prepareCoeffs: received trivial point"
 
 {-# INLINEABLE mulBy024 #-}
@@ -167,17 +87,6 @@ mulBy024 this (EllCoeffs ell0 ellVW ellVV)
 -------------------------------------------------------------------------------
 -- Precomputation on G2
 -------------------------------------------------------------------------------
-
--- | Iterated frobenius morphisms on fields of characteristic _q,
--- implemented naively
-{-# SPECIALISE frobeniusNaive :: Int -> Fq2 -> Fq2 #-}
-frobeniusNaive :: forall k . GaloisField k => Int -> k -> k
-frobeniusNaive i a
-  | i == 0 = a
-  | i == 1 = a ^ F.char (witness :: k)
-  | i > 1 = let prev = frobeniusNaive (i - 1) a
-            in prev ^ F.char (witness :: k)
-  | otherwise = panic "frobeniusNaive: received negative input"
 
 {-# INLINEABLE mulByQ #-}
 mulByQ :: G2' -> G2'
@@ -227,20 +136,20 @@ atePrecomputeG2 origPt@(A _ _)
 atePrecomputeG2 _ = []
 
 twistCoeffB :: Fq2
-twistCoeffB = scale _b $ recip _xi
+twistCoeffB = _b *^ recip _xi
 
 doublingStepForFlippedMillerLoop :: G2' -> (G2', EllCoeffs)
 doublingStepForFlippedMillerLoop (J oldX oldY oldZ)
   = let
   a, b, c, d, e, f, g, h, i, j, eSquared :: Fq2
 
-  a = scale 0.5 (oldX * oldY)
+  a = 0.5 * (oldX * oldY)
   b = oldY * oldY
   c = oldZ * oldZ
   d = c + c + c
   e = twistCoeffB * d
   f = e + e + e
-  g = scale 0.5 (b + f)
+  g = 0.5 * (b + f)
   h = (oldY + oldZ) * (oldY + oldZ) - (b + c)
   i = e - b
   j = oldX * oldX
@@ -282,16 +191,13 @@ mixedAdditionStepForFlippedMillerLoop (J x2 y2 _) (J x1 y1 z1)
 -- Final exponentiation
 -------------------------------------------------------------------------------
 
--- | Naive implementation of the final exponentiation step
-finalExponentiationNaive :: Fq12 -> Fq12
-finalExponentiationNaive f = pow f _h''
-
--- | A faster way of performing the final exponentiation step
-finalExponentiation :: Fq12 -> Fq12
-finalExponentiation f = pow (finalExponentiationFirstChunk f) expVal
+-- | Optimal ate pairing final exponentiation.
+finalExponentiation :: GT -> GT
+finalExponentiation f = flip pow expVal . finalExponentiationFirstChunk <$> f
   where
     expVal = div (qq * (qq - 1) + 1) (F.char (witness :: Fr))
     qq = join (*) $ F.char (witness :: Fq)
+{-# INLINABLE finalExponentiation #-}
 
 finalExponentiationFirstChunk :: Fq12 -> Fq12
 finalExponentiationFirstChunk f
@@ -301,14 +207,27 @@ finalExponentiationFirstChunk f
                     newf0 = f1 * f2 -- == f^(_q ^6 - 1)
                 in fq12Frobenius 2 newf0 * newf0 -- == f^((_q ^ 6 - 1) * (_q ^ 2 + 1))
 
+-- | Iterated Frobenius automorphism in @Fq12@.
+fq12Frobenius :: Int -> Fq12 -> Fq12
+fq12Frobenius i a
+  | i == 0    = a
+  | i == 1    = fastFrobenius a
+  | i > 1     = let prev = fq12Frobenius (i - 1) a in fastFrobenius prev
+  | otherwise = panic "fq12Frobenius: not defined for negative values of i."
+{-# INLINEABLE fq12Frobenius #-}
+
+-- | Fast Frobenius automorphism in @Fq12@.
+fastFrobenius :: Fq12 -> Fq12
+fastFrobenius = coll . conv [[0,2,4],[1,3,5]] . cone
+  where
+    cone = map (map conj . fromE) . fromE
+    conv = zipWith (zipWith (\x y -> pow _xi ((x * (F.char (witness :: Fq) - 1)) `div` 6) * y))
+    coll = toE . map toE
+{-# INLINEABLE fastFrobenius #-}
+
 -------------------------------------------------------------------------------
 -- Auxiliary functions
 -------------------------------------------------------------------------------
-
--- | Scalar multiplication.
-scale :: IrreducibleMonic k im => k -> Extension k im -> Extension k im
-scale = (*) . toE . return
-{-# INLINEABLE scale #-}
 
 -- | Conjugation.
 conj :: forall k im . IrreducibleMonic k im => Extension k im -> Extension k im
@@ -335,27 +254,6 @@ mulXi w = case fromE w of
   []        -> toE []
   _         -> panic "mulXi: not exhaustive."
 {-# INLINEABLE mulXi #-}
-
--- | Iterated Frobenius automorphism in @Fq12@.
-fq12Frobenius :: Int -> Fq12 -> Fq12
-fq12Frobenius i a
-  | i == 0    = a
-  | i == 1    = fastFrobenius a
-  | i > 1     = let prev = fq12Frobenius (i - 1) a in fastFrobenius prev
-  | otherwise = panic "fq12Frobenius: not defined for negative values of i."
-{-# INLINEABLE fq12Frobenius #-}
-
--- | Fast Frobenius automorphism in @Fq12@.
-fastFrobenius :: Fq12 -> Fq12
-fastFrobenius = coll . conv [[0,2,4],[1,3,5]] . map cone . fromE
-  where
-    cone :: Fq6 -> [Fq2]
-    cone = map conj . fromE
-    conv :: [[Natural]] -> [[Fq2]] -> [[Fq2]]
-    conv = zipWith (zipWith (\x y -> pow _xi ((x * (F.char (witness :: Fq) - 1)) `div` 6) * y))
-    coll :: [[Fq2]] -> Fq12
-    coll = toE . map toE
-{-# INLINEABLE fastFrobenius #-}
 
 -- | BN parameter that determines the prime @_q@.
 _t :: Natural
