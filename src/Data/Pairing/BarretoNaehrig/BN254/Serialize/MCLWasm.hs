@@ -10,7 +10,7 @@
 -- and appended as a continuous bytestring, using the element length to split 
 -- each point
 
-module Data.Pairing.BN254.Serialize.MCLWasm where
+module Data.Pairing.BarretoNaehrig.BN254.Serialize.MCLWasm where
 --   ( MCLWASM(..)
 --   ) where
 -- 

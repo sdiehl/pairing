@@ -1,18 +1,21 @@
-module Data.Pairing.BN462.Base
+module Data.Pairing.BarretoNaehrig.BN462.Base
   ( G1.BN462
-  , G1.Fr
-  , G1._q
-  , G1._r
   -- * G1
   , G1.Fq
+  , G1.Fr
+  , G1.Q
+  , G1.R
   , G1
   , G1'
   , G1''
   , G1._a
   , G1._b
   , G1._h
+  , G1._q
+  , G1._r
   -- * G2
   , G2.Fq2
+  , G2.U
   , G2
   , G2'
   , G2''
@@ -23,7 +26,10 @@ module Data.Pairing.BN462.Base
   , Fq6
   , Fq12
   , GT
+  , V
+  , W
   , _h''
+
   ) where
 
 import Protolude
@@ -79,18 +85,18 @@ _h' = G2._h
 -------------------------------------------------------------------------------
 
 -- | @Fq6 = Fq2[v]/<v^3 - u>@.
-data PolynomialV
-instance IrreducibleMonic G2.Fq2 PolynomialV where
+data V
+instance IrreducibleMonic G2.Fq2 V where
   poly _ = X3 - Y X
   {-# INLINE poly #-}
-type Fq6 = Extension G2.Fq2 PolynomialV
+type Fq6 = Extension G2.Fq2 V
 
 -- | @Fq12 = Fq6[w]/<w^2 - v>@.
-data PolynomialW
-instance IrreducibleMonic Fq6 PolynomialW where
+data W
+instance IrreducibleMonic Fq6 W where
   poly _ = X2 - Y X
   {-# INLINE poly #-}
-type Fq12 = Extension Fq6 PolynomialW
+type Fq12 = Extension Fq6 W
 
 -- | @r@-th roots of unity subgroup of the multiplicative group of @Fq12@.
 type GT = RootsOfUnity 0x240480360120023ffffffffff6ff0cf6b7d9bfca0000000000d812908ee1c201f7fffffffff6ff66fc7bf717f7c0000000002401b007e010800d Fq12

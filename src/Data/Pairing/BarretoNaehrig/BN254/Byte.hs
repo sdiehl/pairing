@@ -1,6 +1,6 @@
 {-# OPTIONS -fno-warn-orphans #-}
 
-module Data.Pairing.BN254.Byte
+module Data.Pairing.BarretoNaehrig.BN254.Byte
   ( module Data.Pairing.Byte
   ) where
 
@@ -9,7 +9,7 @@ import Protolude hiding (splitAt)
 import Data.ByteString (splitAt)
 import Data.Field.Galois (fromE, fromP, toE)
 
-import Data.Pairing.BN254.Base
+import Data.Pairing.BarretoNaehrig.BN254.Base
 import Data.Pairing.Byte
 
 -------------------------------------------------------------------------------

@@ -1,10 +1,8 @@
-module Data.Pairing.BLS12381.Ate
+module Data.Pairing.BarretoNaehrig.BN254.Ate
   ( ateLoopCountBinary
   , atePairing
   , finalExponentiation
-  , finalExponentiationNaive
   , fq12Frobenius
-  , frobeniusNaive
   , getYfromX
   , mulXi
   , reducedPairing
@@ -12,12 +10,12 @@ module Data.Pairing.BLS12381.Ate
 
 import Protolude
 
-import Data.Curve.Weierstrass (Curve(..), Point(..))
+import Data.Curve.Weierstrass as C
 import Data.Field.Galois as F
 import Data.List ((!!))
 import GHC.Natural (Natural)
 
-import Data.Pairing.BLS12381.Base
+import Data.Pairing.BarretoNaehrig.BN254.Base
 
 -------------------------------------------------------------------------------
 -- Ate pairing
@@ -30,7 +28,7 @@ data EllCoeffs
 
 -- | Optimal Ate pairing (including final exponentiation step)
 reducedPairing :: G1 -> G2 -> GT
-reducedPairing p@(A _ _) q@(A _ _) = finalExponentiation <$> atePairing p q
+reducedPairing p@(A _ _) q@(A _ _) = finalExponentiation $ atePairing p q
 reducedPairing _         _         = mempty
 
 -------------------------------------------------------------------------------
@@ -77,7 +75,7 @@ ateLoopBody p coeffs (oldIx, oldF) currentBit = let
 prepareCoeffs :: [EllCoeffs] -> G1 -> Int -> EllCoeffs
 prepareCoeffs coeffs (A px py) ix =
   let (EllCoeffs ell0 ellVW ellVV) = coeffs !! ix
-  in EllCoeffs ell0 (scale py ellVW) (scale px ellVV)
+  in EllCoeffs ell0 (py *^ ellVW) (px *^ ellVV)
 prepareCoeffs _ _ _ = panic "prepareCoeffs: received trivial point"
 
 {-# INLINEABLE mulBy024 #-}
@@ -89,17 +87,6 @@ mulBy024 this (EllCoeffs ell0 ellVW ellVV)
 -------------------------------------------------------------------------------
 -- Precomputation on G2
 -------------------------------------------------------------------------------
-
--- | Iterated frobenius morphisms on fields of characteristic _q,
--- implemented naively
-{-# SPECIALISE frobeniusNaive :: Int -> Fq2 -> Fq2 #-}
-frobeniusNaive :: forall k . GaloisField k => Int -> k -> k
-frobeniusNaive i a
-  | i == 0 = a
-  | i == 1 = a ^ F.char (witness :: k)
-  | i > 1 = let prev = frobeniusNaive (i - 1) a
-            in prev ^ F.char (witness :: k)
-  | otherwise = panic "frobeniusNaive: received negative input"
 
 {-# INLINEABLE mulByQ #-}
 mulByQ :: G2' -> G2'
@@ -149,20 +136,20 @@ atePrecomputeG2 origPt@(A _ _)
 atePrecomputeG2 _ = []
 
 twistCoeffB :: Fq2
-twistCoeffB = scale _b $ recip _xi
+twistCoeffB = _b *^ recip _xi
 
 doublingStepForFlippedMillerLoop :: G2' -> (G2', EllCoeffs)
 doublingStepForFlippedMillerLoop (J oldX oldY oldZ)
   = let
   a, b, c, d, e, f, g, h, i, j, eSquared :: Fq2
 
-  a = scale 0.5 (oldX * oldY)
+  a = 0.5 * (oldX * oldY)
   b = oldY * oldY
   c = oldZ * oldZ
   d = c + c + c
   e = twistCoeffB * d
   f = e + e + e
-  g = scale 0.5 (b + f)
+  g = 0.5 * (b + f)
   h = (oldY + oldZ) * (oldY + oldZ) - (b + c)
   i = e - b
   j = oldX * oldX
@@ -204,16 +191,13 @@ mixedAdditionStepForFlippedMillerLoop (J x2 y2 _) (J x1 y1 z1)
 -- Final exponentiation
 -------------------------------------------------------------------------------
 
--- | Naive implementation of the final exponentiation step
-finalExponentiationNaive :: Fq12 -> Fq12
-finalExponentiationNaive f = pow f _h''
-
--- | A faster way of performing the final exponentiation step
-finalExponentiation :: Fq12 -> Fq12
-finalExponentiation f = pow (finalExponentiationFirstChunk f) expVal
+-- | Optimal ate pairing final exponentiation.
+finalExponentiation :: GT -> GT
+finalExponentiation f = flip pow expVal . finalExponentiationFirstChunk <$> f
   where
     expVal = div (qq * (qq - 1) + 1) (F.char (witness :: Fr))
     qq = join (*) $ F.char (witness :: Fq)
+{-# INLINABLE finalExponentiation #-}
 
 finalExponentiationFirstChunk :: Fq12 -> Fq12
 finalExponentiationFirstChunk f
@@ -223,14 +207,27 @@ finalExponentiationFirstChunk f
                     newf0 = f1 * f2 -- == f^(_q ^6 - 1)
                 in fq12Frobenius 2 newf0 * newf0 -- == f^((_q ^ 6 - 1) * (_q ^ 2 + 1))
 
+-- | Iterated Frobenius automorphism in @Fq12@.
+fq12Frobenius :: Int -> Fq12 -> Fq12
+fq12Frobenius i a
+  | i == 0    = a
+  | i == 1    = fastFrobenius a
+  | i > 1     = let prev = fq12Frobenius (i - 1) a in fastFrobenius prev
+  | otherwise = panic "fq12Frobenius: not defined for negative values of i."
+{-# INLINEABLE fq12Frobenius #-}
+
+-- | Fast Frobenius automorphism in @Fq12@.
+fastFrobenius :: Fq12 -> Fq12
+fastFrobenius = coll . conv [[0,2,4],[1,3,5]] . cone
+  where
+    cone = map (map conj . fromE) . fromE
+    conv = zipWith (zipWith (\x y -> pow _xi ((x * (F.char (witness :: Fq) - 1)) `div` 6) * y))
+    coll = toE . map toE
+{-# INLINEABLE fastFrobenius #-}
+
 -------------------------------------------------------------------------------
 -- Auxiliary functions
 -------------------------------------------------------------------------------
-
--- | Scalar multiplication.
-scale :: IrreducibleMonic k im => k -> Extension k im -> Extension k im
-scale = (*) . toE . return
-{-# INLINEABLE scale #-}
 
 -- | Conjugation.
 conj :: forall k im . IrreducibleMonic k im => Extension k im -> Extension k im
@@ -258,30 +255,12 @@ mulXi w = case fromE w of
   _         -> panic "mulXi: not exhaustive."
 {-# INLINEABLE mulXi #-}
 
--- | Iterated Frobenius automorphism in @Fq12@.
-fq12Frobenius :: Int -> Fq12 -> Fq12
-fq12Frobenius i a
-  | i == 0    = a
-  | i == 1    = fastFrobenius a
-  | i > 1     = let prev = fq12Frobenius (i - 1) a in fastFrobenius prev
-  | otherwise = panic "fq12Frobenius: not defined for negative values of i."
-{-# INLINEABLE fq12Frobenius #-}
+-- | BN parameter that determines the prime @_q@.
+_t :: Natural
+_t = 4965661367192848881
+{-# INLINABLE _t #-}
 
--- | Fast Frobenius automorphism in @Fq12@.
-fastFrobenius :: Fq12 -> Fq12
-fastFrobenius = coll . conv [[0,2,4],[1,3,5]] . map cone . fromE
-  where
-    cone :: Fq6 -> [Fq2]
-    cone = map conj . fromE
-    conv :: [[Natural]] -> [[Fq2]] -> [[Fq2]]
-    conv = zipWith (zipWith (\x y -> pow _xi ((x * (F.char (witness :: Fq) - 1)) `div` 6) * y))
-    coll :: [[Fq2]] -> Fq12
-    coll = toE . map toE
-{-# INLINEABLE fastFrobenius #-}
-
--- | Temporary quadratic nonresidue.
+-- | Parameter of twisted curve over @Fq@.
 _xi :: Fq2
-_xi = case qnr of
-  Just xi -> xi
-  _       -> panic "no quadratic nonresidue."
-{-# INLINEABLE _xi #-}
+_xi = toE' [9, 1]
+{-# INLINABLE _xi #-}

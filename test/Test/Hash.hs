@@ -3,7 +3,7 @@ module Test.Hash where
 import Protolude
 
 import Data.Curve
-import qualified Data.Pairing.BN254 as BN254
+import qualified Data.Pairing.BarretoNaehrig.BN254 as BN254
 import Test.QuickCheck.Instances ()
 import Test.QuickCheck.Monadic
 import Test.Tasty

@@ -1,10 +1,10 @@
-module Data.Pairing.BN254.Unity
+module Data.Pairing.BarretoNaehrig.BN254.Unity
   ( precompRootOfUnity
   ) where
 
 import Protolude
 
-import Data.Pairing.BN254.Base
+import Data.Pairing.BarretoNaehrig.BN254.Base
 
 -------------------------------------------------------------------------------
 -- Roots of unity

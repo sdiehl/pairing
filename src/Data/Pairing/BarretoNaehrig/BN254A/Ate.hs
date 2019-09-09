@@ -1,4 +1,4 @@
-module Data.Pairing.BN254B.Ate
+module Data.Pairing.BarretoNaehrig.BN254A.Ate
   ( ateLoopCountBinary
   , atePairing
   , finalExponentiation
@@ -17,7 +17,7 @@ import Data.Field.Galois as F
 import Data.List ((!!))
 import GHC.Natural (Natural)
 
-import Data.Pairing.BN254B.Base
+import Data.Pairing.BarretoNaehrig.BN254A.Base
 
 -------------------------------------------------------------------------------
 -- Ate pairing
@@ -281,5 +281,5 @@ fastFrobenius = coll . conv [[0,2,4],[1,3,5]] . map cone . fromE
 
 -- | Parameter of twisted curve over @Fq@.
 _xi :: Fq2
-_xi = 1 / toE' [1, 1]
+_xi = -5 / toE' [0, 1]
 {-# INLINABLE _xi #-}

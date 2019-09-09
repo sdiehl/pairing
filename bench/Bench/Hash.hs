@@ -3,7 +3,7 @@ module Bench.Hash where
 import Protolude
 
 import Criterion.Main
-import Data.Pairing.BN254
+import Data.Pairing.BarretoNaehrig.BN254
 
 benchmarkHash :: Benchmark
 benchmarkHash = bgroup "Hash"

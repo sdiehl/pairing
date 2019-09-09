@@ -1,5 +1,3 @@
-{-# LANGUAGE QuantifiedConstraints #-}
-
 module Data.Pairing.BarretoNaehrig
   (
   -- * Barreto-Naehrig curves
@@ -26,8 +24,8 @@ class (KnownNat (Q e), KnownNat (R e),
        WACurve e (Extension (Prime (Q e)) (Q2 e)) (Prime (R e)),
        G1 e ~ WAPoint e (Prime (Q e)) (Prime (R e)),
        G2 e ~ WAPoint e (Extension (Prime (Q e)) (Q2 e)) (Prime (R e)),
-       GT e ~ RootsOfUnity (R e) (Extension (Extension (Extension (Prime (Q e)) (Q2 e)) (Q6 e)) (Q12 e)), Pairing e)
-  => BarretoNaehrig e where
+       GT e ~ RootsOfUnity (R e) (Extension (Extension (Extension (Prime (Q e)) (Q2 e)) (Q6 e)) (Q12 e)),
+       Pairing e) => BarretoNaehrig e where
   {-# MINIMAL beta, finalExponentiation, lineFunction, millerAlgorithm, parameter, twistFunction, xi #-}
 
   type family Q e = (q :: Nat) | q -> e
@@ -40,7 +38,7 @@ class (KnownNat (Q e), KnownNat (R e),
 
   type family R e = (r :: Nat) | r -> e
 
-  -- | Barreto-Naehrig Parameter.
+  -- | Barreto-Naehrig parameter.
   parameter :: e -> [Int]
 
   -- | Quadratic nonresidue.

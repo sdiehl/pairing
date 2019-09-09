@@ -2,7 +2,7 @@
 Base API for Point serialisation for G1, G2 and GT
 -}
 
-module Data.Pairing.BN254.Serialize.Types where
+module Data.Pairing.BarretoNaehrig.BN254.Serialize.Types where
 --   ( MkCompressedForm(..)
 --   , MkUncompressedForm(..)
 --   , FromSerialisedForm(..)

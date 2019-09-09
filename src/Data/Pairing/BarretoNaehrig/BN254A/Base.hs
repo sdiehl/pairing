@@ -1,5 +1,5 @@
-module Data.Pairing.BN254.Base
-  ( G1.BN254
+module Data.Pairing.BarretoNaehrig.BN254A.Base
+  ( G1.BN254A
   -- * G1
   , G1.Fq
   , G1.Fr
@@ -33,8 +33,8 @@ module Data.Pairing.BN254.Base
 
 import Protolude
 
-import qualified Data.Curve.Weierstrass.BN254 as G1
-import qualified Data.Curve.Weierstrass.BN254T as G2
+import qualified Data.Curve.Weierstrass.BN254A as G1
+import qualified Data.Curve.Weierstrass.BN254AT as G2
 import Data.Field.Galois
 import GHC.Natural (Natural)
 
@@ -83,10 +83,10 @@ _h' = G2._h
 -- GT
 -------------------------------------------------------------------------------
 
--- | @Fq6 = Fq2[v]/<v^3 - u - 9>@.
+-- | @Fq6 = Fq2[v]/<v^3 - u>@.
 data V
 instance IrreducibleMonic G2.Fq2 V where
-  poly _ = X3 - Y X - 9
+  poly _ = X3 - Y X
   {-# INLINE poly #-}
 type Fq6 = Extension G2.Fq2 V
 
@@ -98,7 +98,7 @@ instance IrreducibleMonic Fq6 W where
 type Fq12 = Extension Fq6 W
 
 -- | @r@-th roots of unity subgroup of the multiplicative group of @Fq12@.
-type GT = RootsOfUnity 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001 Fq12
+type GT = RootsOfUnity 0x2370fb049d410fbe4e761a9886e502411dc1af70120000017e80600000000001 Fq12
 
 -- | @r@-th roots of unity cofactor.
 _h'' :: Natural
@@ -108,24 +108,24 @@ _h'' = cofactor (witness :: GT)
 -- @r@-th roots of unity are cyclic subgroups.
 instance CyclicSubgroup GT where
   gen = toU' $
-    toE' [ toE' [ toE' [ 0x12c70e90e12b7874510cd1707e8856f71bf7f61d72631e268fca81000db9a1f5
-                       , 0x84f330485b09e866bc2f2ea2b897394deaf3f12aa31f28cb0552990967d4704
+    toE' [ toE' [ toE' [ 15293211362672711259967846127256880522925388037042319991968631081997962354462
+                       , 10972921344698134413111439141452969960263438185003151174614738792248911921991
                        ]
-                , toE' [ 0xe841c2ac18a4003ac9326b9558380e0bc27fdd375e3605f96b819a358d34bde
-                       , 0x2067586885c3318eeffa1938c754fe3c60224ee5ae15e66af6b5104c47c8c5d8
+                , toE' [ 10924666965052611682400321309403586918658655775221788845649508786577023844351
+                       , 3143996464592934599466742955053357262962884189606828321648225176347052840062
                        ]
-                , toE' [ 0x1676555de427abc409c4a394bc5426886302996919d4bf4bdd02236e14b3636
-                       , 0x2b03614464f04dd772d86df88674c270ffc8747ea13e72da95e3594468f222c4
+                , toE' [ 7667403173998560465934597705067182239385273095682224498602650330121074616271
+                       , 7940815261953454397199541811520058036993225128729216919621904354152391154301
                        ]
                 ]
-         , toE' [ toE' [ 0x2c53748bcd21a7c038fb30ddc8ac3bf0af25d7859cfbc12c30c866276c565909
-                       , 0x27ed208e7a0b55ae6e710bbfbd2fd922669c026360e37cc5b2ab862411536104
+         , toE' [ toE' [ 2810458386379820048169944941638678548167959648092200460468533440509297001811
+                       , 1744460166333994514477626075683052763945872941985715420571615472651160755592
                        ]
-                , toE' [ 0x1ad9db1937fd72f4ac462173d31d3d6117411fa48dba8d499d762b47edb3b54a
-                       , 0x279db296f9d479292532c7c493d8e0722b6efae42158387564889c79fc038ee3
+                , toE' [ 9323771210978530137074972251876201052708972336189033307233814260139992693020
+                       , 10789685903846303039587023833466290529575133066688576935066689750065438267962
                        ]
-                , toE' [ 0xdc26f240656bbe2029bd441d77c221f0ba4c70c94b29b5f17f0f6d08745a069
-                       , 0x108c19d15f9446f744d0f110405d3856d6cc3bda6c4d537663729f5257628417
+                , toE' [ 11462374343074488034760014242615063609716170310791177037826909348755140872769
+                       , 4836025625638211202444198015509426610087496986314730561673707591233656565137
                        ]
                 ]
          ]

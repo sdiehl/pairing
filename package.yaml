@@ -48,31 +48,32 @@ library:
   exposed-modules:
     - Data.Pairing
     - Data.Pairing.BarretoNaehrig
-    - Data.Pairing.BLS12381
-    - Data.Pairing.BLS48581
-    - Data.Pairing.BN254
-    - Data.Pairing.BN254A
-    - Data.Pairing.BN254B
-    - Data.Pairing.BN462
+    - Data.Pairing.BarretoNaehrig.BN254
+    - Data.Pairing.BarretoNaehrig.BN254A
+    - Data.Pairing.BarretoNaehrig.BN254B
+    - Data.Pairing.BarretoNaehrig.BN462
+    - Data.Pairing.BarretoLynnScott
+    - Data.Pairing.BarretoLynnScott.BLS12381
+    - Data.Pairing.BarretoLynnScott.BLS48581
   other-modules:
     - Data.Pairing.BarretoNaehrig.Ate
-    - Data.Pairing.BLS12381.Ate
-    - Data.Pairing.BLS12381.Base
-    - Data.Pairing.BLS12381.Hash
-    - Data.Pairing.BLS48581.Base
-    - Data.Pairing.BN254.Ate
-    - Data.Pairing.BN254.Base
-    - Data.Pairing.BN254.Byte
-    - Data.Pairing.BN254.Hash
-    - Data.Pairing.BN254.Serialize.Jivsov
-    - Data.Pairing.BN254.Serialize.MCLWasm
-    - Data.Pairing.BN254.Serialize.Types
-    - Data.Pairing.BN254.Unity
-    - Data.Pairing.BN254A.Ate
-    - Data.Pairing.BN254A.Base
-    - Data.Pairing.BN254B.Ate
-    - Data.Pairing.BN254B.Base
-    - Data.Pairing.BN462.Base
+    - Data.Pairing.BarretoNaehrig.BN254.Ate
+    - Data.Pairing.BarretoNaehrig.BN254.Base
+    - Data.Pairing.BarretoNaehrig.BN254.Byte
+    - Data.Pairing.BarretoNaehrig.BN254.Hash
+    - Data.Pairing.BarretoNaehrig.BN254.Serialize.Jivsov
+    - Data.Pairing.BarretoNaehrig.BN254.Serialize.MCLWasm
+    - Data.Pairing.BarretoNaehrig.BN254.Serialize.Types
+    - Data.Pairing.BarretoNaehrig.BN254.Unity
+    - Data.Pairing.BarretoNaehrig.BN254A.Ate
+    - Data.Pairing.BarretoNaehrig.BN254A.Base
+    - Data.Pairing.BarretoNaehrig.BN254B.Ate
+    - Data.Pairing.BarretoNaehrig.BN254B.Base
+    - Data.Pairing.BarretoNaehrig.BN462.Base
+    - Data.Pairing.BarretoLynnScott.BLS12381.Ate
+    - Data.Pairing.BarretoLynnScott.BLS12381.Base
+    - Data.Pairing.BarretoLynnScott.BLS12381.Hash
+    - Data.Pairing.BarretoLynnScott.BLS48581.Base
     - Data.Pairing.Byte
   source-dirs:
     - src

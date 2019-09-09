@@ -5,12 +5,12 @@ import Protolude
 import Data.Field.Galois as F
 import Data.Group
 import Data.Pairing
-import qualified Data.Pairing.BLS12381 as BLS12381
-import qualified Data.Pairing.BLS48581 as BLS48581
-import qualified Data.Pairing.BN254 as BN254
-import qualified Data.Pairing.BN254A as BN254A
-import qualified Data.Pairing.BN254B as BN254B
-import qualified Data.Pairing.BN462 as BN462
+import qualified Data.Pairing.BarretoLynnScott.BLS12381 as BLS12381
+import qualified Data.Pairing.BarretoLynnScott.BLS48581 as BLS48581
+import qualified Data.Pairing.BarretoNaehrig.BN254 as BN254
+import qualified Data.Pairing.BarretoNaehrig.BN254A as BN254A
+import qualified Data.Pairing.BarretoNaehrig.BN254B as BN254B
+import qualified Data.Pairing.BarretoNaehrig.BN462 as BN462
 import Test.Tasty
 import Test.Tasty.QuickCheck
 

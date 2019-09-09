@@ -1,4 +1,4 @@
-module Data.Pairing.BN254A.Ate
+module Data.Pairing.BarretoLynnScott.BLS12381.Ate
   ( ateLoopCountBinary
   , atePairing
   , finalExponentiation
@@ -17,7 +17,7 @@ import Data.Field.Galois as F
 import Data.List ((!!))
 import GHC.Natural (Natural)
 
-import Data.Pairing.BN254A.Base
+import Data.Pairing.BarretoLynnScott.BLS12381.Base
 
 -------------------------------------------------------------------------------
 -- Ate pairing
@@ -279,7 +279,9 @@ fastFrobenius = coll . conv [[0,2,4],[1,3,5]] . map cone . fromE
     coll = toE . map toE
 {-# INLINEABLE fastFrobenius #-}
 
--- | Parameter of twisted curve over @Fq@.
+-- | Temporary quadratic nonresidue.
 _xi :: Fq2
-_xi = -5 / toE' [0, 1]
-{-# INLINABLE _xi #-}
+_xi = case qnr of
+  Just xi -> xi
+  _       -> panic "no quadratic nonresidue."
+{-# INLINEABLE _xi #-}

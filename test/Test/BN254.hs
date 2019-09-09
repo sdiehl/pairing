@@ -4,7 +4,7 @@ import Protolude
 
 import Data.Curve.Weierstrass
 import Data.Field.Galois
-import Data.Pairing.BN254
+import Data.Pairing.BarretoNaehrig.BN254
 import Test.Tasty
 import Test.Tasty.HUnit
 import Test.Tasty.QuickCheck

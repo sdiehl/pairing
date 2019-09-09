@@ -1,4 +1,4 @@
-module Data.Pairing.BN254.Hash
+module Data.Pairing.BarretoNaehrig.BN254.Hash
   ( swEncBN
   ) where
 
@@ -11,7 +11,7 @@ import Data.Field.Galois (qr, rnd, sr)
 import Data.List ((!!))
 
 import Data.Pairing.Byte
-import Data.Pairing.BN254.Base
+import Data.Pairing.BarretoNaehrig.BN254.Base
 
 -- | Encodes a given byte string to a point on the BN curve.
 -- The implementation uses the Shallue-van de Woestijne encoding to BN curves as
