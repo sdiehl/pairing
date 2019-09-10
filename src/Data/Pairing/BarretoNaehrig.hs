@@ -24,10 +24,10 @@ import Data.Pairing.BarretoNaehrig.Ate
 import Data.Pairing.BarretoNaehrig.Base
 
 -------------------------------------------------------------------------------
--- Pairings of Barreto-Naehrig curves
+-- Barreto-Naehrig curves
 -------------------------------------------------------------------------------
 
--- | Barreto-Naehrig curves are pairing-friendly.
+-- Barreto-Naehrig curves are pairing-friendly curves.
 instance PairingBN e => Pairing (BN e) where
 
   type instance G1 (BN e) = G1BN e

@@ -23,7 +23,6 @@ default-extensions:
   - PatternSynonyms
   - StandaloneDeriving
   - TypeFamilyDependencies
-  - UndecidableInstances
 
 dependencies:
   - base >= 4.10 && < 5

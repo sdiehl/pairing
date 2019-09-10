@@ -21,10 +21,10 @@ import Data.Pairing.BarretoNaehrig.BN254.Byte
 import Data.Pairing.BarretoNaehrig.BN254.Hash
 
 -------------------------------------------------------------------------------
--- BN254 curves
+-- BN254 curve
 -------------------------------------------------------------------------------
 
--- | Pairing of BN254 curves.
+-- BN254 curve is a pairing-friendly curve.
 instance Pairing (BN BN254) where
 
   type instance G1 (BN BN254) = G1BN BN254
