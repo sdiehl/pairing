@@ -11,7 +11,7 @@ import Data.Field.Galois (qr, rnd, sr)
 import Data.List ((!!))
 
 import Data.Pairing.BN (PairingBN(..), Fq, G1BN)
-import Data.Pairing.BN254.Base (BN254)
+import Data.Pairing.BN254 (BN254)
 import Data.Pairing.Byte (ByteOrder(..), fromBytesToInteger)
 
 -- | Encodes a given byte string to a point on the BN curve.

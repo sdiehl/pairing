@@ -10,7 +10,7 @@ import Data.ByteString (splitAt)
 import Data.Field.Galois (fromE, fromP, toE)
 
 import Data.Pairing.BN (Fq, Fq2, Fq6, Fq12)
-import Data.Pairing.BN254.Base (BN254)
+import Data.Pairing.BN254 (BN254)
 import Data.Pairing.Byte
 
 -------------------------------------------------------------------------------
