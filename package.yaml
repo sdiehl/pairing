@@ -17,10 +17,13 @@ default-extensions:
   - ScopedTypeVariables
   - RankNTypes
   - DataKinds
+  - DeriveGeneric
   - GeneralizedNewtypeDeriving
   - MultiParamTypeClasses
   - PatternSynonyms
+  - StandaloneDeriving
   - TypeFamilyDependencies
+  - UndecidableInstances
 
 dependencies:
   - base >= 4.10 && < 5
@@ -31,6 +34,7 @@ dependencies:
   - galois-field >= 0.4 && < 0.5
   - groups
   - MonadRandom
+  - poly
   - semirings
   - tasty-quickcheck
   - wl-pprint-text
@@ -57,14 +61,13 @@ library:
     - Data.Pairing.BarretoLynnScott.BLS48581
   other-modules:
     - Data.Pairing.BarretoNaehrig.Ate
-    - Data.Pairing.BarretoNaehrig.BN254.Ate
+    - Data.Pairing.BarretoNaehrig.Base
     - Data.Pairing.BarretoNaehrig.BN254.Base
     - Data.Pairing.BarretoNaehrig.BN254.Byte
     - Data.Pairing.BarretoNaehrig.BN254.Hash
     - Data.Pairing.BarretoNaehrig.BN254.Serialize.Jivsov
     - Data.Pairing.BarretoNaehrig.BN254.Serialize.MCLWasm
     - Data.Pairing.BarretoNaehrig.BN254.Serialize.Types
-    - Data.Pairing.BarretoNaehrig.BN254.Unity
     - Data.Pairing.BarretoNaehrig.BN254A.Ate
     - Data.Pairing.BarretoNaehrig.BN254A.Base
     - Data.Pairing.BarretoNaehrig.BN254B.Ate

@@ -9,17 +9,15 @@ import Protolude
 
 import Data.Curve.Weierstrass as C
 import Data.Field.Galois as F
-import Data.Group as G
 
-import Data.Pairing (Pairing(..))
-import Data.Pairing.BarretoNaehrig (BarretoNaehrig(Q, parameter, xi))
+import Data.Pairing.BarretoNaehrig.Base
 
 -------------------------------------------------------------------------------
 -- Miller algorithm
 -------------------------------------------------------------------------------
 
 -- | Optimal ate pairing Miller algorithm.
-millerAlgorithm :: forall e . BarretoNaehrig e => G1 e -> G2 e -> GT e
+millerAlgorithm :: forall e . PairingBN e => G1BN e -> G2BN e -> GTBN e
 millerAlgorithm O _ = mempty
 millerAlgorithm _ O = mempty
 millerAlgorithm p q = finalAddition p q $
@@ -27,7 +25,7 @@ millerAlgorithm p q = finalAddition p q $
 {-# INLINABLE millerAlgorithm #-}
 
 -- Line 2 to line 10
-millerLoop :: BarretoNaehrig e => G1 e -> G2 e -> [Int] -> (G2 e, GT e) -> (G2 e, GT e)
+millerLoop :: PairingBN e => G1BN e -> G2BN e -> [Int] -> (G2BN e, GTBN e) -> (G2BN e, GTBN e)
 millerLoop p q = millerLoop'
   where
     millerLoop' []     tf = tf
@@ -39,17 +37,17 @@ millerLoop p q = millerLoop'
 {-# INLINABLE millerLoop #-}
 
 -- Line 4
-doublingStep :: BarretoNaehrig e => G1 e -> (G2 e, GT e) -> (G2 e, GT e)
+doublingStep :: PairingBN e => G1BN e -> (G2BN e, GTBN e) -> (G2BN e, GTBN e)
 doublingStep p (t, f) = (dbl t, lineFunction t t p <> join (<>) f)
 {-# INLINABLE doublingStep #-}
 
 -- Line 6 and line 8
-additionStep :: BarretoNaehrig e => G1 e -> G2 e -> (G2 e, GT e) -> (G2 e, GT e)
+additionStep :: PairingBN e => G1BN e -> G2BN e -> (G2BN e, GTBN e) -> (G2BN e, GTBN e)
 additionStep p q (t, f) = (add t q, lineFunction t q p <> f)
 {-# INLINABLE additionStep #-}
 
 -- Line 11 to line 13
-finalAddition :: BarretoNaehrig e => G1 e -> G2 e -> (G2 e, GT e) -> GT e
+finalAddition :: PairingBN e => G1BN e -> G2BN e -> (G2BN e, GTBN e) -> GTBN e
 finalAddition p q (t, f) = lineFunction t q1 p <> lineFunction t' q2 p <> f
   where
     q1 = twistFunction $ C.frob q
@@ -58,7 +56,7 @@ finalAddition p q (t, f) = lineFunction t q1 p <> lineFunction t' q2 p <> f
 {-# INLINABLE finalAddition #-}
 
 -- Line function
-lineFunction :: forall e . BarretoNaehrig e => G2 e -> G2 e -> G1 e -> GT e
+lineFunction :: forall e . PairingBN e => G2BN e -> G2BN e -> G1BN e -> GTBN e
 lineFunction (A x1 y1) (A x2 y2) (A x y)
   | x1 /= x2       = toU' $ toE' [embed (-y), toE' [x *^ l, y1 - l * x1]]
   | y1 + y2 == 0   = toU' $ toE' [embed x, embed (-x1)]
@@ -66,15 +64,15 @@ lineFunction (A x1 y1) (A x2 y2) (A x y)
   where
     l = (y2 - y1) / (x2 - x1)
     m = (3 * x1 * x1) / (2 * y1)
-lineFunction _ _ _ = panic "BarretoNaehrig.line: point at infinity."
+lineFunction _ _ _ = panic "PairingBN.line: point at infinity."
 {-# INLINE lineFunction #-}
 
 -- Twist function
-twistFunction :: forall e . BarretoNaehrig e => G2 e -> G2 e
+twistFunction :: forall e . PairingBN e => G2BN e -> G2BN e
 twistFunction (A x y) = A (x * x') (y * y')
   where
-    x' = F.pow xi $ quot (F.char (witness :: Prime (Q e)) - 1) 3
-    y' = F.pow xi $ shiftR (F.char (witness :: Prime (Q e))) 1
+    x' = F.pow xi $ quot (F.char (witness :: Fq e) - 1) 3
+    y' = F.pow xi $ shiftR (F.char (witness :: Fq e)) 1
 twistFunction _       = O
 {-# INLINE twistFunction #-}
 
@@ -83,5 +81,46 @@ twistFunction _       = O
 -------------------------------------------------------------------------------
 
 -- | Optimal ate pairing final exponentiation.
-finalExponentiation :: BarretoNaehrig e => GT e -> GT e
-finalExponentiation = G.pow <*> cofactor
+finalExponentiation :: forall e . PairingBN e => GTBN e -> GTBN e
+finalExponentiation f = flip F.pow expVal . finalExponentiationFirstChunk <$> f
+  where
+    expVal = div (qq * (qq - 1) + 1) $ F.char (witness :: Fr e)
+    qq = join (*) $ F.char (witness :: Fq e)
+{-# INLINABLE finalExponentiation #-}
+
+finalExponentiationFirstChunk :: PairingBN e => Fq12 e -> Fq12 e
+finalExponentiationFirstChunk f
+  | f == 0 = 0
+  | otherwise = let f1 = conj f
+                    f2 = recip f
+                    newf0 = f1 * f2 -- == f^(_q ^6 - 1)
+                in fq12Frobenius 2 newf0 * newf0 -- == f^((_q ^ 6 - 1) * (_q ^ 2 + 1))
+
+-- | Iterated Frobenius automorphism in @Fq12@.
+fq12Frobenius :: PairingBN e => Int -> Fq12 e -> Fq12 e
+fq12Frobenius i a
+  | i == 0    = a
+  | i == 1    = fastFrobenius a
+  | i > 1     = let prev = fq12Frobenius (i - 1) a in fastFrobenius prev
+  | otherwise = panic "fq12Frobenius: not defined for negative values of i."
+{-# INLINEABLE fq12Frobenius #-}
+
+-- | Fast Frobenius automorphism in @Fq12@.
+fastFrobenius :: forall e . PairingBN e => Fq12 e -> Fq12 e
+fastFrobenius = coll . conv [[0,2,4],[1,3,5]] . cone
+  where
+    cone = map (map conj . fromE) . fromE
+    conv = zipWith (zipWith (\x y -> F.pow xi ((x * (F.char (witness :: Fq e) - 1)) `div` 6) * y))
+    coll = toE . map toE
+{-# INLINEABLE fastFrobenius #-}
+
+-- | Conjugation.
+conj :: forall k im . IrreducibleMonic k im => Extension k im -> Extension k im
+conj x
+  | deg x /= 2 * deg (witness :: k) = panic "conj: extension degree is not two."
+  | otherwise                       = case fromE x of
+    [y, z] -> toE [y, negate z]
+    [y]    -> toE [y]
+    []     -> 0
+    _      -> panic "conj: unreachable."
+{-# INLINEABLE conj #-}
