@@ -67,9 +67,7 @@ library:
     - Data.Pairing.BarretoNaehrig.BN254.Serialize.Jivsov
     - Data.Pairing.BarretoNaehrig.BN254.Serialize.MCLWasm
     - Data.Pairing.BarretoNaehrig.BN254.Serialize.Types
-    - Data.Pairing.BarretoNaehrig.BN254A.Ate
     - Data.Pairing.BarretoNaehrig.BN254A.Base
-    - Data.Pairing.BarretoNaehrig.BN254B.Ate
     - Data.Pairing.BarretoNaehrig.BN254B.Base
     - Data.Pairing.BarretoNaehrig.BN462.Base
     - Data.Pairing.BarretoLynnScott.BLS12381.Ate

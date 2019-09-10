@@ -8,7 +8,7 @@ import Protolude
 
 import Data.Curve.Weierstrass (Point(..))
 import Data.Curve.Weierstrass.BN254 as BN254 (BN254, Q, R)
-import Data.Field.Galois (CyclicSubgroup(..), RootsOfUnity, toE', toU')
+import Data.Field.Galois
 
 import Data.Pairing.BarretoNaehrig (PairingBN(..), Fq12)
 
@@ -23,7 +23,7 @@ instance PairingBN BN254 where
 
   type instance R BN254 = BN254.R
 
-  beta = -1
+  beta = 1
   {-# INLINABLE beta #-}
 
   coefficient = 3

@@ -128,7 +128,7 @@ deriving instance PairingBN e => Show (Fq e)
 type Fq2 e = Extension (Fq e) U
 data U
 instance PairingBN e => IrreducibleMonic (Fq e) U where
-  poly _ = X2 - monomial 0 beta
+  poly _ = X2 + monomial 0 beta
   {-# INLINE poly #-}
 
 -- | @Fq6@.

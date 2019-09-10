@@ -2,75 +2,30 @@
 
 module Data.Pairing.BarretoNaehrig.BN254A
   ( module Data.Pairing
+  , module Data.Pairing.BarretoNaehrig
   -- * BN254A curve
-  , B.BN254A
-  -- ** Domain parameters
-  , B.Fq
-  , B.Fq2
-  , B.Fq6
-  , B.Fq12
-  , B.Fr
+  , BN254A
   ) where
 
 import Protolude
 
-import Data.Field.Galois (toE')
-
 import Data.Pairing
 import Data.Pairing.BarretoNaehrig
-import qualified Data.Pairing.BarretoNaehrig.Ate as B
-import qualified Data.Pairing.BarretoNaehrig.BN254A.Base as B
+import Data.Pairing.BarretoNaehrig.Ate
+import Data.Pairing.BarretoNaehrig.BN254A.Base
 
 -------------------------------------------------------------------------------
 -- BN254A curve
 -------------------------------------------------------------------------------
 
--- Pairing of BN254A curve.
-instance Pairing B.BN254A where
+-- BN254A curve is a pairing-friendly curve.
+instance Pairing (BN BN254A) where
 
-  type instance G1 B.BN254A = B.G1
+  type instance G1 (BN BN254A) = G1BN BN254A
 
-  type instance G2 B.BN254A = B.G2
+  type instance G2 (BN BN254A) = G2BN BN254A
 
-  type instance GT B.BN254A = B.GT
+  type instance GT (BN BN254A) = GTBN BN254A
 
-  pairing = (.) B.finalExponentiation . B.millerAlgorithm
+  pairing = (.) finalExponentiation . millerAlgorithm
   {-# INLINABLE pairing #-}
-
--- BN254A curve is a Barreto-Naehrig curve.
-instance BarretoNaehrig B.BN254A where
-
-  type instance Q B.BN254A = B.Q
-
-  type instance Q2 B.BN254A = B.U
-
-  type instance Q6 B.BN254A = B.V
-
-  type instance Q12 B.BN254A = B.W
-
-  type instance R B.BN254A = B.R
-
-  parameter _ = [ 1, 0, 1, 0, 0,-1, 0, 1, 1, 0, 0, 0,-1, 0, 0, 1
-                , 1, 0, 0,-1, 0, 0, 0, 0, 0, 1, 0, 0,-1, 0, 0, 1
-                , 1, 1, 0, 0, 0, 0,-1, 0, 1, 0, 0,-1, 0, 1, 1, 0
-                , 0, 1, 0, 0,-1, 1, 0, 0,-1, 0, 1, 0, 1, 0, 0, 0
-                ]
-  {-# INLINABLE parameter #-}
-
-  beta = -1
-  {-# INLINABLE beta #-}
-
-  xi = toE' [9, 1]
-  {-# INLINABLE xi #-}
-
-  finalExponentiation = B.finalExponentiation
-  {-# INLINABLE finalExponentiation #-}
-
-  lineFunction = B.lineFunction
-  {-# INLINABLE lineFunction #-}
-
-  millerAlgorithm = B.millerAlgorithm
-  {-# INLINABLE millerAlgorithm #-}
-
-  twistFunction = B.twistFunction
-  {-# INLINABLE twistFunction #-}

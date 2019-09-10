@@ -1,113 +1,51 @@
+{-# OPTIONS -fno-warn-orphans #-}
+
 module Data.Pairing.BarretoNaehrig.BN254B.Base
-  ( G1.BN254B
-  -- * G1
-  , G1.Fq
-  , G1.Fr
-  , G1.Q
-  , G1.R
-  , G1
-  , G1'
-  , G1''
-  , G1._a
-  , G1._b
-  , G1._h
-  , G1._q
-  , G1._r
-  -- * G2
-  , G2.Fq2
-  , G2.U
-  , G2
-  , G2'
-  , G2''
-  , _a'
-  , _b'
-  , _h'
-  -- * GT
-  , Fq6
-  , Fq12
-  , GT
-  , V
-  , W
-  , _h''
+  ( BN254B
   ) where
 
 import Protolude
 
-import qualified Data.Curve.Weierstrass.BN254B as G1
-import qualified Data.Curve.Weierstrass.BN254BT as G2
+import Data.Curve.Weierstrass (Point(..))
+import Data.Curve.Weierstrass.BN254B as BN254B (BN254B, Q, R)
 import Data.Field.Galois
-import GHC.Natural (Natural)
+
+import Data.Pairing.BarretoNaehrig (PairingBN(..), Fq12)
 
 -------------------------------------------------------------------------------
--- G1
+-- BN254B curve
 -------------------------------------------------------------------------------
 
--- | @E(Fq)@ in affine coordinates.
-type G1 = G1.PA
+-- BN254B curve is a Barreto-Naehrig curve.
+instance PairingBN BN254B where
 
--- | @E(Fq)@ in Jacobian coordinates.
-type G1' = G1.PJ
+  type instance Q BN254B = BN254B.Q
 
--- | @E(Fq)@ in projective coordinates.
-type G1'' = G1.PP
+  type instance R BN254B = BN254B.R
 
--------------------------------------------------------------------------------
--- G2
--------------------------------------------------------------------------------
+  beta = 1
+  {-# INLINABLE beta #-}
 
--- | @E'(Fq2)@ in affine coordinates.
-type G2 = G2.PA
+  coefficient = 2
+  {-# INLINABLE coefficient #-}
 
--- | @E'(Fq2)@ in Jacobian coordinates.
-type G2' = G2.PJ
+  generator1 = A
+    0x2523648240000001ba344d80000000086121000000000013a700000000000012
+    0x1
+  {-# INLINABLE generator1 #-}
 
--- | @E'(Fq2)@ in projective coordinates.
-type G2'' = G2.PP
+  generator2 = A
+    (toE' [ 0x61a10bb519eb62feb8d8c7e8c61edb6a4648bbb4898bf0d91ee4224c803fb2b
+          , 0x516aaf9ba737833310aa78c5982aa5b1f4d746bae3784b70d8c34c1e7d54cf3
+          ]
+    )
+    (toE' [ 0x21897a06baf93439a90e096698c822329bd0ae6bdbe09bd19f0e07891cd2b9a
+          , 0xebb2b0e7c8b15268f6d4456f5f38d37b09006ffd739c9578a2d1aec6b3ace9b
+          ]
+    )
+  {-# INLINABLE generator2 #-}
 
--- | @E'(Fq2)@ coordinate @A@.
-_a' :: G2.Fq2
-_a' = G2._a
-{-# INLINABLE _a' #-}
-
--- | @E'(Fq2)@ coordinate @B@.
-_b' :: G2.Fq2
-_b' = G2._b
-{-# INLINABLE _b' #-}
-
--- | @E'(Fq2)@ cofactor.
-_h' :: Natural
-_h' = G2._h
-{-# INLINABLE _h' #-}
-
--------------------------------------------------------------------------------
--- GT
--------------------------------------------------------------------------------
-
--- | @Fq6 = Fq2[v]/<v^3 - u - 1>@.
-data V
-instance IrreducibleMonic G2.Fq2 V where
-  poly _ = X3 - Y X - 1
-  {-# INLINE poly #-}
-type Fq6 = Extension G2.Fq2 V
-
--- | @Fq12 = Fq6[w]/<w^2 - v>@.
-data W
-instance IrreducibleMonic Fq6 W where
-  poly _ = X2 - Y X
-  {-# INLINE poly #-}
-type Fq12 = Extension Fq6 W
-
--- | @r@-th roots of unity subgroup of the multiplicative group of @Fq12@.
-type GT = RootsOfUnity 0x2523648240000001ba344d8000000007ff9f800000000010a10000000000000d Fq12
-
--- | @r@-th roots of unity cofactor.
-_h'' :: Natural
-_h'' = cofactor (witness :: GT)
-{-# INLINABLE _h'' #-}
-
--- @r@-th roots of unity are cyclic subgroups.
-instance CyclicSubgroup GT where
-  gen = toU' $
+  generatorT = toU' $
     toE' [ toE' [ toE' [ 15269873623239800999557327311250435268617471208059090937044486994450822355367
                        , 9380725316676863990416130313685403656187507254911875018589618543298700745417
                        ]
@@ -129,4 +67,20 @@ instance CyclicSubgroup GT where
                        ]
                 ]
          ]
+  {-# INLINABLE generatorT #-}
+
+  parameter _ = [ 1, 0, 1, 0, 0,-1, 0, 1, 1, 0, 0, 0,-1, 0, 0, 1
+                , 1, 0, 0,-1, 0, 0, 0, 0, 0, 1, 0, 0,-1, 0, 0, 1
+                , 1, 1, 0, 0, 0, 0,-1, 0, 1, 0, 0,-1, 0, 1, 1, 0
+                , 0, 1, 0, 0,-1, 1, 0, 0,-1, 0, 1, 0, 1, 0, 0, 0
+                ]
+  {-# INLINABLE parameter #-}
+
+  xi = toE' [1, 1]
+  {-# INLINABLE xi #-}
+
+-- BN254B curve @r@-th roots of unity is a cyclic subgroup.
+instance CyclicSubgroup (RootsOfUnity BN254B.R (Fq12 BN254B)) where
+
+  gen = generatorT
   {-# INLINABLE gen #-}
