@@ -3,7 +3,7 @@ module Test.Hash where
 import Protolude
 
 import Data.Curve
-import qualified Data.Pairing.BarretoNaehrig.BN254 as BN254
+import Data.Pairing.BN254.Hash
 import Test.QuickCheck.Instances ()
 import Test.QuickCheck.Monadic
 import Test.Tasty
@@ -16,7 +16,7 @@ testHash = testGroup "Hash"
 
 prop_swEncBN :: ByteString -> Property
 prop_swEncBN bs = monadicIO $ do
-  curve <- run $ BN254.swEncBN bs
+  curve <- run $ swEncBN bs
   assert $ isJust curve
   let curve' = fromMaybe (panic "unreachable.") curve
   assert $ def curve'

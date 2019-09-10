@@ -3,7 +3,9 @@ module Test.Byte where
 import Protolude
 
 import Data.Field.Galois
-import Data.Pairing.BarretoNaehrig.BN254
+import Data.Pairing.BN
+import Data.Pairing.BN254
+import Data.Pairing.BN254.Byte
 import Test.QuickCheck.Monadic
 import Test.Tasty
 import Test.Tasty.HUnit
@@ -11,14 +13,13 @@ import Test.Tasty.QuickCheck
 
 testByte :: TestTree
 testByte = testGroup "Byte"
-  [ testProperty "Fq" prop_fqByteRepr
-  , testProperty "Fq2" prop_fq2ByteRepr
-  , testProperty "Fq6" prop_fq6ByteRepr
-  , testProperty "Fq12" prop_fq12ByteRepr
+  [ testProperty "Fq" (galoisFieldTest :: Fq BN254 -> Property)
+  , testProperty "Fq2" (galoisFieldTest :: Fq2 BN254 -> Property)
+  , testProperty "Fq6" (galoisFieldTest :: Fq6 BN254 -> Property)
+  , testProperty "Fq12" (galoisFieldTest :: Fq12 BN254 -> Property)
   ]
 
-byteReprTest :: (ByteRepr k, GaloisField k)
-  => k -> ByteOrder -> Int -> Assertion
+byteReprTest :: (ByteRepr k, GaloisField k) => k -> ByteOrder -> Int -> Assertion
 byteReprTest f bo sz = do 
   let t = mkRepr (ByteOrderLength bo sz) f
   assertBool ("mkRepr " <> show f) (isJust t)
@@ -27,32 +28,10 @@ byteReprTest f bo sz = do
   assertBool ("fromRepr " <> show f) (isJust d)
   d @?= Just f
 
-primeTest :: (ByteRepr (Prime p), KnownNat p)
-  => Prime p -> Assertion
-primeTest f = do
+galoisFieldTest :: (ByteRepr k, GaloisField k) => k -> Property
+galoisFieldTest 0 = monadicIO $ pure ()
+galoisFieldTest f = monadicIO . run $ do
   byteReprTest f MostSignificantFirst 32
   byteReprTest f LeastSignificantFirst 32
   byteReprTest f MostSignificantFirst 64
   byteReprTest f LeastSignificantFirst 64
-
-extensionTest :: forall k im . (ByteRepr (Extension k im), IrreducibleMonic k im)
-  => Extension k im -> Assertion
-extensionTest f = case fromE f of
-  [] -> pure ()
-  _  -> do
-    byteReprTest f MostSignificantFirst 32
-    byteReprTest f LeastSignificantFirst 32
-    byteReprTest f MostSignificantFirst 64
-    byteReprTest f LeastSignificantFirst 64
-
-prop_fqByteRepr :: Fq -> Property
-prop_fqByteRepr = monadicIO . run . primeTest
-
-prop_fq2ByteRepr :: Fq2 -> Property
-prop_fq2ByteRepr = monadicIO . run . extensionTest
-
-prop_fq6ByteRepr :: Fq6 -> Property
-prop_fq6ByteRepr = monadicIO . run . extensionTest
-
-prop_fq12ByteRepr :: Fq12 -> Property
-prop_fq12ByteRepr = monadicIO . run . extensionTest

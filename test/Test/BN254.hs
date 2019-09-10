@@ -4,7 +4,8 @@ import Protolude
 
 import Data.Curve.Weierstrass
 import Data.Field.Galois
-import Data.Pairing.BarretoNaehrig.BN254
+import Data.Pairing.BN
+import Data.Pairing.BN254
 import Test.Tasty
 import Test.Tasty.HUnit
 import Test.Tasty.QuickCheck
@@ -13,18 +14,18 @@ import Test.Pairing
 
 testBN254 :: TestTree
 testBN254 = localOption (QuickCheckTests 10) $ testGroup "BN254"
-  [ groupPairingAxioms (witness :: BN254)
-  , curvePairingAxioms (witness :: BN254)
-  , testCase "Verify pairing" $
-    pairing g1 g2 @?= gt
+  [ pairingAxioms (witness :: BN254)
+  , groupAxioms (witness :: GTBN BN254)
+  , fieldAxioms (witness :: Fq12 BN254)
+  , testCase "Verify pairing" $ pairing g1 g2 @?= gt
   ]
 
-g1 :: G1 BN254
+g1 :: G1BN BN254
 g1 = A
   1368015179489954701390400359078579693043519447331113978918064868415326638035
   9918110051302171585080402603319702774565515993150576347155970296011118125764
 
-g2 :: G2 BN254
+g2 :: G2BN BN254
 g2 = A
   ( toE' [ 2725019753478801796453339367788033689375851816420509565303521482350756874229
          , 7273165102799931111715871471550377909735733521218303035754523677688038059653
@@ -35,7 +36,7 @@ g2 = A
          ]
   )
 
-gt :: GT BN254
+gt :: GTBN BN254
 gt = toU $
   toE' [ toE' [ toE' [ 7297928317524675251652102644847406639091474940444702627333408876432772026640
                      , 18010865284024443253481973710158529446817119443459787454101328040744995455319
