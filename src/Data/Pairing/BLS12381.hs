@@ -1,6 +1,6 @@
 {-# OPTIONS -fno-warn-orphans #-}
 
-module Data.Pairing.BLS.BLS12381
+module Data.Pairing.BLS12381
   ( module Data.Pairing
   -- * BLS12381 curve
   , B.BLS12381
@@ -11,15 +11,15 @@ module Data.Pairing.BLS.BLS12381
   , B.Fq12
   , B.Fr
   -- ** Optimal ate pairing
-  , module Data.Pairing.BLS.BLS12381.Ate
+  , module Data.Pairing.BLS12381.Ate
   -- ** Hash encoding
-  , module Data.Pairing.BLS.BLS12381.Hash
+  , module Data.Pairing.BLS12381.Hash
   ) where
 
 import Data.Pairing
-import Data.Pairing.BLS.BLS12381.Ate
-import qualified Data.Pairing.BLS.BLS12381.Base as B
-import Data.Pairing.BLS.BLS12381.Hash
+import Data.Pairing.BLS12381.Ate
+import qualified Data.Pairing.BLS12381.Base as B
+import Data.Pairing.BLS12381.Hash
 
 -------------------------------------------------------------------------------
 -- BLS12381 curve

@@ -1,6 +1,6 @@
 {-# OPTIONS -fno-warn-orphans #-}
 
-module Data.Pairing.BN.BN254.Byte
+module Data.Pairing.BN254.Byte
   ( module Data.Pairing.Byte
   ) where
 
@@ -10,7 +10,7 @@ import Data.ByteString (splitAt)
 import Data.Field.Galois (fromE, fromP, toE)
 
 import Data.Pairing.BN (Fq, Fq2, Fq6, Fq12)
-import Data.Pairing.BN.BN254.Base (BN254)
+import Data.Pairing.BN254.Base (BN254)
 import Data.Pairing.Byte
 
 -------------------------------------------------------------------------------

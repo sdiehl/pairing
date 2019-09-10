@@ -1,14 +1,14 @@
 {-# OPTIONS -fno-warn-orphans #-}
 
-module Data.Pairing.BN.BN254
+module Data.Pairing.BN254
   ( module Data.Pairing
   , module Data.Pairing.BN
   -- * BN254 curve
   , BN254
   -- ** Byte representation
-  , module Data.Pairing.BN.BN254.Byte
+  , module Data.Pairing.BN254.Byte
   -- ** Hash encoding
-  , module Data.Pairing.BN.BN254.Hash
+  , module Data.Pairing.BN254.Hash
   ) where
 
 import Protolude
@@ -16,9 +16,9 @@ import Protolude
 import Data.Pairing
 import Data.Pairing.BN
 import Data.Pairing.BN.Ate
-import Data.Pairing.BN.BN254.Base
-import Data.Pairing.BN.BN254.Byte
-import Data.Pairing.BN.BN254.Hash
+import Data.Pairing.BN254.Base
+import Data.Pairing.BN254.Byte
+import Data.Pairing.BN254.Hash
 
 -------------------------------------------------------------------------------
 -- BN254 curve

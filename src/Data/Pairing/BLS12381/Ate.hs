@@ -1,4 +1,4 @@
-module Data.Pairing.BLS.BLS12381.Ate
+module Data.Pairing.BLS12381.Ate
   ( ateLoopCountBinary
   , atePairing
   , finalExponentiation
@@ -17,7 +17,7 @@ import Data.Field.Galois as F
 import Data.List ((!!))
 import GHC.Natural (Natural)
 
-import Data.Pairing.BLS.BLS12381.Base
+import Data.Pairing.BLS12381.Base
 
 -------------------------------------------------------------------------------
 -- Ate pairing

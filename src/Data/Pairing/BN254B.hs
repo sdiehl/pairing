@@ -1,6 +1,6 @@
 {-# OPTIONS -fno-warn-orphans #-}
 
-module Data.Pairing.BN.BN254B
+module Data.Pairing.BN254B
   ( module Data.Pairing
   , module Data.Pairing.BN
   -- * BN254B curve
@@ -12,7 +12,7 @@ import Protolude
 import Data.Pairing
 import Data.Pairing.BN
 import Data.Pairing.BN.Ate
-import Data.Pairing.BN.BN254B.Base
+import Data.Pairing.BN254B.Base
 
 -------------------------------------------------------------------------------
 -- BN254B curve

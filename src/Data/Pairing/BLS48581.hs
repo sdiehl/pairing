@@ -1,6 +1,6 @@
 {-# OPTIONS -fno-warn-orphans #-}
 
-module Data.Pairing.BLS.BLS48581
+module Data.Pairing.BLS48581
   ( module Data.Pairing
   -- * BLS48581 curve
   , B.BLS48581
@@ -13,7 +13,7 @@ module Data.Pairing.BLS.BLS48581
   ) where
 
 import Data.Pairing
-import qualified Data.Pairing.BLS.BLS48581.Base as B
+import qualified Data.Pairing.BLS48581.Base as B
 
 -------------------------------------------------------------------------------
 -- BLS48581 curve

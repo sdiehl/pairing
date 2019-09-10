@@ -1,4 +1,4 @@
-module Data.Pairing.BLS.BLS48581.Base
+module Data.Pairing.BLS48581.Base
   ( G1.BLS48581
   , G1.Fr
   , G1._q

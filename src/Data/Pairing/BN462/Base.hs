@@ -1,6 +1,6 @@
 {-# OPTIONS -fno-warn-orphans #-}
 
-module Data.Pairing.BN.BN462.Base
+module Data.Pairing.BN462.Base
   ( BN462
   ) where
 

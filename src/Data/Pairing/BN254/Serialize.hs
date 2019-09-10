@@ -1,8 +1,8 @@
-module Data.Pairing.BN.BN254.Serialize
+module Data.Pairing.BN254.Serialize
   (
   ) where
 
--- import Data.Pairing.BN.BN254.Serialize.Types
+-- import Data.Pairing.BN254.Serialize.Types
 
 -- fromByteStringG1 :: FromSerialisedForm u => u -> LByteString -> Either Text G1
 -- fromByteStringG1 unser = unserializePoint unser generatorG1 . toSL
