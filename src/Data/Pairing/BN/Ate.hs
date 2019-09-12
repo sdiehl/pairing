@@ -115,7 +115,7 @@ fastFrobenius = coll . conv [[0,2,4],[1,3,5]] . cone
 {-# INLINEABLE fastFrobenius #-}
 
 -- | Conjugation.
-conj :: forall k im . IrreducibleMonic k im => Extension k im -> Extension k im
+conj :: forall k p . IrreducibleMonic p k => Extension p k -> Extension p k
 conj x
   | deg x /= 2 * deg (witness :: k) = panic "conj: extension degree is not two."
   | otherwise                       = case fromE x of

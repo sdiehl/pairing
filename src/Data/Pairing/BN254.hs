@@ -23,6 +23,8 @@ import Data.Pairing.BN (PairingBN(..), Fq12)
 -- BN254 curve is a Barreto-Naehrig curve.
 instance PairingBN BN254 where
 
+  data instance BN BN254
+
   type instance Q BN254 = BN254.Q
 
   type instance R BN254 = BN254.R

@@ -1,6 +1,5 @@
 module Data.Pairing.BN.Base
-  ( BN
-  , Fq
+  ( Fq
   , Fq2
   , Fq6
   , Fq12
@@ -29,13 +28,13 @@ import Data.Pairing (Pairing(..))
 -- Pairings
 -------------------------------------------------------------------------------
 
--- | Barreto-Naehrig curves.
-data BN e
-
 -- | Pairings of Barreto-Naehrig curves.
 class (G1 (BN e) ~ G1BN e, G2 (BN e) ~ G2BN e, GT (BN e) ~ GTBN e,
        KnownNat (Q e), KnownNat (R e), Pairing (BN e)) => PairingBN e where
   {-# MINIMAL beta, coefficient, generator1, generator2, generatorT, parameter, xi #-}
+
+  -- | Barreto-Naehrig curves.
+  data family BN e :: *
 
   -- | Characteristic of field of points.
   type family Q e :: Nat
@@ -105,63 +104,53 @@ type GTBN e = RootsOfUnity (R e) (Fq12 e)
 
 -- | @Fq@.
 newtype Fq e = Fq (Prime (Q e))
+  deriving (Bits, Eq, Generic, NFData, Ord, Show)
 deriving instance PairingBN e => Arbitrary (Fq e)
-deriving instance PairingBN e => Bits (Fq e)
-deriving instance PairingBN e => Eq (Fq e)
 deriving instance PairingBN e => Euclidean (Fq e)
 deriving instance PairingBN e => Field (Fq e)
 deriving instance PairingBN e => Fractional (Fq e)
 deriving instance PairingBN e => GaloisField (Fq e)
 deriving instance PairingBN e => GcdDomain (Fq e)
-deriving instance PairingBN e => Generic (Fq e)
-deriving instance PairingBN e => NFData (Fq e)
 deriving instance PairingBN e => Num (Fq e)
-deriving instance PairingBN e => Ord (Fq e)
 deriving instance PairingBN e => Pretty (Fq e)
 deriving instance PairingBN e => PrimeField (Fq e)
 deriving instance PairingBN e => Random (Fq e)
 deriving instance PairingBN e => Ring (Fq e)
 deriving instance PairingBN e => Semiring (Fq e)
-deriving instance PairingBN e => Show (Fq e)
 
 -- | @Fq2@.
-type Fq2 e = Extension (Fq e) U
+type Fq2 e = Extension U (Fq e)
 data U
-instance PairingBN e => IrreducibleMonic (Fq e) U where
+instance PairingBN e => IrreducibleMonic U (Fq e) where
   poly _ = X2 + monomial 0 beta
   {-# INLINE poly #-}
 
 -- | @Fq6@.
-type Fq6 e = Extension (Fq2 e) V
+type Fq6 e = Extension V (Fq2 e)
 data V
-instance PairingBN e => IrreducibleMonic (Fq2 e) V where
+instance PairingBN e => IrreducibleMonic V (Fq2 e) where
   poly _ = X3 - monomial 0 xi
   {-# INLINE poly #-}
 
 -- | @Fq12@.
-type Fq12 e = Extension (Fq6 e) W
+type Fq12 e = Extension W (Fq6 e)
 data W
-instance PairingBN e => IrreducibleMonic (Fq6 e) W where
+instance PairingBN e => IrreducibleMonic W (Fq6 e) where
   poly _ = X2 - Y X
   {-# INLINE poly #-}
 
 -- | @Fr@.
 newtype Fr e = Fr (Prime (R e))
+  deriving (Bits, Eq, Generic, NFData, Ord, Show)
 deriving instance PairingBN e => Arbitrary (Fr e)
-deriving instance PairingBN e => Bits (Fr e)
-deriving instance PairingBN e => Eq (Fr e)
 deriving instance PairingBN e => Euclidean (Fr e)
 deriving instance PairingBN e => Field (Fr e)
 deriving instance PairingBN e => Fractional (Fr e)
 deriving instance PairingBN e => GaloisField (Fr e)
 deriving instance PairingBN e => GcdDomain (Fr e)
-deriving instance PairingBN e => Generic (Fr e)
-deriving instance PairingBN e => NFData (Fr e)
 deriving instance PairingBN e => Num (Fr e)
-deriving instance PairingBN e => Ord (Fr e)
 deriving instance PairingBN e => Pretty (Fr e)
 deriving instance PairingBN e => PrimeField (Fr e)
 deriving instance PairingBN e => Random (Fr e)
 deriving instance PairingBN e => Ring (Fr e)
 deriving instance PairingBN e => Semiring (Fr e)
-deriving instance PairingBN e => Show (Fr e)

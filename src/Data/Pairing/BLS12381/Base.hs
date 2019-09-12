@@ -80,17 +80,17 @@ _h' = G2._h
 
 -- | @Fq6 = Fq2[v]/<v^3 - u - 1>@.
 data PolynomialV
-instance IrreducibleMonic G2.Fq2 PolynomialV where
+instance IrreducibleMonic PolynomialV G2.Fq2 where
   poly _ = X3 - Y X - 1
   {-# INLINE poly #-}
-type Fq6 = Extension G2.Fq2 PolynomialV
+type Fq6 = Extension PolynomialV G2.Fq2
 
 -- | @Fq12 = Fq6[w]/<w^2 - v>@.
 data PolynomialW
-instance IrreducibleMonic Fq6 PolynomialW where
+instance IrreducibleMonic PolynomialW Fq6 where
   poly _ = X2 - Y X
   {-# INLINE poly #-}
-type Fq12 = Extension Fq6 PolynomialW
+type Fq12 = Extension PolynomialW Fq6
 
 -- | @r@-th roots of unity subgroup of the multiplicative group of @Fq12@.
 type GT = RootsOfUnity 0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001 Fq12

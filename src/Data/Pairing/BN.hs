@@ -3,7 +3,6 @@
 module Data.Pairing.BN
   ( module Data.Pairing
   -- * Barreto-Naehrig curves
-  , BN
   , PairingBN(..)
   -- ** Elliptic curves
   , G1BN
