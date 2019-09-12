@@ -20,7 +20,7 @@ testByte = testGroup "Byte"
   ]
 
 byteReprTest :: (ByteRepr k, GaloisField k) => k -> ByteOrder -> Int -> Assertion
-byteReprTest f bo sz = do 
+byteReprTest f bo sz = do
   let t = mkRepr (ByteOrderLength bo sz) f
   assertBool ("mkRepr " <> show f) (isJust t)
   let bs = fromMaybe (panic "unreachable.") t

@@ -58,7 +58,7 @@ class (G1 (BN e) ~ G1BN e, G2 (BN e) ~ G2BN e, GT (BN e) ~ GTBN e,
   generatorT :: GTBN e
 
   -- | Barreto-Naehrig parameter.
-  parameter :: e -> [Int]
+  parameter :: e -> (Bool, [Int])
 
   -- | Cubic nonresidue of @Fq2@.
   xi :: Fq2 e

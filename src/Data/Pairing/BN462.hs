@@ -23,6 +23,8 @@ import Data.Pairing.BN (PairingBN(..), Fq12)
 -- BN462 curve is a Barreto-Naehrig curve.
 instance PairingBN BN462 where
 
+  data instance BN BN462
+
   type instance Q BN462 = BN462.Q
 
   type instance R BN462 = BN462.R
@@ -39,9 +41,9 @@ instance PairingBN BN462 where
   {-# INLINABLE generator1 #-}
 
   generator2 = A
-    (toE' [ 0x257ccc85b58dda0dfb38e3a8cbdc5482e0337e7c1cd96ed61c913820408208f9ad2699bad92e0032ae1f0aa6a8b48807695468e3d934ae1e4df                                                                 
+    (toE' [ 0x257ccc85b58dda0dfb38e3a8cbdc5482e0337e7c1cd96ed61c913820408208f9ad2699bad92e0032ae1f0aa6a8b48807695468e3d934ae1e4df
           , 0x1d2e4343e8599102af8edca849566ba3c98e2a354730cbed9176884058b18134dd86bae555b783718f50af8b59bf7e850e9b73108ba6aa8cd283
-          ] 
+          ]
     )
     (toE' [ 0xa0650439da22c1979517427a20809eca035634706e23c3fa7a6bb42fe810f1399a1f41c9ddae32e03695a140e7b11d7c3376e5b68df0db7154e
           , 0x73ef0cbd438cbe0172c8ae37306324d44d5e6b0c69ac57b393f1ab370fd725cc647692444a04ef87387aa68d53743493b9eba14cc552ca2a93a
@@ -52,11 +54,16 @@ instance PairingBN BN462 where
   generatorT = notImplemented
   {-# INLINABLE generatorT #-}
 
-  parameter _ = [ 1, 0, 1, 0, 0,-1, 0, 1, 1, 0, 0, 0,-1, 0, 0, 1
-                , 1, 0, 0,-1, 0, 0, 0, 0, 0, 1, 0, 0,-1, 0, 0, 1
-                , 1, 1, 0, 0, 0, 0,-1, 0, 1, 0, 0,-1, 0, 1, 1, 0
-                , 0, 1, 0, 0,-1, 1, 0, 0,-1, 0, 1, 0, 1, 0, 0, 0
-                ]
+  -- t = 20771722735339766972924978723274751
+  -- s = 124630336412038601837549872339648508
+  parameter _ = (True, [ 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0
+                       , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                       , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                       , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                       , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                       , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,-1, 0, 1, 1
+                       , 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,-1, 0, 1, 0, 1, 0
+                       ])
   {-# INLINABLE parameter #-}
 
   xi = toE' [2, 1]

@@ -20,8 +20,9 @@ import Data.Pairing.BN.Base
 millerAlgorithm :: forall e . PairingBN e => G1BN e -> G2BN e -> GTBN e
 millerAlgorithm O _ = mempty
 millerAlgorithm _ O = mempty
-millerAlgorithm p q = finalAddition p q $
-  millerLoop p q (parameter (witness :: e)) (q, mempty)
+millerAlgorithm p q = case parameter (witness :: e) of
+  (x, xs) -> (if x then identity else (<$>) recip) $
+    finalAddition p q $ millerLoop p q xs (q, mempty)
 {-# INLINABLE millerAlgorithm #-}
 
 -- Line 2 to line 10
@@ -38,12 +39,12 @@ millerLoop p q = millerLoop'
 
 -- Line 4
 doublingStep :: PairingBN e => G1BN e -> (G2BN e, GTBN e) -> (G2BN e, GTBN e)
-doublingStep p (t, f) = (dbl t, lineFunction t t p <> join (<>) f)
+doublingStep p (t, f) = (dbl t, lineFunction t t p <> f <> f)
 {-# INLINABLE doublingStep #-}
 
 -- Line 6 and line 8
 additionStep :: PairingBN e => G1BN e -> G2BN e -> (G2BN e, GTBN e) -> (G2BN e, GTBN e)
-additionStep p q (t, f) = (add t q, lineFunction t q p <> f)
+additionStep p q (t, f) = (t <> q, lineFunction t q p <> f)
 {-# INLINABLE additionStep #-}
 
 -- Line 11 to line 13
@@ -64,7 +65,7 @@ lineFunction (A x1 y1) (A x2 y2) (A x y)
   where
     l = (y2 - y1) / (x2 - x1)
     m = (3 * x1 * x1) / (2 * y1)
-lineFunction _ _ _ = panic "PairingBN.line: point at infinity."
+lineFunction _ _ _ = panic "Ate.lineFunction: point at infinity."
 {-# INLINE lineFunction #-}
 
 -- Twist function
