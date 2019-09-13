@@ -1,6 +1,5 @@
 module Data.Pairing.BN.Ate
   ( finalExponentiation
-  , lineFunction
   , millerAlgorithm
   , twistFunction
   ) where
@@ -39,34 +38,43 @@ millerLoop p q = millerLoop'
 
 -- Line 4
 doublingStep :: PairingBN e => G1BN e -> (G2BN e, GTBN e) -> (G2BN e, GTBN e)
-doublingStep p (t, f) = (dbl t, lineFunction t t p <> f <> f)
+doublingStep (A x y) (A x1 y1, f) = (A x3 y3, (f' *) <$> f <> f)
+  where
+    l  = (3 * x1 * x1) / (2 * y1)
+    x3 = l * l - 2 * x1
+    y3 = l * (x1 - x3) - y1
+    f' = toE' [embed (-y), toE' [x *^ l, y1 - l * x1]]
+doublingStep _ _                  = panic "Ate.doublingStep: point at infinity."
 {-# INLINABLE doublingStep #-}
 
 -- Line 6 and line 8
 additionStep :: PairingBN e => G1BN e -> G2BN e -> (G2BN e, GTBN e) -> (G2BN e, GTBN e)
-additionStep p q (t, f) = (t <> q, lineFunction t q p <> f)
+additionStep (A x y) (A x1 y1) (A x2 y2, f) = (A x3 y3, (f' *) <$> f)
+  where
+    l  = (y2 - y1) / (x2 - x1)
+    x3 = l * l - x1 - x2
+    y3 = l * (x1 - x3) - y1
+    f' = toE' [embed (-y), toE' [x *^ l, y1 - l * x1]]
+additionStep _ _ _                          = panic "Ate.additionStep: point at infinity."
 {-# INLINABLE additionStep #-}
 
 -- Line 11 to line 13
 finalAddition :: PairingBN e => G1BN e -> G2BN e -> (G2BN e, GTBN e) -> GTBN e
-finalAddition p q (t, f) = lineFunction t q1 p <> lineFunction t' q2 p <> f
-  where
-    q1 = twistFunction $ C.frob q
-    q2 = inv . twistFunction $ C.frob q1
-    t' = add t q1
+finalAddition (A x y) q (A x1 y1, f) = case twistFunction $ C.frob q of
+  q'@(A x2 y2) -> case inv . twistFunction $ C.frob q' of
+    A x2' y2' -> ((f'' * f') *) <$> f
+      where
+        m  = (y2' - y1') / (x2' - x1')
+        f' = toE' [embed (-y), toE' [x *^ m, y1' - m * x1']]
+    _         -> panic "Ate.finalAddition: point at infinity."
+    where
+      l   = (y2 - y1) / (x2 - x1)
+      x1' = l * l - x1 - x2
+      y1' = l * (x1 - x1') - y1
+      f'' = toE' [embed (-y), toE' [x *^ l, y1 - l * x1]]
+  _            -> panic "Ate.finalAddition: point at infinity."
+finalAddition _ _ _                  = panic "Ate.finalAddition: point at infinity."
 {-# INLINABLE finalAddition #-}
-
--- Line function
-lineFunction :: forall e . PairingBN e => G2BN e -> G2BN e -> G1BN e -> GTBN e
-lineFunction (A x1 y1) (A x2 y2) (A x y)
-  | x1 /= x2       = toU' $ toE' [embed (-y), toE' [x *^ l, y1 - l * x1]]
-  | y1 + y2 == 0   = toU' $ toE' [embed x, embed (-x1)]
-  | otherwise      = toU' $ toE' [embed (-y), toE' [x *^ m, y1 - m * x1]]
-  where
-    l = (y2 - y1) / (x2 - x1)
-    m = (3 * x1 * x1) / (2 * y1)
-lineFunction _ _ _ = panic "Ate.lineFunction: point at infinity."
-{-# INLINE lineFunction #-}
 
 -- Twist function
 twistFunction :: forall e . PairingBN e => G2BN e -> G2BN e
