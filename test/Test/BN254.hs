@@ -8,14 +8,13 @@ import Data.Pairing.BN
 import Data.Pairing.BN254
 import Test.Tasty
 import Test.Tasty.HUnit
-import Test.Tasty.QuickCheck
 
 import Test.Pairing
 
 testBN254 :: TestTree
-testBN254 = localOption (QuickCheckTests 10) $ testGroup "BN254"
+testBN254 = testGroup "BN254"
   [ testBN (witness :: BN254)
-  , testCase "Verify pairing" $ pairing g1 g2 @?= gt
+  , testCase "Test vector" $ pairing g1 g2 @?= gt
   ]
 
 g1 :: G1BN BN254

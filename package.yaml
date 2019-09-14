@@ -64,10 +64,9 @@ library:
     - Data.Pairing.BN254B
     - Data.Pairing.BN462
   other-modules:
-    - Data.Pairing.BLS12381.Ate
-    - Data.Pairing.BLS12381.Base
-    - Data.Pairing.BLS12381.Hash
     - Data.Pairing.BLS48581.Base
+    - Data.Pairing.BLS.Ate
+    - Data.Pairing.BLS.Base
     - Data.Pairing.BN.Ate
     - Data.Pairing.BN.Base
     - Data.Pairing.Byte

@@ -1,62 +1,39 @@
-{-# LANGUAGE QuantifiedConstraints #-}
+{-# OPTIONS -fno-warn-orphans #-}
 
 module Data.Pairing.BLS
-  (
+  ( module Data.Pairing
   -- * Barreto-Lynn-Scott curves
-    BLS(..)
+  , PairingBLS(..)
+  -- ** Elliptic curves
+  , G1BLS
+  , G2BLS
+  , GTBLS
+  -- ** Galois fields
+  , Fq
+  , Fq2
+  , Fq6
+  , Fq12
+  , Fr
   ) where
 
 import Protolude
 
-import Data.Curve.Weierstrass (WACurve, WAPoint)
-import Data.Field.Galois
-
-import Data.Pairing (Pairing(..))
+import Data.Pairing
+import Data.Pairing.BLS.Ate
+import Data.Pairing.BLS.Base
 
 -------------------------------------------------------------------------------
 -- Barreto-Lynn-Scott curves
 -------------------------------------------------------------------------------
 
--- Pairings of Barreto-Lynn-Scott curves.
-class (KnownNat (Q e), KnownNat (R e),
-       IrreducibleMonic (Prime (Q e)) (Q2 e),
-       IrreducibleMonic (Extension (Prime (Q e)) (Q2 e)) (Q6 e),
-       IrreducibleMonic (Extension (Extension (Prime (Q e)) (Q2 e)) (Q6 e)) (Q12 e),
-       WACurve e (Prime (Q e)) (Prime (R e)),
-       WACurve e (Extension (Prime (Q e)) (Q2 e)) (Prime (R e)),
-       G1 e ~ WAPoint e (Prime (Q e)) (Prime (R e)),
-       G2 e ~ WAPoint e (Extension (Prime (Q e)) (Q2 e)) (Prime (R e)),
-       GT e ~ RootsOfUnity (R e) (Extension (Extension (Extension (Prime (Q e)) (Q2 e)) (Q6 e)) (Q12 e)),
-       Pairing e) => BLS e where
-  {-# MINIMAL beta, finalExponentiation, lineFunction, millerAlgorithm, parameter, twistFunction, xi #-}
+-- Barreto-Lynn-Scott curves are pairing-friendly curves.
+instance PairingBLS e => Pairing (BLS e) where
 
-  type family Q e = (q :: Nat) | q -> e
+  type instance G1 (BLS e) = G1BLS e
 
-  type family Q2 e = (q2 :: *) | q2 -> e
+  type instance G2 (BLS e) = G2BLS e
 
-  type family Q6 e = (q6 :: *) | q6 -> e
+  type instance GT (BLS e) = GTBLS e
 
-  type family Q12 e = (q12 :: *) | q12 -> e
-
-  type family R e = (r :: Nat) | r -> e
-
-  -- | Barreto-Lynn-Scott parameter.
-  parameter :: e -> [Int]
-
-  -- | Quadratic nonresidue.
-  beta :: Prime (Q e)
-
-  -- | Cubic nonresidue.
-  xi :: Extension (Prime (Q e)) (Q2 e)
-
-  -- | Final exponentiation.
-  finalExponentiation :: GT e -> GT e
-
-  -- | Line function.
-  lineFunction :: G2 e -> G2 e -> G1 e -> GT e
-
-  -- | Miller algorithm.
-  millerAlgorithm :: G1 e -> G2 e -> GT e
-
-  -- | Twist function.
-  twistFunction :: G2 e -> G2 e
+  pairing = (.) finalExponentiation . millerAlgorithm
+  {-# INLINABLE pairing #-}

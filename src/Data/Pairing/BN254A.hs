@@ -36,7 +36,7 @@ instance PairingBN BN254A where
   {-# INLINABLE coefficient #-}
 
   generator1 = A
-    1
+    0x1
     0xd45589b158faaf6ab0e4ad38d998e9982e7ff63964ee1460342a592677cccb0
   {-# INLINABLE generator1 #-}
 
@@ -77,14 +77,14 @@ instance PairingBN BN254A where
 
   -- t = 4593689212103950336
   -- s = 27562135272623702018
-  parameter _ = (True, [ 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0
-                       , 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                       , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                       , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0
-                       ])
+  parameter _ = [ 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0
+                   , 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                   , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                   , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0
+                ]
   {-# INLINABLE parameter #-}
 
-  xi = toE' [0, 1]
+  xi = U
   {-# INLINABLE xi #-}
 
 -- BN254A curve @r@-th roots of unity is a cyclic subgroup.

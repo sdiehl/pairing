@@ -52,24 +52,24 @@ instance PairingBN BN254B where
   {-# INLINABLE generator2 #-}
 
   generatorT = toU' $
-    toE' [ toE' [ toE' [ 0x21c27133a2aa06e3b2d66e37e618032d55f38f8b12786597e80695da1faa59a7
-                       , 0x14bd4d686cde84213c4c935c81b830db30fd1d27da523a6b72661df888959ac9
+    toE' [ toE' [ toE' [ 0xd8a793b0defaef46557b6694e97514cc17a5ef2a410a979113e53d0644f9a5a
+                       , 0x1ff35a6f3bd5e17c32b319111480f860b6572335300a6f07eec69fc89a586be7
                        ]
-                , toE' [ 0x21b48684c40004da450abf5c86e8ba5054904bedbd4f4c95c70ab62ae76f2dde
-                       , 0x184641d6aea9cb8ca739e6b42ac92a53bdb8b9ebd364ba98103ff67806eaea92
+                , toE' [ 0x221fc0405a912aa6a474d891868725ff1a821017264e02f74021107f3e32775a
+                       , 0x1c0c4fae54227be18b16acbc49dda4c3faafe051ea945152ad8a9bb4f5e734df
                        ]
-                , toE' [ 0x24c7a78229b7be793921d9d0811b0c6ced305f435506efd7540424ab8ed20f33
-                       , 0x27819b66a974604c0fe300aee03a2709806d4a4e7fcc26f8ac7dc90f302ee97
+                , toE' [ 0x11a0963c0701d5089ae418ebe84a5a97b24089c688eb91a931068a7f91db9339
+                       , 0x20b7dc228dd3a27f9589fae17d352de2f2a1076ff56eb716026708945f53afcf
                        ]
                 ]
-         , toE' [ toE' [ 0x19958fe280a23d8316240760c2406d3cbe4fe72acb873797c7b16c9b3bff04ce
-                       , 0x142435e8f0231bf073b80539f433608890c5e8f99d5e493634d67670a8882668
+         , toE' [ toE' [ 0x2984d9eb6e0fb0e6254c036c9f110c4eda9d0b47873483634e36219ef6d3667
+                       , 0x21bb4de1e9efc68028a58dd3b3677400c6a4edbb321a49b2554a3d94af7049ee
                        ]
-                , toE' [ 0x1ea0dee710f94abc55e17e616c9446cfb17f363c7b6fffbde976a6f9308ebc8b
-                       , 0x1b369c2f63c211e78b4a38b029cc0f48eaac3b995eb1409caf9db220de1f9d2a
+                , toE' [ 0x17224135a9a5fb3989c3f4e890c01ff14c2f25bc365500e6cfa5beacf99c030b
+                       , 0x1e3fabd61be8363430f4b6a50ef66f4dbde24fd135bfbbce2e3e515d6f382bd5
                        ]
-                , toE' [ 0x13f5dfaa80153279f2680e2c86819dcdb106d5313e2b65ceb23f08945248e4bc
-                       , 0x751b2e5bfd1d5bf9b6de4d17363f3792ef69ac4efd45e677ab6b39ac7f037b0
+                , toE' [ 0x237331610f44927d30add64ca35c4d4c6dd776bb212d6eb6da29bdbdb95408f2
+                       , 0x23bc485aa8a38dfabb7dcb49caed2e12b5b7cdffc35f6e41bdab5df1d54d51d8
                        ]
                 ]
          ]
@@ -77,14 +77,14 @@ instance PairingBN BN254B where
 
   -- t = -4647714815446351873
   -- s = -27886288892678111236
-  parameter _ = (False, [-1, 0, 0, 0, 0, 0,-1,-1, 0, 0, 0, 0, 0, 0, 0, 0
-                        , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                        , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                        , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,-1, 0, 0
-                        ])
+  parameter _ = [-1,-1, 0, 0, 0, 0, 0,-1,-1, 0, 0, 0, 0, 0, 0, 0, 0
+                   , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                   , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                   , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,-1, 0, 0
+                ]
   {-# INLINABLE parameter #-}
 
-  xi = toE' [1, 1]
+  xi = 1 + U
   {-# INLINABLE xi #-}
 
 -- BN254B curve @r@-th roots of unity is a cyclic subgroup.

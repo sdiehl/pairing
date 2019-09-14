@@ -4,6 +4,7 @@ import Protolude
 
 import Test.Tasty
 
+import Test.BLS12381
 import Test.BN254
 import Test.BN254A
 import Test.BN254B
@@ -14,5 +15,5 @@ import Test.Serialize
 
 main :: IO ()
 main = defaultMain $
-  testGroup "Pairing" [testBN254, testBN254A, testBN254B, testBN462,
+  testGroup "Pairing" [testBLS12381, testBN254, testBN254A, testBN254B, testBN462,
                        testByte, testHash, testSerialize]

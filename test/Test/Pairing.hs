@@ -5,6 +5,7 @@ import Protolude
 import Data.Field.Galois
 import Data.Group as G
 import Data.Pairing.BN
+import Data.Pairing.BLS
 import Test.Tasty
 import Test.Tasty.QuickCheck
 
@@ -25,7 +26,7 @@ unityRoot :: (KnownNat r, GaloisField q, Group a, Group b)
 unityRoot = ((.) . (.)) isRootOfUnity
 
 testBN :: forall e . PairingBN e => e -> TestTree
-testBN _ = testGroup "Pairing axioms"
+testBN _ = localOption (QuickCheckTests 10) $ testGroup "Pairing axioms"
   [ testProperty "left linearity" $
     leftLinearity (pairing :: G1BN e -> G2BN e -> GTBN e)
   , testProperty "right linearity" $
@@ -34,4 +35,16 @@ testBN _ = testGroup "Pairing axioms"
     nonDegeneracy (pairing :: G1BN e -> G2BN e -> GTBN e)
   , testProperty "unity root" $
     unityRoot (pairing :: G1BN e -> G2BN e -> GTBN e)
+  ]
+
+testBLS :: forall e . PairingBLS e => e -> TestTree
+testBLS _ = localOption (QuickCheckTests 10) $ testGroup "Pairing axioms"
+  [ testProperty "left linearity" $
+    leftLinearity (pairing :: G1BLS e -> G2BLS e -> GTBLS e)
+  , testProperty "right linearity" $
+    rightLinearity (pairing :: G1BLS e -> G2BLS e -> GTBLS e)
+  , testProperty "non-degeneracy" $
+    nonDegeneracy (pairing :: G1BLS e -> G2BLS e -> GTBLS e)
+  , testProperty "unity root" $
+    unityRoot (pairing :: G1BLS e -> G2BLS e -> GTBLS e)
   ]
