@@ -5,12 +5,10 @@ import Protolude
 import Criterion.Main
 import Data.Pairing.BN254.Hash
 
-benchmarkHash :: Benchmark
-benchmarkHash = bgroup "Hash"
-  [ bgroup "Hash to G1"
-    [ bench "swEncBN"
-      $ whnfIO (swEncBN test_hash)
-    ]
+benchHash :: Benchmark
+benchHash = bgroup "Hash"
+  [ bench "swEncBN"
+    $ whnfIO (swEncBN test_hash)
   ]
 
 test_hash :: ByteString

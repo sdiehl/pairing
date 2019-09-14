@@ -14,9 +14,7 @@ import Test.Pairing
 
 testBN254A :: TestTree
 testBN254A = localOption (QuickCheckTests 10) $ testGroup "BN254A"
-  [ pairingAxioms (witness :: BN254A)
-  , groupAxioms (witness :: GTBN BN254A)
-  , fieldAxioms (witness :: Fq12 BN254A)
+  [ testBN (witness :: BN254A)
   , testCase "Verify pairing" $ pairing g1 g2 @?= gt
   ]
 

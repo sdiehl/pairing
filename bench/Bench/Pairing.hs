@@ -10,8 +10,8 @@ import qualified Data.Pairing.BN254A as BN254A
 import qualified Data.Pairing.BN254B as BN254B
 import qualified Data.Pairing.BN462 as BN462
 
-benchmarkPairing :: Benchmark
-benchmarkPairing = bgroup "Pairing"
+benchPairing :: Benchmark
+benchPairing = bgroup "Pairing"
   [ bench "BN254"
     $ nf (uncurry pairing) bn254
   , bench "BN254A"
