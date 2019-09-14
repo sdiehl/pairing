@@ -20,8 +20,7 @@ millerAlgorithm :: forall e . PairingBN e => G1BN e -> G2BN e -> GTBN e
 millerAlgorithm O _ = mempty
 millerAlgorithm _ O = mempty
 millerAlgorithm p q = case parameter (witness :: e) of
-  (x, xs) -> (if x then identity else (<$>) recip) $
-    finalAddition p q $ millerLoop p q xs (q, mempty)
+  (x, xs) -> finalAddition p q $ millerLoop p q xs (if x then q else inv q, mempty)
 {-# INLINABLE millerAlgorithm #-}
 
 -- Line 2 to line 10
