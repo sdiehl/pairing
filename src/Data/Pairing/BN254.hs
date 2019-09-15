@@ -2,45 +2,71 @@
 
 module Data.Pairing.BN254
   ( module Data.Pairing
-  , module Data.Pairing.BN
   -- * BN254 curve
   , BN254
   ) where
 
 import Protolude
 
-import Data.Curve.Weierstrass (Point(..))
-import Data.Curve.Weierstrass.BN254 as BN254 (BN254, Q, R)
-import Data.Field.Galois
+import Data.Curve.Weierstrass.BN254 as BN254
+import Data.Field.Galois as F
+import Data.Poly.Semiring (monomial)
 
 import Data.Pairing (Pairing(..))
-import Data.Pairing.BN (PairingBN(..), Fq12)
+import Data.Pairing.Ate (millerBN)
 
 -------------------------------------------------------------------------------
--- BN254 curve
+-- Fields
 -------------------------------------------------------------------------------
 
--- BN254 curve is a Barreto-Naehrig curve.
-instance PairingBN BN254 where
+-- | Cubic nonresidue.
+xi :: Fq2
+xi = 9 + U
+{-# INLINE xi #-}
 
-  data instance BN BN254
+-- | @Fq2@.
+type Fq2 = Extension U Fq
+data U
+instance IrreducibleMonic U Fq where
+  poly _ = X2 + 1
+  {-# INLINE poly #-}
 
-  type instance Q BN254 = BN254.Q
+-- | @Fq6@.
+type Fq6 = Extension V Fq2
+data V
+instance IrreducibleMonic V Fq2 where
+  poly _ = X3 - monomial 0 xi
+  {-# INLINE poly #-}
 
-  type instance R BN254 = BN254.R
+-- | @Fq12@.
+type Fq12 = Extension W Fq6
+data W
+instance IrreducibleMonic W Fq6 where
+  poly _ = X2 - Y X
+  {-# INLINE poly #-}
 
-  beta = 1
-  {-# INLINABLE beta #-}
+-------------------------------------------------------------------------------
+-- Curves
+-------------------------------------------------------------------------------
 
-  coefficient = 3
-  {-# INLINABLE coefficient #-}
+-- | @G1@.
+type G1' = BN254.PA
 
-  generator1 = A
-    0x1
-    0x2
-  {-# INLINABLE generator1 #-}
-
-  generator2 = A
+-- | @G2@.
+type G2' = WAPoint BN254 Fq2 Fr
+instance WCurve 'Affine BN254 Fq2 Fr where
+  a_ = const 0
+  {-# INLINABLE a_ #-}
+  b_ = const $
+    toE' [ 0x2b149d40ceb8aaae81be18991be06ac3b5b4c5e559dbefa33267e6dc24a138e5
+         , 0x9713b03af0fed4cd2cafadeed8fdf4a74fa084e52d1852e4a2bd0685c315d2
+         ]
+  {-# INLINABLE b_ #-}
+  h_ = panic "G2.h_: not implemented."
+  q_ = panic "G2.q_: not implemented."
+  r_ = panic "G2.r_: not implemented."
+instance WACurve BN254 Fq2 Fr where
+  gA_ = A
     ( toE' [ 0x1800deef121f1e76426a00665e5c4479674322d4f75edadd46debd5cd992f6ed
            , 0x198e9393920d483a7260bfb731fb5d25f1aa493335a9e71297e485b7aef312c2
            ]
@@ -49,9 +75,12 @@ instance PairingBN BN254 where
            , 0x90689d0585ff075ec9e99ad690c3395bc4b313370b38ef355acdadcd122975b
            ]
     )
-  {-# INLINABLE generator2 #-}
+  {-# INLINABLE gA_ #-}
 
-  generatorT = toU' $
+-- | @GT@.
+type GT' = RootsOfUnity BN254.R Fq12
+instance CyclicSubgroup (RootsOfUnity BN254.R Fq12) where
+  gen = toU' $
     toE' [ toE' [ toE' [ 0x12c70e90e12b7874510cd1707e8856f71bf7f61d72631e268fca81000db9a1f5
                        , 0x84f330485b09e866bc2f2ea2b897394deaf3f12aa31f28cb0552990967d4704
                        ]
@@ -73,22 +102,90 @@ instance PairingBN BN254 where
                        ]
                 ]
          ]
-  {-# INLINABLE generatorT #-}
+  {-# INLINABLE gen #-}
+
+-------------------------------------------------------------------------------
+-- Pairings
+-------------------------------------------------------------------------------
+
+-- BN254 curve is pairing-friendly.
+instance Pairing BN254 where
+
+  type instance G1 BN254 = G1'
+
+  type instance G2 BN254 = G2'
+
+  type instance GT BN254 = GT'
+
+  finalExponentiation f = flip F.pow expVal . finalExponentiationFirstChunk <$> f
+    where
+      expVal = div (qq * (qq - 1) + 1) $ F.char (witness :: Fr)
+      qq     = join (*) $ F.char (witness :: Fq)
+  {-# INLINABLE finalExponentiation #-}
+
+  frobFunction (A x y) = A (F.frob x * x') (F.frob y * y')
+    where
+      x' = pow xi $ quot (F.char (witness :: Fq) - 1) 3
+      y' = pow xi $ shiftR (F.char (witness :: Fq)) 1
+  frobFunction _       = O
+  {-# INLINABLE frobFunction #-}
+
+  lineFunction (A x y) (A x1 y1) (A x2 y2) f
+    | x1 /= x2         = (A x3 y3, (<>) f . toU' $ toE' [embed (-y), toE' [x *^ l, y1 - l * x1]])
+    | y1 + y2 == 0     = (O, (<>) f . toU' $ toE' [embed x, embed (-x1)])
+    | otherwise        = (A x3' y3', (<>) f . toU' $ toE' [embed (-y), toE' [x *^ l', y1 - l' * x1]])
+    where
+      l   = (y2 - y1) / (x2 - x1)
+      x3  = l * l - x1 - x2
+      y3  = l * (x1 - x3) - y1
+      x12 = x1 * x1
+      l'  = (x12 + x12 + x12) / (y1 + y1)
+      x3' = l' * l' - x1 - x1
+      y3' = l' * (x1 - x3') - y1
+  lineFunction _ _ _ _ = (O, mempty)
+  {-# INLINABLE lineFunction #-}
 
   -- t = 4965661367192848881
   -- s = 29793968203157093288
-  parameter _ = [ 1, 1, 0, 1, 0, 0,-1, 0, 1, 1, 0, 0, 0,-1, 0, 0, 1
-                   , 1, 0, 0,-1, 0, 0, 0, 0, 0, 1, 0, 0,-1, 0, 0, 1
-                   , 1, 1, 0, 0, 0, 0,-1, 0, 1, 0, 0,-1, 0, 1, 1, 0
-                   , 0, 1, 0, 0,-1, 1, 0, 0,-1, 0, 1, 0, 1, 0, 0, 0
-                ]
-  {-# INLINABLE parameter #-}
+  pairing = (.) finalExponentiation . millerBN
+    [ 1, 1, 0, 1, 0, 0,-1, 0, 1, 1, 0, 0, 0,-1, 0, 0, 1
+       , 1, 0, 0,-1, 0, 0, 0, 0, 0, 1, 0, 0,-1, 0, 0, 1
+       , 1, 1, 0, 0, 0, 0,-1, 0, 1, 0, 0,-1, 0, 1, 1, 0
+       , 0, 1, 0, 0,-1, 1, 0, 0,-1, 0, 1, 0, 1, 0, 0, 0
+    ]
+  {-# INLINABLE pairing #-}
 
-  xi = 9 + U
-  {-# INLINABLE xi #-}
+finalExponentiationFirstChunk :: Fq12 -> Fq12
+finalExponentiationFirstChunk f
+  | f == 0 = 0
+  | otherwise = let f1 = conj f
+                    f2 = recip f
+                    newf0 = f1 * f2 -- == f^(_q ^6 - 1)
+                in fq12Frobenius 2 newf0 * newf0 -- == f^((_q ^ 6 - 1) * (_q ^ 2 + 1))
+{-# INLINABLE finalExponentiationFirstChunk #-}
 
--- BN254 curve @r@-th roots of unity is a cyclic subgroup.
-instance CyclicSubgroup (RootsOfUnity BN254.R (Fq12 BN254)) where
+fq12Frobenius :: Int -> Fq12 -> Fq12
+fq12Frobenius i a
+  | i == 0    = a
+  | i == 1    = fastFrobenius a
+  | i > 1     = let prev = fq12Frobenius (i - 1) a in fastFrobenius prev
+  | otherwise = panic "fq12Frobenius: not defined for negative values of i."
+{-# INLINABLE fq12Frobenius #-}
 
-  gen = generatorT
-  {-# INLINABLE gen #-}
+fastFrobenius :: Fq12 -> Fq12
+fastFrobenius = coll . conv [[0,2,4],[1,3,5]] . cone
+  where
+    cone = map (map conj . fromE) . fromE
+    conv = zipWith (zipWith (\x y -> F.pow xi ((x * (F.char (witness :: Fq) - 1)) `div` 6) * y))
+    coll = toE . map toE
+{-# INLINABLE fastFrobenius #-}
+
+conj :: forall k p . IrreducibleMonic p k => Extension p k -> Extension p k
+conj x
+  | deg x /= 2 * deg (witness :: k) = panic "conj: extension degree is not two."
+  | otherwise                       = case fromE x of
+    [y, z] -> toE [y, negate z]
+    [y]    -> toE [y]
+    []     -> 0
+    _      -> panic "conj: unreachable."
+{-# INLINABLE conj #-}

@@ -3,7 +3,7 @@ module Test.Hash where
 import Protolude
 
 import Data.Curve
-import Data.Pairing.BN254.Hash
+import Data.Pairing.Hash
 import Test.QuickCheck.Instances ()
 import Test.QuickCheck.Monadic
 import Test.Tasty

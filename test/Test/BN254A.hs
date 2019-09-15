@@ -4,7 +4,6 @@ import Protolude
 
 import Data.Curve.Weierstrass
 import Data.Field.Galois
-import Data.Pairing.BN
 import Data.Pairing.BN254A
 import Test.Tasty
 import Test.Tasty.HUnit
@@ -13,16 +12,16 @@ import Test.Pairing
 
 testBN254A :: TestTree
 testBN254A = testGroup "BN254A"
-  [ testBN (witness :: BN254A)
+  [ testPairing (witness :: BN254A)
   , testCase "Test vector" $ pairing g1 g2 @?= gt
   ]
 
-g1 :: G1BN BN254A
+g1 :: G1 BN254A
 g1 = A
   0xa971735a70fbdd0f94d7d6efbbc81bea78d2d92a8510f3344038a416419ad97
   0x9456e41754237447752a448282c0873785f724447e1299826f53ac556936d3f
 
-g2 :: G2BN BN254A
+g2 :: G2 BN254A
 g2 = A
   ( toE' [ 0x115231d7b49901ba97cb93b5227f7f7f438a346532893dd5fafd518950924aa9
          , 0xdf12398fb78695a50bb3499b7e23b0d9035989b91a76d13af7bc64374bfb8a6
@@ -33,7 +32,7 @@ g2 = A
          ]
   )
 
-gt :: GTBN BN254A
+gt :: GT BN254A
 gt = toU $
   toE' [ toE' [ toE' [ 0x6a4e0dd1f7fd2f9e5dacab02cec9ce8254925c5dc6697e153f05a242cbca8a8
                      , 0x22a0e22c097aec1187087b7632c9b963b0e779bc8d09848c44d3ea95cd1c1f8c

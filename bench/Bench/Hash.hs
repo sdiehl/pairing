@@ -3,12 +3,12 @@ module Bench.Hash where
 import Protolude
 
 import Criterion.Main
-import Data.Pairing.BN254.Hash
+import Data.Pairing.Hash
 
 benchHash :: Benchmark
 benchHash = bgroup "Hash"
-  [ bench "swEncBN"
-    $ whnfIO (swEncBN test_hash)
+  [ bench "swEncBN" $
+    whnfIO (swEncBN test_hash)
   ]
 
 test_hash :: ByteString

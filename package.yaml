@@ -50,25 +50,15 @@ ghc-options:
 library:
   exposed-modules:
     - Data.Pairing
-    - Data.Pairing.BLS
     - Data.Pairing.BLS12381
     - Data.Pairing.BLS48581
-    - Data.Pairing.BN
     - Data.Pairing.BN254
-    - Data.Pairing.BN254.Byte
-    - Data.Pairing.BN254.Hash
-    - Data.Pairing.BN254.Serialize.Jivsov
-    - Data.Pairing.BN254.Serialize.MCLWasm
-    - Data.Pairing.BN254.Serialize.Types
     - Data.Pairing.BN254A
     - Data.Pairing.BN254B
     - Data.Pairing.BN462
+    - Data.Pairing.Hash
   other-modules:
-    - Data.Pairing.BLS48581.Base
-    - Data.Pairing.BLS.Ate
-    - Data.Pairing.BLS.Base
-    - Data.Pairing.BN.Ate
-    - Data.Pairing.BN.Base
+    - Data.Pairing.Ate
     - Data.Pairing.Byte
   source-dirs:
     - src
