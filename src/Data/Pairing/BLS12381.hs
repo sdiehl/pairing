@@ -8,7 +8,8 @@ module Data.Pairing.BLS12381
 
 import Protolude
 
-import Data.Curve.Weierstrass.BLS12381 as BLS12381
+import Data.Curve.Weierstrass.BLS12381 as G1
+import qualified Data.Curve.Weierstrass.BLS12381T as G2
 import Data.Field.Galois as F
 import Data.Poly.Semiring (monomial)
 
@@ -21,24 +22,17 @@ import Data.Pairing.Temp (conj)
 -------------------------------------------------------------------------------
 
 -- | Cubic nonresidue.
-xi :: Fq2
+xi :: G2.Fq2
 xi = toE'
   [ 0xd0088f51cbff34d258dd3db21a5d66bb23ba5c279c2895fb39869507b587b120f55ffff58a9ffffdcff7fffffffd556
   , 0xd0088f51cbff34d258dd3db21a5d66bb23ba5c279c2895fb39869507b587b120f55ffff58a9ffffdcff7fffffffd555
   ]
 {-# INLINABLE xi #-}
 
--- | @Fq2@.
-type Fq2 = Extension U Fq
-data U
-instance IrreducibleMonic U Fq where
-  poly _ = X2 + 1
-  {-# INLINABLE poly #-}
-
 -- | @Fq6@.
-type Fq6 = Extension V Fq2
+type Fq6 = Extension V G2.Fq2
 data V
-instance IrreducibleMonic V Fq2 where
+instance IrreducibleMonic V G2.Fq2 where
   poly _ = X3 - monomial 0 xi
   {-# INLINABLE poly #-}
 
@@ -54,36 +48,14 @@ instance IrreducibleMonic W Fq6 where
 -------------------------------------------------------------------------------
 
 -- | @G1@.
-type G1' = BLS12381.PA
+type G1' = G1.PA
 
 -- | @G2@.
-type G2' = WAPoint BLS12381 Fq2 Fr
-instance WCurve 'Affine BLS12381 Fq2 Fr where
-  a_ = const 0
-  {-# INLINABLE a_ #-}
-  b_ = const $
-    toE' [ 0x4
-         , 0x4
-         ]
-  {-# INLINABLE b_ #-}
-  h_ = panic "G2.h_: not implemented."
-  q_ = panic "G2.q_: not implemented."
-  r_ = panic "G2.r_: not implemented."
-instance WACurve BLS12381 Fq2 Fr where
-  gA_ = A
-    ( toE' [ 0x24aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8
-           , 0x13e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e
-           ]
-    )
-    ( toE' [ 0xce5d527727d6e118cc9cdc6da2e351aadfd9baa8cbdd3a76d429a695160d12c923ac9cc3baca289e193548608b82801
-           , 0x606c4a02ea734cc32acd2b02bc28b99cb3e287e85a763af267492ab572e99ab3f370d275cec1da1aaa9075ff05f79be
-           ]
-    )
-  {-# INLINABLE gA_ #-}
+type G2' = G2.PA
 
 -- | @GT@.
-type GT' = RootsOfUnity BLS12381.R Fq12
-instance CyclicSubgroup (RootsOfUnity BLS12381.R Fq12) where
+type GT' = RootsOfUnity G1.R Fq12
+instance CyclicSubgroup (RootsOfUnity G1.R Fq12) where
   gen = toU' $
     toE' [ toE' [ toE' [ 0x11619b45f61edfe3b47a15fac19442526ff489dcda25e59121d9931438907dfd448299a87dde3a649bdba96e84d54558
                        , 0x153ce14a76a53e205ba8f275ef1137c56a566f638b52d34ba3bf3bf22f277d70f76316218c0dfd583a394b8448d2be7f

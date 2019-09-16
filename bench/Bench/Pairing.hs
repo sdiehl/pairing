@@ -9,6 +9,8 @@ import qualified Data.Pairing.BLS12381 as BLS12381
 import qualified Data.Pairing.BN254 as BN254
 import qualified Data.Pairing.BN254A as BN254A
 import qualified Data.Pairing.BN254B as BN254B
+import qualified Data.Pairing.BN254C as BN254C
+import qualified Data.Pairing.BN254D as BN254D
 import qualified Data.Pairing.BN462 as BN462
 
 benchPairing :: Benchmark
@@ -21,6 +23,10 @@ benchPairing = bgroup "Pairing"
     nf (uncurry pairing) bn254a
   , bench "BN254B" $
     nf (uncurry pairing) bn254b
+  , bench "BN254C" $
+    nf (uncurry pairing) bn254c
+  , bench "BN254D" $
+    nf (uncurry pairing) bn254d
   , bench "BN462" $
     nf (uncurry pairing) bn462
   ]
@@ -36,6 +42,12 @@ bn254a = (gen, gen)
 
 bn254b :: (G1 BN254B.BN254B, G2 BN254B.BN254B)
 bn254b = (gen, gen)
+
+bn254c :: (G1 BN254C.BN254C, G2 BN254C.BN254C)
+bn254c = (gen, gen)
+
+bn254d :: (G1 BN254D.BN254D, G2 BN254D.BN254D)
+bn254d = (gen, gen)
 
 bn462 :: (G1 BN462.BN462, G2 BN462.BN462)
 bn462 = (gen, gen)

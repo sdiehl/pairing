@@ -1,15 +1,15 @@
 {-# OPTIONS -fno-warn-orphans #-}
 
-module Data.Pairing.BN254A
+module Data.Pairing.BN254C
   ( module Data.Pairing
-  -- * BN254A curve
-  , BN254A
+  -- * BN254C curve
+  , BN254C
   ) where
 
 import Protolude
 
-import Data.Curve.Weierstrass.BN254A as G1
-import qualified Data.Curve.Weierstrass.BN254AT as G2
+import Data.Curve.Weierstrass.BN254C as G1
+import qualified Data.Curve.Weierstrass.BN254CT as G2
 import Data.Field.Galois as F
 import Data.Poly.Semiring (monomial)
 
@@ -23,7 +23,7 @@ import Data.Pairing.Temp (conj)
 
 -- | Cubic nonresidue.
 xi :: G2.Fq2
-xi = U
+xi = 1 + U
 {-# INLINABLE xi #-}
 
 -- | @Fq6@.
@@ -54,24 +54,24 @@ type G2' = G2.PA
 type GT' = RootsOfUnity G1.R Fq12
 instance CyclicSubgroup (RootsOfUnity G1.R Fq12) where
   gen = toU' $
-    toE' [ toE' [ toE' [ 0x4458b6bb7ef0dda02b9ad613e4409b2d6df24f0c185fa2d78123ca6f77d07da
-                       , 0x2231017130d2fab595f7e65d6523c9a000194b87ecaa4c7ea38fd6521afd5a71
+    toE' [ toE' [ toE' [ 0x201b03133f54fe2bf8b6ae48a590f83fcbf60cf4ca681001aa95a6db00f50ba0
+                       , 0x1758b71a6863d1268c5ba9e33cdce80c10d66a9e2d98b6e20a3749389723dedd
                        ]
-                , toE' [ 0xad346bd688cc084eafd4046c8917e0fa9ab4a57c38030a138d92d2c01e7aed8
-                       , 0x171585475d4ff21f16d98a1d4fe602600291395c2bb90410110e3d371debb5be
+                , toE' [ 0x2d7c549a685216ed0dbbe6cefa86bb379d92ea53aa7b17a7be199aee82f4641
+                       , 0x8a261cf6b255434c19629264a760c2b4eed29fb450834408f2a76294b09d253
                        ]
-                , toE' [ 0x22581de973331965d6d99e91e099f7103fc1adae7ff144b2883700e8a62c736d
-                       , 0x1a1aea16ea2f8a1a83bbb94f313017d4d219934299f164a4cf81d238ba1a28f7
+                , toE' [ 0x9ab7b58c63a0cd02b5c19dff7564cadf762bf685c56d013d8d0fcd90ee1ac74
+                       , 0x10c1e82167537a441d0d9bc44a430f32cb6652d99707a1afb6d3fdc41e16841e
                        ]
                 ]
-         , toE' [ toE' [ 0xe13cf00937f8e3ac7a5a0fb48155d00da25dffb034dd4bcdfe0f104c4add186
-                       , 0x2078ec5a822a57b5f6d9588693d1f133c5fd810af9eed8f49f8f2eeeca7291ce
+         , toE' [ toE' [ 0xe801b7d99eaab8a3766f1c6bea69dab74c3f8705928debb967c85faeecba31e
+                       , 0x2aaa88a8c47590d35be04a52aa98ab389a005cd761a4e26a0244e18adece700
                        ]
-                , toE' [ 0xae3a9a729c6b4499e68c37eda1d2bb5102c8cf5ebce94be9fcfac8c9e0a919f
-                       , 0x1f0d8b494d6cfe679c44568e3aa183442bc3b330dbed889d5fd23e72042b9563
+                , toE' [ 0x1f84449717982278c6ee46778aca80058914641b82d36a980c5542b7be4451e6
+                       , 0xeda0f13df8a542d4a958ab270ed43c393ccccf4328196e6f21e08b9c8a33891
                        ]
-                , toE' [ 0x771453fb3496035abf9120d7a2f69760cc6096cea55b8734bf1e31cfb47bbbd
-                       , 0x7252678df761476bf642f8a9870c8c38a6c89adc2078e724188f7b7731899f3
+                , toE' [ 0x51045def1264f6fb73d28c60403d35b724e0a20f47cce88dc100216e03a3b46
+                       , 0xacdd532a90f3566bf0df387a766ace58d21fef93a414f30825372ebc0adb6fc
                        ]
                 ]
          ]
@@ -81,14 +81,14 @@ instance CyclicSubgroup (RootsOfUnity G1.R Fq12) where
 -- Pairings
 -------------------------------------------------------------------------------
 
--- BN254A curve is pairing-friendly.
-instance Pairing BN254A where
+-- BN254C curve is pairing-friendly.
+instance Pairing BN254C where
 
-  type instance G1 BN254A = G1'
+  type instance G1 BN254C = G1'
 
-  type instance G2 BN254A = G2'
+  type instance G2 BN254C = G2'
 
-  type instance GT BN254A = GT'
+  type instance GT BN254C = GT'
 
   finalExponentiation f = flip F.pow expVal . finalExponentiationFirstChunk <$> f
     where
@@ -118,13 +118,13 @@ instance Pairing BN254A where
   lineFunction _ _ _ _ = (O, mempty)
   {-# INLINABLE lineFunction #-}
 
-  -- t = 4593689212103950336
-  -- s = 27562135272623702018
+  -- t = -4611827168232620161
+  -- s = -27670963009395720964
   pairing = (.) finalExponentiation . millerBN
-    [ 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0
-       , 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-       , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-       , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0
+    [-1,-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,-1,-1
+       , 0, 0, 0, 0, 0, 0,-1, 0, 0,-1, 0, 0, 0, 0, 0, 0
+       , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,-1
+       ,-1, 0, 0, 0, 0, 0,-1,-1, 0, 0, 0, 0, 0,-1, 0, 0
     ]
   {-# INLINABLE pairing #-}
 

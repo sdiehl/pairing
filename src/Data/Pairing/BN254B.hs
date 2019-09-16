@@ -8,7 +8,8 @@ module Data.Pairing.BN254B
 
 import Protolude
 
-import Data.Curve.Weierstrass.BN254B as BN254B
+import Data.Curve.Weierstrass.BN254B as G1
+import qualified Data.Curve.Weierstrass.BN254BT as G2
 import Data.Field.Galois as F
 import Data.Poly.Semiring (monomial)
 
@@ -21,21 +22,14 @@ import Data.Pairing.Temp (conj)
 -------------------------------------------------------------------------------
 
 -- | Cubic nonresidue.
-xi :: Fq2
+xi :: G2.Fq2
 xi = 1 + U
 {-# INLINABLE xi #-}
 
--- | @Fq2@.
-type Fq2 = Extension U Fq
-data U
-instance IrreducibleMonic U Fq where
-  poly _ = X2 + 1
-  {-# INLINABLE poly #-}
-
 -- | @Fq6@.
-type Fq6 = Extension V Fq2
+type Fq6 = Extension V G2.Fq2
 data V
-instance IrreducibleMonic V Fq2 where
+instance IrreducibleMonic V G2.Fq2 where
   poly _ = X3 - monomial 0 xi
   {-# INLINABLE poly #-}
 
@@ -51,36 +45,14 @@ instance IrreducibleMonic W Fq6 where
 -------------------------------------------------------------------------------
 
 -- | @G1@.
-type G1' = BN254B.PA
+type G1' = G1.PA
 
 -- | @G2@.
-type G2' = WAPoint BN254B Fq2 Fr
-instance WCurve 'Affine BN254B Fq2 Fr where
-  a_ = const 0
-  {-# INLINABLE a_ #-}
-  b_ = const $
-    toE' [ 0x1
-         , 0x2523648240000001ba344d80000000086121000000000013a700000000000012
-         ]
-  {-# INLINABLE b_ #-}
-  h_ = panic "G2.h_: not implemented."
-  q_ = panic "G2.q_: not implemented."
-  r_ = panic "G2.r_: not implemented."
-instance WACurve BN254B Fq2 Fr where
-  gA_ = A
-    ( toE' [ 0x61a10bb519eb62feb8d8c7e8c61edb6a4648bbb4898bf0d91ee4224c803fb2b
-           , 0x516aaf9ba737833310aa78c5982aa5b1f4d746bae3784b70d8c34c1e7d54cf3
-           ]
-    )
-    ( toE' [ 0x21897a06baf93439a90e096698c822329bd0ae6bdbe09bd19f0e07891cd2b9a
-           , 0xebb2b0e7c8b15268f6d4456f5f38d37b09006ffd739c9578a2d1aec6b3ace9b
-           ]
-    )
-  {-# INLINABLE gA_ #-}
+type G2' = G2.PA
 
 -- | @GT@.
-type GT' = RootsOfUnity BN254B.R Fq12
-instance CyclicSubgroup (RootsOfUnity BN254B.R Fq12) where
+type GT' = RootsOfUnity G1.R Fq12
+instance CyclicSubgroup (RootsOfUnity G1.R Fq12) where
   gen = toU' $
     toE' [ toE' [ toE' [ 0xd8a793b0defaef46557b6694e97514cc17a5ef2a410a979113e53d0644f9a5a
                        , 0x1ff35a6f3bd5e17c32b319111480f860b6572335300a6f07eec69fc89a586be7

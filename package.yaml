@@ -55,6 +55,8 @@ library:
     - Data.Pairing.BN254
     - Data.Pairing.BN254A
     - Data.Pairing.BN254B
+    - Data.Pairing.BN254C
+    - Data.Pairing.BN254D
     - Data.Pairing.BN462
     - Data.Pairing.Hash
   other-modules:
