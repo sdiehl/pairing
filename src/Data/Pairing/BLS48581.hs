@@ -23,35 +23,35 @@ type Fq2 = Extension U Fq
 data U
 instance IrreducibleMonic U Fq where
   poly _ = X2 + 1
-  {-# INLINE poly #-}
+  {-# INLINABLE poly #-}
 
 -- | @Fq4@.
 type Fq4 = Extension V Fq2
 data V
 instance IrreducibleMonic V Fq2 where
   poly _ = X2 + 1 + Y X
-  {-# INLINE poly #-}
+  {-# INLINABLE poly #-}
 
 -- | @Fq8@.
 type Fq8 = Extension W Fq4
 data W
 instance IrreducibleMonic W Fq4 where
   poly _ = X2 + Y X
-  {-# INLINE poly #-}
+  {-# INLINABLE poly #-}
 
 -- | @Fq24@.
 type Fq24 = Extension Z Fq8
 data Z
 instance IrreducibleMonic Z Fq8 where
   poly _ = X3 + Y X
-  {-# INLINE poly #-}
+  {-# INLINABLE poly #-}
 
 -- | @Fq48@.
 type Fq48 = Extension S Fq24
 data S
 instance IrreducibleMonic S Fq24 where
   poly _ = X2 + Y X
-  {-# INLINE poly #-}
+  {-# INLINABLE poly #-}
 
 -------------------------------------------------------------------------------
 -- Curves
@@ -163,14 +163,16 @@ instance Pairing BLS48581 where
 
   lineFunction (A x y) (A x1 y1) (A x2 y2) f
     | x1 /= x2         = (A x3 y3, (<>) f . toU' $ toE' [embed (-y), toE' [x *^ l, y1 - l * x1]])
-    | y1 + y2 == 0     = (A x3 y3, (<>) f . toU' $ toE' [embed x, embed (-x1)])
-    | otherwise        = (A x3 y3, (<>) f . toU' $ toE' [embed (-y), toE' [x *^ m, y1 - m * x1]])
+    | y1 + y2 == 0     = (O, (<>) f . toU' $ toE' [embed x, embed (-x1)])
+    | otherwise        = (A x3' y3', (<>) f . toU' $ toE' [embed (-y), toE' [x *^ l', y1 - l' * x1]])
     where
-      x12 = x1 * x1
       l   = (y2 - y1) / (x2 - x1)
-      m   = (x12 + x12 + x12) / (y1 + y1)
       x3  = l * l - x1 - x2
       y3  = l * (x1 - x3) - y1
+      x12 = x1 * x1
+      l'  = (x12 + x12 + x12) / (y1 + y1)
+      x3' = l' * l' - x1 - x2
+      y3' = l' * (x1 - x3') - y1
   lineFunction _ _ _ _ = (O, mempty)
   {-# INLINABLE lineFunction #-}
 

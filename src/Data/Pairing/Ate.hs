@@ -22,7 +22,7 @@ millerBLS _ _ _      = mempty
 
 -- | Miller algorithm for Barreto-Naehrig curves.
 millerBN :: forall e . Pairing e => [Int] -> G1 e -> G2 e -> GT e
-millerBN (x:xs) p q = finalAddition p q $
+millerBN (x:xs) p q = finalStep p q $
   millerLoop p q xs (if x > 0 then q else invert q, mempty)
 millerBN _ _ _      = mempty
 {-# INLINABLE millerBN #-}
@@ -50,9 +50,9 @@ additionStep p q (t, f) = lineFunction p q t f
 {-# INLINABLE additionStep #-}
 
 -- Line 11 to line 13
-finalAddition :: Pairing e => G1 e -> G2 e -> (G2 e, GT e) -> GT e
-finalAddition p q = snd . uncurry (lineFunction p q2) . uncurry (lineFunction p q1)
+finalStep :: Pairing e => G1 e -> G2 e -> (G2 e, GT e) -> GT e
+finalStep p q = snd . uncurry (lineFunction p q2) . uncurry (lineFunction p q1)
   where
     q1 = frobFunction q
     q2 = invert $ frobFunction q1
-{-# INLINABLE finalAddition #-}
+{-# INLINABLE finalStep #-}

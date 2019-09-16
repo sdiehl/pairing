@@ -14,6 +14,7 @@ import Data.Poly.Semiring (monomial)
 
 import Data.Pairing (Pairing(..))
 import Data.Pairing.Ate (millerBN)
+import Data.Pairing.Temp (conj)
 
 -------------------------------------------------------------------------------
 -- Fields
@@ -22,28 +23,28 @@ import Data.Pairing.Ate (millerBN)
 -- | Cubic nonresidue.
 xi :: Fq2
 xi = 9 + U
-{-# INLINE xi #-}
+{-# INLINABLE xi #-}
 
 -- | @Fq2@.
 type Fq2 = Extension U Fq
 data U
 instance IrreducibleMonic U Fq where
   poly _ = X2 + 1
-  {-# INLINE poly #-}
+  {-# INLINABLE poly #-}
 
 -- | @Fq6@.
 type Fq6 = Extension V Fq2
 data V
 instance IrreducibleMonic V Fq2 where
   poly _ = X3 - monomial 0 xi
-  {-# INLINE poly #-}
+  {-# INLINABLE poly #-}
 
 -- | @Fq12@.
 type Fq12 = Extension W Fq6
 data W
 instance IrreducibleMonic W Fq6 where
   poly _ = X2 - Y X
-  {-# INLINE poly #-}
+  {-# INLINABLE poly #-}
 
 -------------------------------------------------------------------------------
 -- Curves
@@ -161,31 +162,13 @@ finalExponentiationFirstChunk f
   | otherwise = let f1 = conj f
                     f2 = recip f
                     newf0 = f1 * f2 -- == f^(_q ^6 - 1)
-                in fq12Frobenius 2 newf0 * newf0 -- == f^((_q ^ 6 - 1) * (_q ^ 2 + 1))
+                in fastFrobenius (fastFrobenius newf0) * newf0 -- == f^((_q ^ 6 - 1) * (_q ^ 2 + 1))
 {-# INLINABLE finalExponentiationFirstChunk #-}
-
-fq12Frobenius :: Int -> Fq12 -> Fq12
-fq12Frobenius i a
-  | i == 0    = a
-  | i == 1    = fastFrobenius a
-  | i > 1     = let prev = fq12Frobenius (i - 1) a in fastFrobenius prev
-  | otherwise = panic "fq12Frobenius: not defined for negative values of i."
-{-# INLINABLE fq12Frobenius #-}
 
 fastFrobenius :: Fq12 -> Fq12
 fastFrobenius = coll . conv [[0,2,4],[1,3,5]] . cone
   where
     cone = map (map conj . fromE) . fromE
     conv = zipWith (zipWith (\x y -> F.pow xi ((x * (F.char (witness :: Fq) - 1)) `div` 6) * y))
-    coll = toE . map toE
+    coll = toE' . map toE'
 {-# INLINABLE fastFrobenius #-}
-
-conj :: forall k p . IrreducibleMonic p k => Extension p k -> Extension p k
-conj x
-  | deg x /= 2 * deg (witness :: k) = panic "conj: extension degree is not two."
-  | otherwise                       = case fromE x of
-    [y, z] -> toE [y, negate z]
-    [y]    -> toE [y]
-    []     -> 0
-    _      -> panic "conj: unreachable."
-{-# INLINABLE conj #-}
