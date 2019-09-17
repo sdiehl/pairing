@@ -9,7 +9,7 @@ module Data.Pairing.BLS48581
 import Protolude
 
 import Data.Curve.Weierstrass.BLS48581 as G1
-import qualified Data.Curve.Weierstrass.BLS48581T as G2
+import Data.Curve.Weierstrass.BLS48581T as G2
 import Data.Field.Galois as F
 
 import Data.Pairing (Pairing(..))
@@ -20,9 +20,9 @@ import Data.Pairing.Ate (millerBLS)
 -------------------------------------------------------------------------------
 
 -- | @Fq24@.
-type Fq24 = Extension Z G2.Fq8
+type Fq24 = Extension Z Fq8
 data Z
-instance IrreducibleMonic Z G2.Fq8 where
+instance IrreducibleMonic Z Fq8 where
   poly _ = X3 + Y X
   {-# INLINABLE poly #-}
 
@@ -44,8 +44,8 @@ type G1' = G1.PA
 type G2' = G2.PA
 
 -- | @GT@.
-type GT' = RootsOfUnity G1.R Fq48
-instance CyclicSubgroup (RootsOfUnity G1.R Fq48) where
+type GT' = RootsOfUnity R Fq48
+instance CyclicSubgroup (RootsOfUnity R Fq48) where
   gen = notImplemented
   {-# INLINABLE gen #-}
 

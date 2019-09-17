@@ -9,7 +9,7 @@ module Data.Pairing.BN254D
 import Protolude
 
 import Data.Curve.Weierstrass.BN254D as G1
-import qualified Data.Curve.Weierstrass.BN254DT as G2
+import Data.Curve.Weierstrass.BN254DT as G2
 import Data.Field.Galois as F
 import Data.Poly.Semiring (monomial)
 
@@ -22,14 +22,14 @@ import Data.Pairing.Temp (conj)
 -------------------------------------------------------------------------------
 
 -- | Cubic nonresidue.
-xi :: G2.Fq2
+xi :: Fq2
 xi = 1 + U
 {-# INLINABLE xi #-}
 
 -- | @Fq6@.
-type Fq6 = Extension V G2.Fq2
+type Fq6 = Extension V Fq2
 data V
-instance IrreducibleMonic V G2.Fq2 where
+instance IrreducibleMonic V Fq2 where
   poly _ = X3 - monomial 0 xi
   {-# INLINABLE poly #-}
 
@@ -51,8 +51,8 @@ type G1' = G1.PA
 type G2' = G2.PA
 
 -- | @GT@.
-type GT' = RootsOfUnity G1.R Fq12
-instance CyclicSubgroup (RootsOfUnity G1.R Fq12) where
+type GT' = RootsOfUnity R Fq12
+instance CyclicSubgroup (RootsOfUnity R Fq12) where
   gen = toU' $
     toE' [ toE' [ toE' [ 0x162b1d8d5992ddbc4b1076b1608602b3a438540fdc62c78d28e15fd6b6d6488c
                        , 0x6a832abcf68a00ed481a0ae12884aae74b9e585eaae5f91f1273dff1b8c6fd5
@@ -134,13 +134,5 @@ finalExponentiationFirstChunk f
   | otherwise = let f1 = conj f
                     f2 = recip f
                     newf0 = f1 * f2 -- == f^(_q ^6 - 1)
-                in fastFrobenius (fastFrobenius newf0) * newf0 -- == f^((_q ^ 6 - 1) * (_q ^ 2 + 1))
+                in F.frob (F.frob newf0) * newf0 -- == f^((_q ^ 6 - 1) * (_q ^ 2 + 1))
 {-# INLINABLE finalExponentiationFirstChunk #-}
-
-fastFrobenius :: Fq12 -> Fq12
-fastFrobenius = coll . conv [[0,2,4],[1,3,5]] . cone
-  where
-    cone = map (map conj . fromE) . fromE
-    conv = zipWith (zipWith (\x y -> F.pow xi ((x * (F.char (witness :: Fq) - 1)) `div` 6) * y))
-    coll = toE' . map toE'
-{-# INLINABLE fastFrobenius #-}
