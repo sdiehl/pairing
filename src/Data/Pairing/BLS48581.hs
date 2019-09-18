@@ -23,14 +23,14 @@ import Data.Pairing.Ate (millerBLS)
 type Fq24 = Extension Z Fq8
 data Z
 instance IrreducibleMonic Z Fq8 where
-  poly _ = X3 + Y X
+  poly _ = [[0, 1], 0, 0, 1]
   {-# INLINABLE poly #-}
 
 -- | @Fq48@.
 type Fq48 = Extension S Fq24
 data S
 instance IrreducibleMonic S Fq24 where
-  poly _ = X2 + Y X
+  poly _ = [[0, 1], 0, 1]
   {-# INLINABLE poly #-}
 
 -------------------------------------------------------------------------------

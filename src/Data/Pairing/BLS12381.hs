@@ -11,7 +11,6 @@ import Protolude
 import Data.Curve.Weierstrass.BLS12381 as G1
 import Data.Curve.Weierstrass.BLS12381T as G2
 import Data.Field.Galois as F
-import Data.Poly.Semiring (monomial)
 
 import Data.Pairing (Pairing(..))
 import Data.Pairing.Ate (millerBLS)
@@ -33,14 +32,14 @@ xi = toE'
 type Fq6 = Extension V Fq2
 data V
 instance IrreducibleMonic V Fq2 where
-  poly _ = X3 - monomial 0 xi
+  poly _ = [-xi, 0, 0, 1]
   {-# INLINABLE poly #-}
 
 -- | @Fq12@.
 type Fq12 = Extension W Fq6
 data W
 instance IrreducibleMonic W Fq6 where
-  poly _ = X2 - Y X
+  poly _ = [[0, -1], 0, 1]
   {-# INLINABLE poly #-}
 
 -------------------------------------------------------------------------------
