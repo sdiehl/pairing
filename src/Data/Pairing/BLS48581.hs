@@ -20,11 +20,16 @@ import Data.Pairing.Ate (millerBLS)
 -- Fields
 -------------------------------------------------------------------------------
 
+-- | Cubic nonresidue.
+xi :: Fq8
+xi = [0, 1]
+{-# INLINABLE xi #-}
+
 -- | @Fq24@.
 type Fq24 = Extension Z Fq8
 data Z
 instance IrreducibleMonic Z Fq8 where
-  poly _ = [[0, 1], 0, 0, 1]
+  poly _ = [xi, 0, 0, 1]
   {-# INLINABLE poly #-}
 
 -- | @Fq48@.
@@ -63,16 +68,16 @@ instance Pairing BLS48581 where
 
   type instance GT BLS48581 = GT'
 
-  finalExponentiation = notImplemented
+  finalExponentiation = (<$>) (^ (quot (G1._q ^ 48 - 1) G1._r))
   {-# INLINABLE finalExponentiation #-}
 
-  frobFunction = notImplemented
+  frobFunction = panic "BLS48581.frobFunction: not implemented."
   {-# INLINABLE frobFunction #-}
 
   lineFunction (A x y) (A x1 y1) (A x2 y2) f
-    | x1 /= x2         = (A x3 y3, (<>) f . toU' $ toE' [embed (-y), toE' [x *^ l, y1 - l * x1]])
-    | y1 + y2 == 0     = (O, (<>) f . toU' $ toE' [embed x, embed (-x1)])
-    | otherwise        = (A x3' y3', (<>) f . toU' $ toE' [embed (-y), toE' [x *^ l', y1 - l' * x1]])
+    | x1 /= x2         = (A x3 y3, f <> toU' [embed (-y), [x *^ l, y1 - l * x1]])
+    | y1 + y2 == 0     = (O, f <> toU' [embed x, embed (-x1)])
+    | otherwise        = (A x3' y3', f <> toU' [embed (-y), [x *^ l', y1 - l' * x1]])
     where
       l   = (y2 - y1) / (x2 - x1)
       x3  = l * l - x1 - x2

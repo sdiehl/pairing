@@ -23,7 +23,7 @@ import Data.Pairing.Temp (conj)
 
 -- | Cubic nonresidue.
 xi :: Fq2
-xi = toE' [1, 1]
+xi = [1, 1]
 {-# INLINABLE xi #-}
 
 -- | @Fq6@.
@@ -53,28 +53,28 @@ type G2' = G2.PA
 -- | @GT@.
 type GT' = RootsOfUnity R Fq12
 instance CyclicSubgroup (RootsOfUnity R Fq12) where
-  gen = toU' $
-    toE' [ toE' [ toE' [ 0xd8a793b0defaef46557b6694e97514cc17a5ef2a410a979113e53d0644f9a5a
-                       , 0x1ff35a6f3bd5e17c32b319111480f860b6572335300a6f07eec69fc89a586be7
-                       ]
-                , toE' [ 0x221fc0405a912aa6a474d891868725ff1a821017264e02f74021107f3e32775a
-                       , 0x1c0c4fae54227be18b16acbc49dda4c3faafe051ea945152ad8a9bb4f5e734df
-                       ]
-                , toE' [ 0x11a0963c0701d5089ae418ebe84a5a97b24089c688eb91a931068a7f91db9339
-                       , 0x20b7dc228dd3a27f9589fae17d352de2f2a1076ff56eb716026708945f53afcf
-                       ]
-                ]
-         , toE' [ toE' [ 0x2984d9eb6e0fb0e6254c036c9f110c4eda9d0b47873483634e36219ef6d3667
-                       , 0x21bb4de1e9efc68028a58dd3b3677400c6a4edbb321a49b2554a3d94af7049ee
-                       ]
-                , toE' [ 0x17224135a9a5fb3989c3f4e890c01ff14c2f25bc365500e6cfa5beacf99c030b
-                       , 0x1e3fabd61be8363430f4b6a50ef66f4dbde24fd135bfbbce2e3e515d6f382bd5
-                       ]
-                , toE' [ 0x237331610f44927d30add64ca35c4d4c6dd776bb212d6eb6da29bdbdb95408f2
-                       , 0x23bc485aa8a38dfabb7dcb49caed2e12b5b7cdffc35f6e41bdab5df1d54d51d8
-                       ]
-                ]
-         ]
+  gen = toU'
+    [ [ [ 0xd8a793b0defaef46557b6694e97514cc17a5ef2a410a979113e53d0644f9a5a
+        , 0x1ff35a6f3bd5e17c32b319111480f860b6572335300a6f07eec69fc89a586be7
+        ]
+      , [ 0x221fc0405a912aa6a474d891868725ff1a821017264e02f74021107f3e32775a
+        , 0x1c0c4fae54227be18b16acbc49dda4c3faafe051ea945152ad8a9bb4f5e734df
+        ]
+      , [ 0x11a0963c0701d5089ae418ebe84a5a97b24089c688eb91a931068a7f91db9339
+        , 0x20b7dc228dd3a27f9589fae17d352de2f2a1076ff56eb716026708945f53afcf
+        ]
+      ]
+    , [ [ 0x2984d9eb6e0fb0e6254c036c9f110c4eda9d0b47873483634e36219ef6d3667
+        , 0x21bb4de1e9efc68028a58dd3b3677400c6a4edbb321a49b2554a3d94af7049ee
+        ]
+      , [ 0x17224135a9a5fb3989c3f4e890c01ff14c2f25bc365500e6cfa5beacf99c030b
+        , 0x1e3fabd61be8363430f4b6a50ef66f4dbde24fd135bfbbce2e3e515d6f382bd5
+        ]
+      , [ 0x237331610f44927d30add64ca35c4d4c6dd776bb212d6eb6da29bdbdb95408f2
+        , 0x23bc485aa8a38dfabb7dcb49caed2e12b5b7cdffc35f6e41bdab5df1d54d51d8
+        ]
+      ]
+    ]
   {-# INLINABLE gen #-}
 
 -------------------------------------------------------------------------------
@@ -104,9 +104,9 @@ instance Pairing BN254B where
   {-# INLINABLE frobFunction #-}
 
   lineFunction (A x y) (A x1 y1) (A x2 y2) f
-    | x1 /= x2         = (A x3 y3, (<>) f . toU' $ toE' [embed (-y), toE' [x *^ l, y1 - l * x1]])
-    | y1 + y2 == 0     = (O, (<>) f . toU' $ toE' [embed x, embed (-x1)])
-    | otherwise        = (A x3' y3', (<>) f . toU' $ toE' [embed (-y), toE' [x *^ l', y1 - l' * x1]])
+    | x1 /= x2         = (A x3 y3, f <> toU' [embed (-y), [x *^ l, y1 - l * x1]])
+    | y1 + y2 == 0     = (O, f <> toU' [embed x, embed (-x1)])
+    | otherwise        = (A x3' y3', f <> toU' [embed (-y), [x *^ l', y1 - l' * x1]])
     where
       l   = (y2 - y1) / (x2 - x1)
       x3  = l * l - x1 - x2
