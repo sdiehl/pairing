@@ -14,7 +14,7 @@ import Data.Curve.Weierstrass.BN462T as G2
 import Data.Field.Galois as F
 
 import Data.Pairing (Pairing(..))
-import Data.Pairing.Ate (millerBN)
+import Data.Pairing.Ate (finalExponentiation12, millerAlgorithmBN)
 import Data.Pairing.Temp (conj)
 
 -------------------------------------------------------------------------------
@@ -120,7 +120,7 @@ instance Pairing BN462 where
 
   -- t = 20771722735339766972924978723274751
   -- s = 124630336412038601837549872339648508
-  pairing = (.) finalExponentiation . millerBN
+  pairing = (.) (finalExponentiation12 20771722735339766972924978723274751) . millerAlgorithmBN
     [ 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0
        , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
        , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0

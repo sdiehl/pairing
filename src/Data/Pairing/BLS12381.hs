@@ -14,7 +14,7 @@ import Data.Curve.Weierstrass.BLS12381T as G2
 import Data.Field.Galois as F
 
 import Data.Pairing (Pairing(..))
-import Data.Pairing.Ate (millerBLS)
+import Data.Pairing.Ate (millerAlgorithmBLS)
 import Data.Pairing.Temp (conj)
 
 -------------------------------------------------------------------------------
@@ -118,7 +118,7 @@ instance Pairing BLS12381 where
   {-# INLINABLE lineFunction #-}
 
   -- t = -15132376222941642752
-  pairing = (.) finalExponentiation . millerBLS
+  pairing = (.) (finalExponentiation ) . millerAlgorithmBLS
     [-1,-1, 0,-1, 0, 0,-1, 0, 0, 0, 0, 0, 0, 0, 0,-1, 0
        , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
        , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,-1, 0

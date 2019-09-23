@@ -14,8 +14,7 @@ import Data.Curve.Weierstrass.BN254BT as G2
 import Data.Field.Galois as F
 
 import Data.Pairing (Pairing(..))
-import Data.Pairing.Ate (millerBN)
-import Data.Pairing.Temp (conj)
+import Data.Pairing.Ate (finalExponentiation12, millerAlgorithmBN)
 
 -------------------------------------------------------------------------------
 -- Fields
@@ -90,12 +89,6 @@ instance Pairing BN254B where
 
   type instance GT BN254B = GT'
 
-  finalExponentiation f = flip F.pow expVal . finalExponentiationFirstChunk <$> f
-    where
-      expVal = div (qq * (qq - 1) + 1) $ F.char (witness :: Fr)
-      qq     = join (*) $ F.char (witness :: Fq)
-  {-# INLINABLE finalExponentiation #-}
-
   frobFunction (A x y) = A (F.frob x * x') (F.frob y * y')
     where
       x' = pow xi $ quot (F.char (witness :: Fq) - 1) 3
@@ -120,22 +113,13 @@ instance Pairing BN254B where
 
   -- t = -4647714815446351873
   -- s = -27886288892678111236
-  pairing = (.) finalExponentiation . millerBN
+  pairing = (.) (finalExponentiation12 (-4647714815446351873)) . millerAlgorithmBN
     [-1,-1, 0, 0, 0, 0, 0,-1,-1, 0, 0, 0, 0, 0, 0, 0, 0
        , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
        , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
        , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,-1, 0, 0
     ]
   {-# INLINABLE pairing #-}
-
-finalExponentiationFirstChunk :: Fq12 -> Fq12
-finalExponentiationFirstChunk f
-  | f == 0 = 0
-  | otherwise = let f1 = conj f
-                    f2 = recip f
-                    newf0 = f1 * f2 -- == f^(_q ^6 - 1)
-                in F.frob (F.frob newf0) * newf0 -- == f^((_q ^ 6 - 1) * (_q ^ 2 + 1))
-{-# INLINABLE finalExponentiationFirstChunk #-}
 
 -- | Compute primitive roots of unity for 2^0, 2^1, ..., 2^28. (2^28
 -- is the largest power of two that divides _r - 1, therefore there
