@@ -4,6 +4,7 @@ module Data.Pairing.BN254C
   ( module Data.Pairing
   -- * BN254C curve
   , BN254C
+  , getRootOfUnity
   ) where
 
 import Protolude
@@ -135,3 +136,12 @@ finalExponentiationFirstChunk f
                     newf0 = f1 * f2 -- == f^(_q ^6 - 1)
                 in F.frob (F.frob newf0) * newf0 -- == f^((_q ^ 6 - 1) * (_q ^ 2 + 1))
 {-# INLINABLE finalExponentiationFirstChunk #-}
+
+-- | Compute primitive roots of unity for 2^0, 2^1, ..., 2^28. (2^28
+-- is the largest power of two that divides _r - 1, therefore there
+-- are no primitive roots of unity for higher powers of 2 in Fr.)
+getRootOfUnity :: Int -> Fr
+getRootOfUnity 0  = 1
+getRootOfUnity 1  = 16285256166819790982212518231621426655034817857667267142801363550619237884172
+getRootOfUnity 2  = 3531193943909383743765472579762059777732585141995099857941
+getRootOfUnity _  = panic "getRootOfUnity: exponent too big for Fr / negative"
