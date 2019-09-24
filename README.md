@@ -27,6 +27,17 @@ The non-degeneracy property guarantees non-trivial pairings for non-trivial argu
 
 An example of a pairing would be the scalar product on euclidean space <.> : R<sup>n</sup> × R<sup>n</sup> → R
 
+## Supported Curves
+
+* [BLS12381](src/Data/Pairing/BLS12381.hs)
+* [BLS48581](src/Data/Pairing/BLS48581.hs)
+* [BN254](src/Data/Pairing/BN254.hs)
+* [BN254A](src/Data/Pairing/BN254A.hs)
+* [BN254B](src/Data/Pairing/BN254B.hs)
+* [BN254C](src/Data/Pairing/BN254C.hs)
+* [BN254D](src/Data/Pairing/BN254D.hs)
+* [BN462](src/Data/Pairing/BN462.hs)
+
 ## Example Usage
 
 A simple example of calculating the optimal ate pairing given two points in G<sub>1</sub> and G<sub>2</sub>.
