@@ -1,7 +1,8 @@
 # Change log for pairing
 
 ## 0.5.1
-* Prepend `Math` to modules
+
+* Prepend `Math` to modules.
 
 ## 0.5
 
