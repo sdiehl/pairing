@@ -22,7 +22,7 @@ class (Arbitrary (G1 e), Arbitrary (G2 e), Arbitrary (GT e),
        NFData    (G1 e), NFData    (G2 e), NFData    (GT e),
        Random    (G1 e), Random    (G2 e), Random    (GT e),
        Show      (G1 e), Show      (G2 e), Show      (GT e)) => Pairing e where
-  {-# MINIMAL finalExponentiation, frobFunction, lineFunction, pairing #-}
+  {-# MINIMAL frobFunction, lineFunction, pairing #-}
 
   -- | Left group @G1@.
   type family G1 e = (g :: *) | g -> e
@@ -32,9 +32,6 @@ class (Arbitrary (G1 e), Arbitrary (G2 e), Arbitrary (GT e),
 
   -- | Target group @GT@.
   type family GT e = (g :: *) | g -> e
-
-  -- | Final exponentiation.
-  finalExponentiation :: GT e -> GT e
 
   -- | Frobenius function.
   frobFunction :: G2 e -> G2 e

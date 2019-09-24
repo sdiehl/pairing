@@ -14,7 +14,7 @@ import Data.Curve.Weierstrass.BN254CT as G2
 import Data.Field.Galois as F
 
 import Data.Pairing (Pairing(..))
-import Data.Pairing.Ate (finalExponentiation12, millerAlgorithmBN)
+import Data.Pairing.Ate (finalExponentiationBN, millerAlgorithmBN)
 
 -------------------------------------------------------------------------------
 -- Fields
@@ -113,7 +113,7 @@ instance Pairing BN254C where
 
   -- t = -4611827168232620161
   -- s = -27670963009395720964
-  pairing = (.) (finalExponentiation12 (-4611827168232620161)) . millerAlgorithmBN
+  pairing = (.) (finalExponentiationBN (-4611827168232620161)) . millerAlgorithmBN
     [-1,-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,-1,-1
        , 0, 0, 0, 0, 0, 0,-1, 0, 0,-1, 0, 0, 0, 0, 0, 0
        , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,-1

@@ -14,8 +14,7 @@ import Data.Curve.Weierstrass.BLS12381T as G2
 import Data.Field.Galois as F
 
 import Data.Pairing (Pairing(..))
-import Data.Pairing.Ate (millerAlgorithmBLS)
-import Data.Pairing.Temp (conj)
+import Data.Pairing.Ate (finalExponentiationBLS12, millerAlgorithmBLS)
 
 -------------------------------------------------------------------------------
 -- Fields
@@ -57,24 +56,24 @@ type G2' = G2.PA
 type GT' = RootsOfUnity R Fq12
 instance CyclicSubgroup (RootsOfUnity R Fq12) where
   gen = toU'
-    [ [ [ 0x11619b45f61edfe3b47a15fac19442526ff489dcda25e59121d9931438907dfd448299a87dde3a649bdba96e84d54558
-        , 0x153ce14a76a53e205ba8f275ef1137c56a566f638b52d34ba3bf3bf22f277d70f76316218c0dfd583a394b8448d2be7f
+    [ [ [ 0x1250ebd871fc0a92a7b2d83168d0d727272d441befa15c503dd8e90ce98db3e7b6d194f60839c508a84305aaca1789b6
+        , 0x89a1c5b46e5110b86750ec6a532348868a84045483c92b7af5af689452eafabf1a8943e50439f1d59882a98eaa0170f
         ]
-      , [ 0x12b9dce6cfccf7c3c4f6cdca4518b20e428ead36196401a7c3211459685fc93f8bebff732cdf0943612265c79ce3e12c
-        , 0xd87cf98eacafe22eafc9be58c3699bc39b2d537b565ff5121c6c4dcf6f87969851b94fda5a8fddb77555fd10b6df64
+      , [ 0x31ee0cf8176faed3d5e214d37e4837b518958ee5c39b2997f01e9ffb9e533bf5cb7335184e4b9b91c232bd7551f5ef
+        , 0x333fc379662be784e4ed53bc809b8c242cd5c26049b5dbe98b3e9599912e2523dbb28ca5f0764eaa9980581f5dd5f5b
         ]
-      , [ 0xc788d3b1b51c02ee78fe6cc41bfaeb58946e0fc615b5f493f9521028e781165dc7888126296311e6a8cbc7e6af205de
-        , 0x63444bb78b43cf73618a802c4d97400c72f57dcf1bca9ae69efc4d0ca0665e8219d83401a1d5d210a62bd54c0ee8746
+      , [ 0x1434ca7627208b631fab9fe851983efa300f78c547c61f10017a080635adb658fcc639b4ed513fdb10cb2a9862a855e3
+        , 0x129cac1291d7cede0e5c448a7fa1879dd6e1d4579d8748542c3a143f14588050bf3874ac39dc273dff6d6e70dadc272b
         ]
       ]
-    , [ [ 0x163c93d3b228c66865eb71b29704a20807d2c349174f801c8d0f3a43d6277112313f87e8fe422867c27854bb14d035e6
-        , 0xae3729da034db008ff8b11447f559d0db243a7f5ab25db6dee90f9c29f13fd777c09efcb84ceaa70fc0581a03be5d0a
+    , [ [ 0xf84ad8722c9486446b9d04ee5c12b31ca548f26fc85317fa4ae45dcacca2709ef1851df07d1c7ac4d23a6ebf1a82869
+        , 0x140766a9b0c7736808ab0e3042aa7be8dd368d5062528949fb7c4413b0f51b6d7989a629b646c3ea8eed395c68774a20
         ]
-      , [ 0x187c9a241b75af510864cc7df3090e28e6b917e4b4bf544ac8900deb0835fbb9008f02f167f90a87556cffcc97fd58dd
-        , 0x446f48067239c6e9c4d0642e44f038cf19a4fe0d6217082621d1cb45c19ac294b8ed8f3409436860b9b97cdeecb7f43
+      , [ 0xe83a4cf2599c26539d4183cce2597a90179aa3ac63883345c450f5245902578fd4737c27d92fcef5d7122d2718820b5
+        , 0x14edc37a74f7bc0cc00ab7d3a7f085e28ebb7d2b9ba3b19a9dd51cacb1a07799f497594dbed2f8a2d9b64613f63d53f9
         ]
-      , [ 0x136507b6e1cbec80530db4a99e8a11fb3b33193142b57ba3ff0bde78ea471317d367bbba605c007dc1c8de294b5c3bf8
-        , 0xa76041990c0450f582481202b3fd414c5451f076b8f8fb04ec81855062d1117653add6c95b4fdb8d0837d0e01c2362b
+      , [ 0x12f6c0f91a404c38fd5629091c63e94df3020950c1adc74636d2cca650f75efe9f15ba1a87a57f85ff69a0640ea93d83
+        , 0x6ecf38c504bc3b9f13ba96c27fbaa763995b521b26e8bb21f46fb401dc62936b863f0edd45760f665c063e9ba54e90c
         ]
       ]
     ]
@@ -92,12 +91,6 @@ instance Pairing BLS12381 where
   type instance G2 BLS12381 = G2'
 
   type instance GT BLS12381 = GT'
-
-  finalExponentiation f = flip F.pow expVal . finalExponentiationFirstChunk <$> f
-    where
-      expVal = div (qq * (qq - 1) + 1) $ F.char (witness :: Fr)
-      qq     = join (*) $ F.char (witness :: Fq)
-  {-# INLINABLE finalExponentiation #-}
 
   frobFunction = panic "BLS12381.frobFunction: not implemented."
   {-# INLINABLE frobFunction #-}
@@ -118,22 +111,13 @@ instance Pairing BLS12381 where
   {-# INLINABLE lineFunction #-}
 
   -- t = -15132376222941642752
-  pairing = (.) (finalExponentiation ) . millerAlgorithmBLS
+  pairing = (.) (finalExponentiationBLS12 (-15132376222941642752)) . millerAlgorithmBLS
     [-1,-1, 0,-1, 0, 0,-1, 0, 0, 0, 0, 0, 0, 0, 0,-1, 0
        , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
        , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,-1, 0
        , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     ]
   {-# INLINABLE pairing #-}
-
-finalExponentiationFirstChunk :: Fq12 -> Fq12
-finalExponentiationFirstChunk f
-  | f == 0 = 0
-  | otherwise = let f1 = conj f
-                    f2 = recip f
-                    newf0 = f1 * f2 -- == f^(_q ^6 - 1)
-                in F.frob (F.frob newf0) * newf0 -- == f^((_q ^ 6 - 1) * (_q ^ 2 + 1))
-{-# INLINABLE finalExponentiationFirstChunk #-}
 
 -- | Compute primitive roots of unity for 2^0, 2^1, ..., 2^28. (2^28
 -- is the largest power of two that divides _r - 1, therefore there

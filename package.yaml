@@ -60,7 +60,6 @@ library:
   other-modules:
     - Data.Pairing.Ate
     - Data.Pairing.Byte
-    - Data.Pairing.Temp
   source-dirs:
     - src
 
