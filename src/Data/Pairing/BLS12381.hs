@@ -14,7 +14,7 @@ import Data.Curve.Weierstrass.BLS12381T as G2
 import Data.Field.Galois as F
 
 import Data.Pairing (Pairing(..))
-import Data.Pairing.Ate (finalExponentiationBLS12, millerAlgorithmBLS)
+import Data.Pairing.Ate (finalExponentiationBLS12, millerAlgorithm)
 
 -------------------------------------------------------------------------------
 -- Fields
@@ -92,8 +92,8 @@ instance Pairing BLS12381 where
 
   type instance GT BLS12381 = GT'
 
-  frobFunction = panic "BLS12381.frobFunction: not implemented."
-  {-# INLINABLE frobFunction #-}
+  finalStep = const $ const snd
+  {-# INLINABLE finalStep #-}
 
   lineFunction (A x y) (A x1 y1) (A x2 y2) f
     | x1 /= x2         = (A x3 y3, (<>) f $ toU' [embed (-y), [x *^ l, y1 - l * x1]])
@@ -111,16 +111,14 @@ instance Pairing BLS12381 where
   {-# INLINABLE lineFunction #-}
 
   -- t = -15132376222941642752
-  pairing = (.)
-    ( finalExponentiationBLS12
-      (-15132376222941642752)
-    )
-    . millerAlgorithmBLS
-      [-1,-1, 0,-1, 0, 0,-1, 0, 0, 0, 0, 0, 0, 0, 0,-1, 0
-         , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-         , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,-1, 0
-         , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-      ]
+  pairing p q =
+    finalExponentiationBLS12 (-15132376222941642752) $
+    finalStep p q $
+    millerAlgorithm [-1,-1, 0,-1, 0, 0,-1, 0, 0, 0, 0, 0, 0, 0, 0,-1, 0
+                       , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                       , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,-1, 0
+                       , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                    ] p q
   {-# INLINABLE pairing #-}
 
 -------------------------------------------------------------------------------

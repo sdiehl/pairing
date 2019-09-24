@@ -1,8 +1,7 @@
 module Data.Pairing.Ate
   ( finalExponentiationBLS12
   , finalExponentiationBN
-  , millerAlgorithmBLS
-  , millerAlgorithmBN
+  , millerAlgorithm
   ) where
 
 import Protolude
@@ -16,19 +15,11 @@ import Data.Pairing (Pairing(..))
 -- Miller algorithm
 -------------------------------------------------------------------------------
 
--- Miller algorithm for Barreto-Lynn-Scott curves.
-millerAlgorithmBLS :: forall e . Pairing e => [Int] -> G1 e -> G2 e -> GT e
-millerAlgorithmBLS (x:xs) p q = snd $
-  millerLoop p q xs (if x > 0 then q else invert q, mempty)
-millerAlgorithmBLS _ _ _      = mempty
-{-# INLINABLE millerAlgorithmBLS #-}
-
--- Miller algorithm for Barreto-Naehrig curves.
-millerAlgorithmBN :: forall e . Pairing e => [Int] -> G1 e -> G2 e -> GT e
-millerAlgorithmBN (x:xs) p q = finalStep p q $
-  millerLoop p q xs (if x > 0 then q else invert q, mempty)
-millerAlgorithmBN _ _ _      = mempty
-{-# INLINABLE millerAlgorithmBN #-}
+-- Miller algorithm.
+millerAlgorithm :: forall e . Pairing e => [Int] -> G1 e -> G2 e -> (G2 e, GT e)
+millerAlgorithm (x:xs) p q = millerLoop p q xs (if x > 0 then q else invert q, mempty)
+millerAlgorithm _ _ _      = mempty
+{-# INLINABLE millerAlgorithm #-}
 
 -- Line 2 to line 10
 millerLoop :: Pairing e => G1 e -> G2 e -> [Int] -> (G2 e, GT e) -> (G2 e, GT e)
@@ -51,14 +42,6 @@ doublingStep p (t, f) = (<>) f <$> lineFunction p t t f
 additionStep :: Pairing e => G1 e -> G2 e -> (G2 e, GT e) -> (G2 e, GT e)
 additionStep p q (t, f) = lineFunction p q t f
 {-# INLINABLE additionStep #-}
-
--- Line 11 to line 13
-finalStep :: Pairing e => G1 e -> G2 e -> (G2 e, GT e) -> GT e
-finalStep p q = snd . uncurry (lineFunction p q2) . uncurry (lineFunction p q1)
-  where
-    q1 = frobFunction q
-    q2 = invert $ frobFunction q1
-{-# INLINABLE finalStep #-}
 
 -------------------------------------------------------------------------------
 -- Final exponentiation

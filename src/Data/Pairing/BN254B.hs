@@ -14,7 +14,7 @@ import Data.Curve.Weierstrass.BN254BT as G2
 import Data.Field.Galois as F
 
 import Data.Pairing (Pairing(..))
-import Data.Pairing.Ate (finalExponentiationBN, millerAlgorithmBN)
+import Data.Pairing.Ate (finalExponentiationBN, millerAlgorithm)
 
 -------------------------------------------------------------------------------
 -- Fields
@@ -89,12 +89,16 @@ instance Pairing BN254B where
 
   type instance GT BN254B = GT'
 
-  frobFunction (A x y) = A (F.frob x * x') (F.frob y * y')
+  finalStep p q = snd . uncurry (lineFunction p q2) . uncurry (lineFunction p q1)
     where
-      x' = pow xi $ quot (F.char (witness :: Fq) - 1) 3
-      y' = pow xi $ shiftR (F.char (witness :: Fq)) 1
-  frobFunction _       = O
-  {-# INLINABLE frobFunction #-}
+      q1            = frob' q
+      q2            = inv $ frob' q1
+      frob' (A x y) = A (F.frob x * x') (F.frob y * y')
+        where
+          x' = pow xi $ quot (F.char (witness :: Fq) - 1) 3
+          y' = pow xi $ shiftR (F.char (witness :: Fq)) 1
+      frob' _       = O
+  {-# INLINABLE finalStep #-}
 
   lineFunction (A x y) (A x1 y1) (A x2 y2) f
     | x1 /= x2         = (A x3 y3, f <> toU' [embed (-y), [x *^ l, y1 - l * x1]])
@@ -113,16 +117,14 @@ instance Pairing BN254B where
 
   -- t = -4647714815446351873
   -- s = -27886288892678111236
-  pairing = (.)
-    ( finalExponentiationBN
-      (-4647714815446351873)
-    )
-    . millerAlgorithmBN
-      [-1,-1, 0, 0, 0, 0, 0,-1,-1, 0, 0, 0, 0, 0, 0, 0, 0
-         , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-         , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-         , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,-1, 0, 0
-      ]
+  pairing p q =
+    finalExponentiationBN (-4647714815446351873) $
+    finalStep p q $
+    millerAlgorithm [-1,-1, 0, 0, 0, 0, 0,-1,-1, 0, 0, 0, 0, 0, 0, 0, 0
+                       , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                       , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                       , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,-1, 0, 0
+                    ] p q
   {-# INLINABLE pairing #-}
 
 -------------------------------------------------------------------------------
