@@ -87,15 +87,21 @@ instance Pairing BLS48581 where
   {-# INLINABLE lineFunction #-}
 
   -- t = -5368710017
-  pairing = (.) (finalExponentiationBLS12 (-5368710017)) . millerAlgorithmBLS
-    [-1, 0,-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-       , 0, 0, 0, 0, 0,-1, 0, 0, 1, 0, 0, 0, 0, 0, 0,-1
-    ]
+  pairing = (.)
+    ( finalExponentiationBLS12
+      (-5368710017)
+    )
+    . millerAlgorithmBLS
+      [-1, 0,-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+         , 0, 0, 0, 0, 0,-1, 0, 0, 1, 0, 0, 0, 0, 0, 0,-1
+      ]
   {-# INLINABLE pairing #-}
 
--- | Compute primitive roots of unity for 2^0, 2^1, ..., 2^28. (2^28
--- is the largest power of two that divides _r - 1, therefore there
--- are no primitive roots of unity for higher powers of 2 in Fr.)
+-------------------------------------------------------------------------------
+-- Roots of unity
+-------------------------------------------------------------------------------
+
+-- | Precompute primitive roots of unity for binary powers that divide _r - 1.
 getRootOfUnity :: Int -> Fr
 getRootOfUnity 0  = 1
 getRootOfUnity 1  = 1
@@ -109,3 +115,4 @@ getRootOfUnity 8  = 476342299743339008482451055637099285448102090246347886165791
 getRootOfUnity 9  = 3078288420221861631754137535845921315095319398058093245375824942741955097566215954443100975244565132595180000488940090609966080
 getRootOfUnity 10 = 310417377551259699142956021509717226402747778131212704388655732962298779099913459912313868560404005686098676909513878396246117437331321879916440481633455891
 getRootOfUnity _  = panic "getRootOfUnity: exponent too big for Fr / negative"
+{-# INLINABLE getRootOfUnity #-}

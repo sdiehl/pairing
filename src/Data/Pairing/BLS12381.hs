@@ -111,17 +111,23 @@ instance Pairing BLS12381 where
   {-# INLINABLE lineFunction #-}
 
   -- t = -15132376222941642752
-  pairing = (.) (finalExponentiationBLS12 (-15132376222941642752)) . millerAlgorithmBLS
-    [-1,-1, 0,-1, 0, 0,-1, 0, 0, 0, 0, 0, 0, 0, 0,-1, 0
-       , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-       , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,-1, 0
-       , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-    ]
+  pairing = (.)
+    ( finalExponentiationBLS12
+      (-15132376222941642752)
+    )
+    . millerAlgorithmBLS
+      [-1,-1, 0,-1, 0, 0,-1, 0, 0, 0, 0, 0, 0, 0, 0,-1, 0
+         , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+         , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,-1, 0
+         , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+      ]
   {-# INLINABLE pairing #-}
 
--- | Compute primitive roots of unity for 2^0, 2^1, ..., 2^28. (2^28
--- is the largest power of two that divides _r - 1, therefore there
--- are no primitive roots of unity for higher powers of 2 in Fr.)
+-------------------------------------------------------------------------------
+-- Roots of unity
+-------------------------------------------------------------------------------
+
+-- | Precompute primitive roots of unity for binary powers that divide _r - 1.
 getRootOfUnity :: Int -> Fr
 getRootOfUnity 0  = 1
 getRootOfUnity 1  = 52435875175126190479447740508185965837690552500527637822603658699938581184512
@@ -157,3 +163,4 @@ getRootOfUnity 30 = 381113859398869529839447741606053343257237740363918067714194
 getRootOfUnity 31 = 43599901455287962219281063402626541872197057165786841304067502694013639882090
 getRootOfUnity 32 = 937917089079007706106976984802249742464848817460758522850752807661925904159
 getRootOfUnity _  = panic "getRootOfUnity: exponent too big for Fr / negative"
+{-# INLINABLE getRootOfUnity #-}
