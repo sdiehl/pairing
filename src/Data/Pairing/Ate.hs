@@ -16,7 +16,7 @@ import Data.Pairing (Pairing(..))
 -------------------------------------------------------------------------------
 
 -- Miller algorithm.
-millerAlgorithm :: forall e . Pairing e => [Int] -> G1 e -> G2 e -> (G2 e, GT e)
+millerAlgorithm :: Pairing e => [Int] -> G1 e -> G2 e -> (G2 e, GT e)
 millerAlgorithm (x:xs) p q = millerLoop p q xs (if x > 0 then q else invert q, mempty)
 millerAlgorithm _ _ _      = mempty
 {-# INLINABLE millerAlgorithm #-}
@@ -100,8 +100,3 @@ finalExponentiationBN t = (<$>) $ hardPart . easyPart
 upow :: IrreducibleMonic p k => Extension p k -> Integer -> Extension p k
 upow x n = if n < 0 then pow (conj x) (negate n) else pow x n
 {-# INLINE upow #-}
-
--- Complex conjugation.
-conj :: forall k p . IrreducibleMonic p k => Extension p k -> Extension p k
-conj = fromMaybe (panic "conj: extension degree is not two.") . con2
-{-# INLINE conj #-}

@@ -29,11 +29,12 @@ dependencies:
   - base >= 4.10 && < 5
   - protolude >= 0.2 && < 0.3
   - bytestring
-  - elliptic-curve >= 0.2 && < 0.3
+  - elliptic-curve >= 0.3 && < 0.4
   - errors
-  - galois-field >= 0.4 && < 0.5
+  - galois-field >= 1 && < 2
   - groups
   - MonadRandom
+  - semirings >= 0.5
   - tasty-quickcheck
 
 extra-source-files:
