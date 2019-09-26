@@ -1,5 +1,6 @@
 module Data.Pairing.Ate
   ( finalExponentiationBLS12
+  , finalExponentiationBLS48
   , finalExponentiationBN
   , millerAlgorithm
   ) where
@@ -8,6 +9,7 @@ import Protolude
 
 import Data.Field.Galois as F
 import Data.Group (invert)
+import Data.List ((!!))
 
 import Data.Pairing (Pairing(..))
 
@@ -49,60 +51,94 @@ additionStep p q (t, f) = lineFunction p q t f
 
 -- Final exponentiation for Barreto-Lynn-Scott degree 12 curves.
 -- (https://eprint.iacr.org/2016/130.pdf)
-finalExponentiationBLS12 :: (Pairing e, KnownNat r, IrreducibleMonic p k,
-  GT e ~ RootsOfUnity r (Extension p k)) => Integer -> GT e -> GT e
-finalExponentiationBLS12 t = (<$>) $ hardPart . easyPart
+finalExponentiationBLS12 :: forall e r p k .
+  (Pairing e, KnownNat r, IrreducibleMonic p k, GT e ~ RootsOfUnity r (Extension p k))
+  => Integer -> GT e -> GT e
+finalExponentiationBLS12 u = (<$>) $ hardPart . easyPart
   where
-    easyPart = p2 . p6
-      where
-        p6 = (*) <$> conj <*> recip                          -- f^(p^6 - 1)
-        p2 = (*) <$> identity <*> F.frob . F.frob            -- f^(p^2 + 1)
-    hardPart f = p4
-      where
-        f2  = upow f 2                                       -- f^2
-        fl3 = upow (upow f t * conj f2) t * f                -- f^(lambda_3)
-        fl2 = upow fl3 t                                     -- f^(lambda_2)
-        fl1 = upow fl2 t * conj fl3                          -- f^(lambda_1)
-        fl0 = upow fl1 t * f2 * f                            -- f^(lambda_0)
-        p4  = fl0 * F.frob (fl1 * F.frob (fl2 * F.frob fl3)) -- f^((p^4 - p^2 + 1) / r)
-{-# INLINABLE finalExponentiationBLS12 #-}
-
--- Final exponentiation for Barreto-Lynn-Scott degree 48 curves.
--- (http://www.comp.tmu.ac.jp/s-yokoyama/research/files/nonref16.pdf)
-finalExponentiationBLS48 :: (Pairing e, KnownNat r, IrreducibleMonic p k,
-  GT e ~ RootsOfUnity r (Extension p k)) => Integer -> GT e -> GT e
-finalExponentiationBLS48 t =  (<$>) $ hardPart . easyPart
-  where
-    easyPart = p2 . p6
-      where
-        p6 = (*) <$> conj <*> recip                          -- f^(p^6 - 1)
-        p2 = (*) <$> identity <*> F.frob . F.frob . F.frob . F.frob . F.frob .F.frob . F.frob . F.frob            -- f^(p^8 + 1)
-    hardPart f = notImplemented
-{-# INLINABLE finalExponentiationBLS48 #-}
-
--- Final exponentiation for Barreto-Naehrig curves.
--- (https://eprint.iacr.org/2008/490.pdf)
-finalExponentiationBN :: (Pairing e, KnownNat r, IrreducibleMonic p k,
-  GT e ~ RootsOfUnity r (Extension p k)) => Integer -> GT e -> GT e
-finalExponentiationBN t = (<$>) $ hardPart . easyPart
-  where
+    easyPart :: Extension p k -> Extension p k
     easyPart = p2 . p6
       where
         p6 = (*) <$> conj <*> recip               -- f^(p^6 - 1)
         p2 = (*) <$> identity <*> F.frob . F.frob -- f^(p^2 + 1)
+    hardPart :: Extension p k -> Extension p k
     hardPart f = p4
       where
-        ft  = upow f t                            -- f^t
-        ft2 = upow ft t                           -- f^(t^2)
-        ft3 = upow ft2 t                          -- f^(t^3)
-        fpt = F.frob ft2                          -- f^(pt^2)
+        f2 = f * f                                -- f^2
+        y3 = upow (upow f u * conj f2) u * f      -- f^(lambda_3)
+        y2 = upow y3 u                            -- f^(lambda_2)
+        y1 = upow y2 u * conj y3                  -- f^(lambda_1)
+        y0 = upow y1 u * f2 * f                   -- f^(lambda_0)
+        p4 = foldr' ((. F.frob) . (*)) 1 ys       -- f^((p^4 - p^2 + 1) / r)
+          where
+            ys :: [Extension p k]
+            ys = [y0, y1, y2, y3]
+{-# INLINABLE finalExponentiationBLS12 #-}
+
+-- Final exponentiation for Barreto-Lynn-Scott degree 48 curves.
+-- (http://www.comp.tmu.ac.jp/s-yokoyama/research/files/nonref16.pdf)
+finalExponentiationBLS48 :: forall e r p k .
+  (Pairing e, KnownNat r, IrreducibleMonic p k, GT e ~ RootsOfUnity r (Extension p k))
+  => Integer -> GT e -> GT e
+finalExponentiationBLS48 u = (<$>) $ hardPart . easyPart
+  where
+    easyPart :: Extension p k -> Extension p k
+    easyPart = p2 . p6
+      where
+        p6 = (*) <$> conj <*> recip                              -- f^(p^6 - 1)
+        p2 = (*) <$> identity <*> flip ((!!) . iterate F.frob) 8 -- f^(p^8 + 1)
+    hardPart :: Extension p k -> Extension p k
+    hardPart f = p4
+      where
+        f2  = f * f                                              -- f^2
+        y15 = upow (upow f u * conj f2) u * f                    -- f^(mu_15)
+        y14 = upow y15 u                                         -- f^(mu_14)
+        y13 = upow y14 u                                         -- f^(mu_13)
+        y12 = upow y13 u                                         -- f^(mu_12)
+        y11 = upow y12 u                                         -- f^(mu_11)
+        y10 = upow y11 u                                         -- f^(mu_10)
+        y9  = upow y10 u                                         -- f^(mu_9)
+        y8  = upow y9 u                                          -- f^(mu_8)
+        y7  = upow y8 u * conj y15                               -- f^(mu_7)
+        y6  = upow y7 u                                          -- f^(mu_6)
+        y5  = upow y6 u                                          -- f^(mu_5)
+        y4  = upow y5 u                                          -- f^(mu_4)
+        y3  = upow y4 u                                          -- f^(mu_3)
+        y2  = upow y3 u                                          -- f^(mu_2)
+        y1  = upow y2 u                                          -- f^(mu_1)
+        y0  = y1 * f2 * f                                        -- f^(mu_0)
+        p4  = foldr' ((. F.frob) . (*)) 1 ys                     -- f^((p^4 - p^2 + 1) / r)
+          where
+            ys :: [Extension p k]
+            ys = [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15]
+{-# INLINABLE finalExponentiationBLS48 #-}
+
+-- Final exponentiation for Barreto-Naehrig curves.
+-- (https://eprint.iacr.org/2008/490.pdf)
+finalExponentiationBN :: forall e r p k .
+  (Pairing e, KnownNat r, IrreducibleMonic p k, GT e ~ RootsOfUnity r (Extension p k))
+  => Integer -> GT e -> GT e
+finalExponentiationBN u = (<$>) $ hardPart . easyPart
+  where
+    easyPart :: Extension p k -> Extension p k
+    easyPart = p2 . p6
+      where
+        p6 = (*) <$> conj <*> recip               -- f^(p^6 - 1)
+        p2 = (*) <$> identity <*> F.frob . F.frob -- f^(p^2 + 1)
+    hardPart :: Extension p k -> Extension p k
+    hardPart f = p4
+      where
+        fu  = upow f u                            -- f^u
+        fu2 = upow fu u                           -- f^(u^2)
+        fu3 = upow fu2 u                          -- f^(u^3)
+        fpu = F.frob fu2                          -- f^(pu^2)
         y0  = F.frob (f * F.frob (f * F.frob f))  -- f^(p + p^2 + p^3)
         y1  = conj f                              -- f^(-1)
-        y2  = F.frob fpt                          -- f^(p^2t^2)
-        y3  = conj $ F.frob ft                    -- f^(-pt)
-        y4  = conj $ ft * fpt                     -- f^(-t - pt^2)
-        y5  = conj ft2                            -- f^(-t^2)
-        y6  = conj $ ft3 * F.frob ft3             -- f^(-t^3 - pt^3)
+        y2  = F.frob fpu                          -- f^(p^2u^2)
+        y3  = conj $ F.frob fu                    -- f^(-pu)
+        y4  = conj $ fu * fpu                     -- f^(-u - pu^2)
+        y5  = conj fu2                            -- f^(-u^2)
+        y6  = conj $ fu3 * F.frob fu3             -- f^(-u^3 - pu^3)
         p4  = p4' * y0 * join (*) (p4' * y1)      -- f^((p^4 - p^2 + 1) / r)
           where
             p4'  = join (*) $ p4'' * y2 * join (*) (p4'' * y3 * y5)

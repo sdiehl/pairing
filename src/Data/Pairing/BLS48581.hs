@@ -14,7 +14,7 @@ import Data.Curve.Weierstrass.BLS48581T as G2
 import Data.Field.Galois as F
 
 import Data.Pairing (Pairing(..))
-import Data.Pairing.Ate (finalExponentiationBLS12, millerAlgorithm)
+import Data.Pairing.Ate (finalExponentiationBLS48, millerAlgorithm)
 
 -------------------------------------------------------------------------------
 -- Fields
@@ -88,7 +88,7 @@ instance Pairing BLS48581 where
 
   -- t = -5368710017
   pairing p q =
-    finalExponentiationBLS12 (-5368710017) $
+    finalExponentiationBLS48 (-5368710017) $
     finalStep p q $
     millerAlgorithm [-1, 0,-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                        , 0, 0, 0, 0, 0,-1, 0, 0, 1, 0, 0, 0, 0, 0, 0,-1
