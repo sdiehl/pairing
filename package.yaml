@@ -59,7 +59,6 @@ library:
     - Data.Pairing.Hash
   other-modules:
     - Data.Pairing.Ate
-    - Data.Pairing.Byte
   source-dirs:
     - src
 

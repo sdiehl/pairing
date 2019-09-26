@@ -27,9 +27,16 @@ testPairing _ = localOption (QuickCheckTests 10) $ testGroup "Pairing axioms"
     nondegeneracy (pairing :: G1 e -> G2 e -> GT e)
   ]
 
-testHash :: forall e q r . (Pairing e, WACurve e q r, G1 e ~ WAPoint e q r) => e -> TestTree
-testHash _ = testProperty "Encoding well-defined" $ \bs -> monadicIO $ do
+testHashBN :: forall e q r . (Pairing e, WACurve e q r, G1 e ~ WAPoint e q r) => e -> TestTree
+testHashBN _ = testProperty "Encoding well-defined" $ \bs -> monadicIO $ do
   curve :: Maybe (G1 e) <- run $ swEncBN bs
   assert $ isJust curve
   let curve' = fromMaybe (panic "unreachable.") curve
   assert $ def curve'
+
+-- testHashBLS :: forall e q r . (Pairing e, WACurve e q r, G1 e ~ WAPoint e q r) => e -> TestTree
+-- testHashBLS _ = testProperty "Encoding well-defined" $ \bs -> monadicIO $ do
+--   curve :: Maybe (G1 e) <- run $ swEncBLS bs
+--   assert $ isJust curve
+--   let curve' = fromMaybe (panic "unreachable.") curve
+--   assert $ def curve'

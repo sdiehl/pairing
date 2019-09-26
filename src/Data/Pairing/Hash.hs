@@ -1,19 +1,38 @@
 module Data.Pairing.Hash
   ( module Data.Pairing
-  -- * Shallue-van de Woestijne encoding hashing
+  -- * Shallue-van de Woestijne encoding hashing to BN curves
   , swEncBN
+  -- * Shallue-van de Woestijne encoding hashing to BLS curves
+  --, swEncBLS
   ) where
 
 import Protolude
 
 import Control.Error (hoistMaybe, runMaybeT)
 import Control.Monad.Random (MonadRandom)
+import qualified Data.ByteString as B
 import Data.Curve.Weierstrass
 import Data.Field.Galois as F
 import Data.List ((!!))
 
 import Data.Pairing (Pairing(..))
-import Data.Pairing.Byte (ByteOrder(..), fromBytesToInteger)
+
+-------------------------------------------------------------------------------
+-- Byte representation
+-------------------------------------------------------------------------------
+
+data ByteOrder = MostSignificantFirst
+               | LeastSignificantFirst
+
+fromBytesToInteger :: ByteOrder -> ByteString -> Integer
+fromBytesToInteger MostSignificantFirst = B.foldl' f 0
+  where
+    f a b = a `shiftL` 8 .|. fromIntegral b
+fromBytesToInteger LeastSignificantFirst = (fromBytesToInteger MostSignificantFirst) . B.reverse
+
+-------------------------------------------------------------------------------
+-- Shallue-van de Woestijne encoding
+-------------------------------------------------------------------------------
 
 -- | Encodes a given byte string to a point on the BN curve.
 -- The implementation uses the Shallue-van de Woestijne encoding to BN curves as
@@ -26,7 +45,7 @@ swEncBN :: forall e m q r .
   => ByteString -> m (Maybe (G1 e))
 swEncBN bs = runMaybeT $ do
   sqrt3 <- hoistMaybe $ sr $ -3
-  let t  = fromInteger (fromBytesToInteger MostSignificantFirst bs)
+  let t  = fromInteger $ fromBytesToInteger MostSignificantFirst bs
       s1 = (sqrt3 - 1) / 2
       b1 = 1 + b_ (witness :: G1 e)
   guard (b1 + t * t /= 0)
@@ -54,3 +73,10 @@ swEncBN bs = runMaybeT $ do
       A x . (fromIntegral c *) <$> hoistMaybe y
   where
     ch x = if x == 0 then 0 else if qr x then 1 else -1 :: Int
+
+-- | Encodes a given byte string to a point on the BLS curve.
+-- TODO: see Section 3 of https://eprint.iacr.org/2019/403.pdf.
+-- swEncBLS :: forall e m q r .
+--   (MonadRandom m, Pairing e, WACurve e q r, G1 e ~ WAPoint e q r)
+--   => ByteString -> m (Maybe (G1 e))
+-- swEncBLS = notImplemented

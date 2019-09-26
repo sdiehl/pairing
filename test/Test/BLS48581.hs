@@ -3,19 +3,22 @@ module Test.BLS48581 where
 import Protolude
 
 import Data.Curve.Weierstrass
-import Data.Field.Galois
+-- import Data.Field.Galois
 import Data.Pairing.BLS48581
 import Test.Tasty
-import Test.Tasty.HUnit
-import Test.Tasty.QuickCheck
+-- import Test.Tasty.HUnit
+-- import Test.Tasty.QuickCheck
 
-import Test.Pairing
+-- import Test.Pairing
 
 testBLS48581 :: TestTree
 testBLS48581 = testGroup "BLS48581"
-  [ testPairing (witness :: BLS48581)
-  --, testCase "Test vector" $ pairing g1 g2 @?= gt
+  [
   ]
+  -- [ testPairing (witness :: BLS48581)
+  -- , testHashBLS (witness :: BLS48581)
+  -- , testCase "Test vector" $ pairing g1 g2 @?= gt
+  -- ]
 
 g1 :: G1 BLS48581
 g1 = A
@@ -58,4 +61,4 @@ g2 = A
   )
 
 gt :: GT BLS48581
-gt = notImplemented
+gt = panic "not implemented."
