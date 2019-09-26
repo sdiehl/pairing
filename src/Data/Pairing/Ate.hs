@@ -67,6 +67,19 @@ finalExponentiationBLS12 t = (<$>) $ hardPart . easyPart
         p4  = fl0 * F.frob (fl1 * F.frob (fl2 * F.frob fl3)) -- f^((p^4 - p^2 + 1) / r)
 {-# INLINABLE finalExponentiationBLS12 #-}
 
+-- Final exponentiation for Barreto-Lynn-Scott degree 48 curves.
+-- (http://www.comp.tmu.ac.jp/s-yokoyama/research/files/nonref16.pdf)
+finalExponentiationBLS48 :: (Pairing e, KnownNat r, IrreducibleMonic p k,
+  GT e ~ RootsOfUnity r (Extension p k)) => Integer -> GT e -> GT e
+finalExponentiationBLS48 t =  (<$>) $ hardPart . easyPart
+  where
+    easyPart = p2 . p6
+      where
+        p6 = (*) <$> conj <*> recip                          -- f^(p^6 - 1)
+        p2 = (*) <$> identity <*> F.frob . F.frob . F.frob . F.frob . F.frob .F.frob . F.frob . F.frob            -- f^(p^8 + 1)
+    hardPart f = notImplemented
+{-# INLINABLE finalExponentiationBLS48 #-}
+
 -- Final exponentiation for Barreto-Naehrig curves.
 -- (https://eprint.iacr.org/2008/490.pdf)
 finalExponentiationBN :: (Pairing e, KnownNat r, IrreducibleMonic p k,
