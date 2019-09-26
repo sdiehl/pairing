@@ -34,7 +34,6 @@ dependencies:
   - galois-field >= 1 && < 2
   - groups
   - MonadRandom
-  - semirings >= 0.5
   - tasty-quickcheck
 
 extra-source-files:

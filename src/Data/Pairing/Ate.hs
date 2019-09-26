@@ -107,7 +107,7 @@ finalExponentiationBLS48 u = (<$>) $ hardPart . easyPart
         y2  = upow y3 u                                          -- f^(mu_2)
         y1  = upow y2 u                                          -- f^(mu_1)
         y0  = y1 * f2 * f                                        -- f^(mu_0)
-        p4  = foldr' ((. F.frob) . (*)) 1 ys                     -- f^((p^4 - p^2 + 1) / r)
+        p4  = foldr' ((. F.frob) . (*)) 1 ys                     -- f^((p^16 - p^4 + 1) / r)
           where
             ys :: [Extension p k]
             ys = [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15]
