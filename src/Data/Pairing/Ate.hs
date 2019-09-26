@@ -18,13 +18,13 @@ import Data.Pairing (Pairing(..))
 -------------------------------------------------------------------------------
 
 -- Miller algorithm.
-millerAlgorithm :: Pairing e => [Int] -> G1 e -> G2 e -> (G2 e, GT e)
+millerAlgorithm :: Pairing e => [Int8] -> G1 e -> G2 e -> (G2 e, GT e)
 millerAlgorithm (x:xs) p q = millerLoop p q xs (if x > 0 then q else invert q, mempty)
 millerAlgorithm _ _ _      = mempty
 {-# INLINABLE millerAlgorithm #-}
 
 -- Line 2 to line 10
-millerLoop :: Pairing e => G1 e -> G2 e -> [Int] -> (G2 e, GT e) -> (G2 e, GT e)
+millerLoop :: Pairing e => G1 e -> G2 e -> [Int8] -> (G2 e, GT e) -> (G2 e, GT e)
 millerLoop p q = millerLoop'
   where
     millerLoop' []     tf = tf

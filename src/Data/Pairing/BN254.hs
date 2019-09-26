@@ -4,6 +4,19 @@ module Data.Pairing.BN254
   ( module Data.Pairing
   -- * BN254 curve
   , BN254
+  , parameterBin
+  , parameterHex
+  -- ** Fields
+  , Fq
+  , Fq2
+  , Fq6
+  , Fq12
+  , Fr
+  -- ** Groups
+  , G1'
+  , G2'
+  , GT'
+  -- ** Roots of unity
   , getRootOfUnity
   ) where
 
@@ -80,6 +93,20 @@ instance CyclicSubgroup (RootsOfUnity R Fq12) where
 -- Pairings
 -------------------------------------------------------------------------------
 
+-- | Parameter in signed binary.
+parameterBin :: [Int8]
+parameterBin = [ 1, 1, 0, 1, 0, 0,-1, 0, 1, 1, 0, 0, 0,-1, 0, 0, 1
+                  , 1, 0, 0,-1, 0, 0, 0, 0, 0, 1, 0, 0,-1, 0, 0, 1
+                  , 1, 1, 0, 0, 0, 0,-1, 0, 1, 0, 0,-1, 0, 1, 1, 0
+                  , 0, 1, 0, 0,-1, 1, 0, 0,-1, 0, 1, 0, 1, 0, 0, 0
+               ]
+{-# INLINABLE parameterBin #-}
+
+-- | Parameter in hexadecimal.
+parameterHex :: Integer
+parameterHex = 0x44e992b44a6909f1
+{-# INLINABLE parameterHex #-}
+
 -- BN254 curve is pairing-friendly.
 instance Pairing BN254 where
 
@@ -115,16 +142,8 @@ instance Pairing BN254 where
   lineFunction _ _ _ _ = (O, mempty)
   {-# INLINABLE lineFunction #-}
 
-  -- t = 4965661367192848881
-  -- s = 29793968203157093288
-  pairing p q =
-    finalExponentiationBN 4965661367192848881 $
-    finalStep p q $
-    millerAlgorithm [ 1, 1, 0, 1, 0, 0,-1, 0, 1, 1, 0, 0, 0,-1, 0, 0, 1
-                       , 1, 0, 0,-1, 0, 0, 0, 0, 0, 1, 0, 0,-1, 0, 0, 1
-                       , 1, 1, 0, 0, 0, 0,-1, 0, 1, 0, 0,-1, 0, 1, 1, 0
-                       , 0, 1, 0, 0,-1, 1, 0, 0,-1, 0, 1, 0, 1, 0, 0, 0
-                    ] p q
+  pairing p q = finalExponentiationBN parameterHex $
+                finalStep p q $ millerAlgorithm parameterBin p q
   {-# INLINABLE pairing #-}
 
 -------------------------------------------------------------------------------

@@ -4,6 +4,19 @@ module Data.Pairing.BLS12381
   ( module Data.Pairing
   -- * BLS12381 curve
   , BLS12381
+  , parameterBin
+  , parameterHex
+  -- ** Fields
+  , Fq
+  , Fq2
+  , Fq6
+  , Fq12
+  , Fr
+  -- ** Groups
+  , G1'
+  , G2'
+  , GT'
+  -- ** Roots of unity
   , getRootOfUnity
   ) where
 
@@ -83,6 +96,20 @@ instance CyclicSubgroup (RootsOfUnity R Fq12) where
 -- Pairings
 -------------------------------------------------------------------------------
 
+-- | Parameter in signed binary.
+parameterBin :: [Int8]
+parameterBin = [-1,-1, 0,-1, 0, 0,-1, 0, 0, 0, 0, 0, 0, 0, 0,-1, 0
+                  , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                  , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,-1, 0
+                  , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+               ]
+{-# INLINABLE parameterBin #-}
+
+-- | Parameter in hexadecimal.
+parameterHex :: Integer
+parameterHex = -0xd201000000010000
+{-# INLINABLE parameterHex #-}
+
 -- BLS12381 curve is pairing-friendly.
 instance Pairing BLS12381 where
 
@@ -110,15 +137,8 @@ instance Pairing BLS12381 where
   lineFunction _ _ _ _ = (O, mempty)
   {-# INLINABLE lineFunction #-}
 
-  -- t = -15132376222941642752
-  pairing p q =
-    finalExponentiationBLS12 (-15132376222941642752) $
-    finalStep p q $
-    millerAlgorithm [-1,-1, 0,-1, 0, 0,-1, 0, 0, 0, 0, 0, 0, 0, 0,-1, 0
-                       , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                       , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,-1, 0
-                       , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                    ] p q
+  pairing p q = finalExponentiationBLS12 parameterHex $
+                finalStep p q $ millerAlgorithm parameterBin p q
   {-# INLINABLE pairing #-}
 
 -------------------------------------------------------------------------------

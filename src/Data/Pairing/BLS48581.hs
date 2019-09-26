@@ -4,6 +4,21 @@ module Data.Pairing.BLS48581
   ( module Data.Pairing
   -- * BLS48581 curve
   , BLS48581
+  , parameterBin
+  , parameterHex
+  -- ** Fields
+  , Fq
+  , Fq2
+  , Fq4
+  , Fq8
+  , Fq24
+  , Fq48
+  , Fr
+  -- ** Groups
+  , G1'
+  , G2'
+  , GT'
+  -- ** Roots of unity
   , getRootOfUnity
   ) where
 
@@ -59,6 +74,18 @@ instance CyclicSubgroup (RootsOfUnity R Fq48) where
 -- Pairings
 -------------------------------------------------------------------------------
 
+-- | Parameter in signed binary.
+parameterBin :: [Int8]
+parameterBin = [-1, 0,-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                  , 0, 0, 0, 0, 0,-1, 0, 0, 1, 0, 0, 0, 0, 0, 0,-1
+               ]
+{-# INLINABLE parameterBin #-}
+
+-- | Parameter in hexadecimal.
+parameterHex :: Integer
+parameterHex = -0x140000381
+{-# INLINABLE parameterHex #-}
+
 -- BLS48581 curve is pairing-friendly.
 instance Pairing BLS48581 where
 
@@ -87,12 +114,8 @@ instance Pairing BLS48581 where
   {-# INLINABLE lineFunction #-}
 
   -- t = -5368710017
-  pairing p q =
-    finalExponentiationBLS48 (-5368710017) $
-    finalStep p q $
-    millerAlgorithm [-1, 0,-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                       , 0, 0, 0, 0, 0,-1, 0, 0, 1, 0, 0, 0, 0, 0, 0,-1
-                    ] p q
+  pairing p q = finalExponentiationBLS48 parameterHex $
+                finalStep p q $ millerAlgorithm parameterBin p q
   {-# INLINABLE pairing #-}
 
 -------------------------------------------------------------------------------

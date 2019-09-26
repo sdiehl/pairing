@@ -4,6 +4,19 @@ module Data.Pairing.BN254C
   ( module Data.Pairing
   -- * BN254C curve
   , BN254C
+  , parameterBin
+  , parameterHex
+  -- ** Fields
+  , Fq
+  , Fq2
+  , Fq6
+  , Fq12
+  , Fr
+  -- ** Groups
+  , G1'
+  , G2'
+  , GT'
+  -- ** Roots of unity
   , getRootOfUnity
   ) where
 
@@ -80,6 +93,20 @@ instance CyclicSubgroup (RootsOfUnity R Fq12) where
 -- Pairings
 -------------------------------------------------------------------------------
 
+-- | Parameter in signed binary.
+parameterBin :: [Int8]
+parameterBin = [-1,-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,-1,-1
+                  , 0, 0, 0, 0, 0, 0,-1, 0, 0,-1, 0, 0, 0, 0, 0, 0
+                  , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,-1
+                  ,-1, 0, 0, 0, 0, 0,-1,-1, 0, 0, 0, 0, 0,-1, 0, 0
+               ]
+{-# INLINABLE parameterBin #-}
+
+-- | Parameter in hexadecimal.
+parameterHex :: Integer
+parameterHex = -0x4000806000004081
+{-# INLINABLE parameterHex #-}
+
 -- BN254C curve is pairing-friendly.
 instance Pairing BN254C where
 
@@ -115,16 +142,8 @@ instance Pairing BN254C where
   lineFunction _ _ _ _ = (O, mempty)
   {-# INLINABLE lineFunction #-}
 
-  -- t = -4611827168232620161
-  -- s = -27670963009395720964
-  pairing p q =
-    finalExponentiationBN (-4611827168232620161) $
-    finalStep p q $
-    millerAlgorithm [-1,-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,-1,-1
-                       , 0, 0, 0, 0, 0, 0,-1, 0, 0,-1, 0, 0, 0, 0, 0, 0
-                       , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,-1
-                       ,-1, 0, 0, 0, 0, 0,-1,-1, 0, 0, 0, 0, 0,-1, 0, 0
-                    ] p q
+  pairing p q = finalExponentiationBN parameterHex $
+                finalStep p q $ millerAlgorithm parameterBin p q
   {-# INLINABLE pairing #-}
 
 -------------------------------------------------------------------------------
@@ -133,8 +152,8 @@ instance Pairing BN254C where
 
 -- | Precompute primitive roots of unity for binary powers that divide _r - 1.
 getRootOfUnity :: Int -> Fr
-getRootOfUnity 0  = 1
-getRootOfUnity 1  = 16285256166819790982212518231621426655034817857667267142801363550619237884172
-getRootOfUnity 2  = 3531193943909383743765472579762059777732585141995099857941
-getRootOfUnity _  = panic "getRootOfUnity: exponent too big for Fr / negative"
+getRootOfUnity 0 = 1
+getRootOfUnity 1 = 16285256166819790982212518231621426655034817857667267142801363550619237884172
+getRootOfUnity 2 = 3531193943909383743765472579762059777732585141995099857941
+getRootOfUnity _ = panic "getRootOfUnity: exponent too big for Fr / negative"
 {-# INLINABLE getRootOfUnity #-}

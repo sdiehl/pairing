@@ -4,6 +4,19 @@ module Data.Pairing.BN462
   ( module Data.Pairing
   -- * BN462 curve
   , BN462
+  , parameterBin
+  , parameterHex
+  -- ** Fields
+  , Fq
+  , Fq2
+  , Fq6
+  , Fq12
+  , Fr
+  -- ** Groups
+  , G1'
+  , G2'
+  , GT'
+  -- ** Roots of unity
   , getRootOfUnity
   ) where
 
@@ -80,6 +93,24 @@ instance CyclicSubgroup (RootsOfUnity R Fq12) where
 -- Pairings
 -------------------------------------------------------------------------------
 
+-- | Parameter in signed binary.
+parameterBin :: [Int8]
+parameterBin = [ 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0
+                  , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                  , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                  , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                  , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                  , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                  , 0, 0,-1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                  , 0,-1, 0, 0
+               ]
+{-# INLINABLE parameterBin #-}
+
+-- | Parameter in hexadecimal.
+parameterHex :: Integer
+parameterHex = 0x4001fffffffffffffffffffffbfff
+{-# INLINABLE parameterHex #-}
+
 -- BN462 curve is pairing-friendly.
 instance Pairing BN462 where
 
@@ -115,20 +146,8 @@ instance Pairing BN462 where
   lineFunction _ _ _ _ = (O, mempty)
   {-# INLINABLE lineFunction #-}
 
-  -- t = 20771722735339766972924978723274751
-  -- s = 124630336412038601837549872339648508
-  pairing p q =
-    finalExponentiationBN 20771722735339766972924978723274751 $
-    finalStep p q $
-    millerAlgorithm [ 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0
-                       , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                       , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                       , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                       , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                       , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                       , 0, 0,-1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-                       , 0,-1, 0, 0
-                    ] p q
+  pairing p q = finalExponentiationBN parameterHex $
+                finalStep p q $ millerAlgorithm parameterBin p q
   {-# INLINABLE pairing #-}
 
 -------------------------------------------------------------------------------
@@ -137,8 +156,8 @@ instance Pairing BN462 where
 
 -- | Precompute primitive roots of unity for binary powers that divide _r - 1.
 getRootOfUnity :: Int -> Fr
-getRootOfUnity 0  = 1
-getRootOfUnity 1  = 6701817056313037086248947066310538444882082605308124576230408038843354961099564416871567745979441241809893679037520753402159179772451651596
-getRootOfUnity 2  = 6701817056313037086248947066310538122240713774066876784715216358244698888639313144783432601961772704202466509837286441148448873569895743522
-getRootOfUnity _  = panic "getRootOfUnity: exponent too big for Fr / negative"
+getRootOfUnity 0 = 1
+getRootOfUnity 1 = 6701817056313037086248947066310538444882082605308124576230408038843354961099564416871567745979441241809893679037520753402159179772451651596
+getRootOfUnity 2 = 6701817056313037086248947066310538122240713774066876784715216358244698888639313144783432601961772704202466509837286441148448873569895743522
+getRootOfUnity _ = panic "getRootOfUnity: exponent too big for Fr / negative"
 {-# INLINABLE getRootOfUnity #-}
