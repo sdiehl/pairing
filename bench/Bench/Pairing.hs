@@ -15,7 +15,7 @@ import qualified Data.Pairing.BN254D as BN254D
 import qualified Data.Pairing.BN462 as BN462
 
 benchPairing :: Benchmark
-benchPairing = bgroup "Pairing"
+benchPairing = bgroup "Optimal ate pairing"
   [ bench "BLS12381" $
     nf (uncurry pairing) bls12381
   , bench "BLS48581" $

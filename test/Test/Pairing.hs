@@ -2,8 +2,11 @@ module Test.Pairing where
 
 import Protolude
 
+import Data.Curve.Weierstrass
 import Data.Group
-import Data.Pairing
+import Data.Pairing.Hash
+import Test.QuickCheck.Instances ()
+import Test.QuickCheck.Monadic
 import Test.Tasty
 import Test.Tasty.QuickCheck
 
@@ -23,3 +26,10 @@ testPairing _ = localOption (QuickCheckTests 10) $ testGroup "Pairing axioms"
   , testProperty "nondegeneracy" $
     nondegeneracy (pairing :: G1 e -> G2 e -> GT e)
   ]
+
+testHash :: forall e q r . (Pairing e, WACurve e q r, G1 e ~ WAPoint e q r) => e -> TestTree
+testHash _ = testProperty "Encoding well-defined" $ \bs -> monadicIO $ do
+  curve :: Maybe (G1 e) <- run $ swEncBN bs
+  assert $ isJust curve
+  let curve' = fromMaybe (panic "unreachable.") curve
+  assert $ def curve'

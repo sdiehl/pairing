@@ -13,6 +13,7 @@ import Test.Pairing
 testBN254 :: TestTree
 testBN254 = testGroup "BN254"
   [ testPairing (witness :: BN254)
+  , testHash (witness :: BN254)
   , testCase "Test vector" $ pairing g1 g2 @?= gt
   ]
 
