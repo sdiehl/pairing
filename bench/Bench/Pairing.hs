@@ -6,7 +6,6 @@ import Criterion.Main
 import Data.Curve
 import Data.Pairing
 import qualified Data.Pairing.BLS12381 as BLS12381
-import qualified Data.Pairing.BLS48581 as BLS48581
 import qualified Data.Pairing.BN254 as BN254
 import qualified Data.Pairing.BN254A as BN254A
 import qualified Data.Pairing.BN254B as BN254B
@@ -18,8 +17,6 @@ benchPairing :: Benchmark
 benchPairing = bgroup "Optimal ate pairing"
   [ bench "BLS12381" $
     nf (uncurry pairing) bls12381
-  , bench "BLS48581" $
-    nf (uncurry pairing) bls48581
   , bench "BN254" $
     nf (uncurry pairing) bn254
   , bench "BN254A" $
@@ -36,9 +33,6 @@ benchPairing = bgroup "Optimal ate pairing"
 
 bls12381 :: (G1 BLS12381.BLS12381, G2 BLS12381.BLS12381)
 bls12381 = (gen, gen)
-
-bls48581 :: (G1 BLS48581.BLS48581, G2 BLS48581.BLS48581)
-bls48581 = (gen, gen)
 
 bn254 :: (G1 BN254.BN254, G2 BN254.BN254)
 bn254 = (gen, gen)

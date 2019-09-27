@@ -16,13 +16,13 @@ default-extensions:
   - FlexibleContexts
   - ScopedTypeVariables
   - RankNTypes
+  - ConstraintKinds
   - DataKinds
   - DeriveGeneric
   - GeneralizedNewtypeDeriving
   - MultiParamTypeClasses
   - OverloadedLists
   - PatternSynonyms
-  - StandaloneDeriving
   - TypeFamilyDependencies
 
 dependencies:
@@ -49,7 +49,6 @@ library:
   exposed-modules:
     - Data.Pairing
     - Data.Pairing.BLS12381
-    - Data.Pairing.BLS48581
     - Data.Pairing.BN254
     - Data.Pairing.BN254A
     - Data.Pairing.BN254B
