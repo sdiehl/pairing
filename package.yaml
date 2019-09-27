@@ -1,5 +1,5 @@
 name:        pairing
-version:     0.5.0
+version:     1.0.0
 synopsis:    Bilinear pairings
 description: Optimal Ate pairing over Barreto-Naehrig curves
 maintainer:  Adjoint Inc (info@adjoint.io)
@@ -16,27 +16,25 @@ default-extensions:
   - FlexibleContexts
   - ScopedTypeVariables
   - RankNTypes
-  - BangPatterns
+  - ConstraintKinds
   - DataKinds
-  - DeriveAnyClass
-  - DeriveFunctor
   - DeriveGeneric
   - GeneralizedNewtypeDeriving
   - MultiParamTypeClasses
+  - OverloadedLists
   - PatternSynonyms
-  - TypeApplications
-  - TypeSynonymInstances
+  - TypeFamilyDependencies
 
 dependencies:
   - base >= 4.10 && < 5
-  - protolude >= 0.2
+  - protolude >= 0.2 && < 0.3
   - bytestring
-  - elliptic-curve >= 0.2 && < 0.3
+  - elliptic-curve >= 0.3 && < 0.4
   - errors
-  - galois-field >= 0.4 && < 0.5
+  - galois-field >= 1 && < 2
+  - groups
   - MonadRandom
-  - QuickCheck
-  - wl-pprint-text
+  - tasty-quickcheck
 
 extra-source-files:
   - README.md
@@ -44,17 +42,21 @@ extra-source-files:
 
 ghc-options:
   - -freverse-errors
+  - -O2
   - -Wall
 
 library:
   exposed-modules:
-    - Pairing.ByteRepr
-    - Pairing.Curve
-    - Pairing.Hash
-    - Pairing.Pairing
-    - Pairing.Serialize.Types
-    - Pairing.Serialize.Jivsov
-    - Pairing.Serialize.MCLWasm
+    - Data.Pairing
+    - Data.Pairing.Ate
+    - Data.Pairing.BLS12381
+    - Data.Pairing.BN254
+    - Data.Pairing.BN254A
+    - Data.Pairing.BN254B
+    - Data.Pairing.BN254C
+    - Data.Pairing.BN254D
+    - Data.Pairing.BN462
+    - Data.Pairing.Hash
   source-dirs:
     - src
 
@@ -62,24 +64,20 @@ tests:
   pairing-tests:
     main: Main
     dependencies:
-      - quickcheck-instances
-      - tasty
-      - tasty-hunit
-      - tasty-quickcheck
-    source-dirs:
-      - src
-      - tests
-
-benchmarks:
-  pairing-benchmarks:
-    main: Main
-    dependencies:
-      - criterion
+      - pairing
       - QuickCheck
       - quickcheck-instances
       - tasty
       - tasty-hunit
       - tasty-quickcheck
     source-dirs:
-      - src
-      - benchmarks
+      - test
+
+benchmarks:
+  pairing-benchmarks:
+    main: Main
+    dependencies:
+      - criterion
+      - pairing
+    source-dirs:
+      - bench

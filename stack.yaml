@@ -1,6 +1,6 @@
-resolver: lts-13.19
+resolver: lts-14.7
 extra-deps:
-- galois-field-0.4.1
-- elliptic-curve-0.2.2
-- poly-0.3.1.0
-- semirings-0.4.2
+  - elliptic-curve-0.3.0
+  - galois-field-1.0.0
+  - poly-0.3.2.0
+  - semirings-0.5.1

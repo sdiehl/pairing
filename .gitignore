@@ -8,3 +8,4 @@ pairing.cabal
 *.o
 .ghc.environment.*
 dist*/
+TAGS
