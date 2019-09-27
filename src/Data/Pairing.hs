@@ -22,6 +22,12 @@ import Test.Tasty.QuickCheck (Arbitrary)
 -------------------------------------------------------------------------------
 
 -- | Pairings of general cryptographic groups.
+--
+-- Let @G1@ and @G2@ be additive cyclic groups of prime order @r@,
+-- and @GT@ be a multiplicative cyclic group of prime order @r@.
+--
+-- Then the pairing is defined to be of type @G1 x G2 -> GT@,
+-- and satisfies bilinearity, non-degeneracy, and computability.
 class (Arbitrary (G1 e), Arbitrary (G2 e), Arbitrary (GT e),
        Eq        (G1 e), Eq        (G2 e), Eq        (GT e),
        Generic   (G1 e), Generic   (G2 e), Generic   (GT e),

@@ -27,17 +27,6 @@ The non-degeneracy property guarantees non-trivial pairings for non-trivial argu
 
 An example of a pairing would be the scalar product on euclidean space <.> : R<sup>n</sup> × R<sup>n</sup> → R
 
-## Supported Curves
-
-* [BLS12381](src/Data/Pairing/BLS12381.hs)
-* [BLS48581](src/Data/Pairing/BLS48581.hs)
-* [BN254](src/Data/Pairing/BN254.hs)
-* [BN254A](src/Data/Pairing/BN254A.hs)
-* [BN254B](src/Data/Pairing/BN254B.hs)
-* [BN254C](src/Data/Pairing/BN254C.hs)
-* [BN254D](src/Data/Pairing/BN254D.hs)
-* [BN462](src/Data/Pairing/BN462.hs)
-
 ## Example Usage
 
 A simple example of calculating the optimal ate pairing given two points in G<sub>1</sub> and G<sub>2</sub>.
@@ -45,39 +34,39 @@ A simple example of calculating the optimal ate pairing given two points in G<su
 ```haskell
 import Protolude
 
-import Pairing.Group
-import Pairing.Pairing
-import Pairing.Point
-import Pairing.Fq (Fq(..))
-import Pairing.Fq2 (Fq2(..))
+import Data.Group (pow)
+import Data.Curve.Weierstrass (Point(A), mul')
 
-e1 :: G1
-e1 = Point
-        (Fq 1368015179489954701390400359078579693043519447331113978918064868415326638035)
-        (Fq 9918110051302171585080402603319702774565515993150576347155970296011118125764)
+import Data.Pairing.BN254 (BN254, G1, G2, pairing)
+
+p :: G1 BN254
+p = A
+    1368015179489954701390400359078579693043519447331113978918064868415326638035
+    9918110051302171585080402603319702774565515993150576347155970296011118125764
 
 
-e2 :: G2
-e2 = Point
-        (Fq2
-         (Fq 2725019753478801796453339367788033689375851816420509565303521482350756874229)
-         (Fq 7273165102799931111715871471550377909735733521218303035754523677688038059653)
-        )
-        (Fq2
-         (Fq 2512659008974376214222774206987427162027254181373325676825515531566330959255)
-         (Fq 957874124722006818841961785324909313781880061366718538693995380805373202866)
-        )
-
+q :: G2 BN254
+q = A
+    [2725019753478801796453339367788033689375851816420509565303521482350756874229
+    ,7273165102799931111715871471550377909735733521218303035754523677688038059653
+    ]
+    [2512659008974376214222774206987427162027254181373325676825515531566330959255
+    ,957874124722006818841961785324909313781880061366718538693995380805373202866
+    ]
 
 main :: IO ()
-main  = do
-  putText "Ate pairing:"
-  print (atePairing e1 e2)
-  let 
-    lhs = reducedPairing (gMul e1 2) (gMul e2 3)
-    rhs = (reducedPairing e1 e2)^(2 * 3)
-  putText "Is bilinear:" 
-  print (lhs == rhs)
+main = do
+  putText "P:"
+  print $ p
+  putText "Q:"
+  print $ q
+  putText "e(P, Q):"
+  print $ pairing p q
+  putText "e(P, Q) is bilinear:"
+  print $ pairing (mul' p a) (mul' q b) == pow (pairing p q) (a * b)
+  where
+    a = 2 :: Int
+    b = 3 :: Int
 ```
 
 ## Pairings in cryptography
@@ -131,27 +120,21 @@ at(Q,P) = f<sub>r,Q</sub>(P)<sup>(q<sup>k</sup> - 1) / r</sup>
 
 ## Implementation
 
-We have implemented the optimal Ate pairing over the BN128 curve, i.e. we define `q` and `r` as
+We have implemented a polymorphic optimal ate pairing over the following pairing-friendly elliptic curves:
 
- * q = 36t<sup>4</sup> + 36t<sup>3</sup> + 24t<sup>2</sup> + 6t + 1
- * r = 36t<sup>4</sup> + 36t<sup>3</sup> + 18t<sup>2</sup> + 6t + 1
- * t = 4965661367192848881
+* Barreto-Lynn-Scott degree 12 curves
+  * [BLS12381](src/Data/Pairing/BLS12381.hs)
+* Barreto-Naehrig curves
+  * [BN254](src/Data/Pairing/BN254.hs)
+  * [BN254A](src/Data/Pairing/BN254A.hs)
+  * [BN254B](src/Data/Pairing/BN254B.hs)
+  * [BN254C](src/Data/Pairing/BN254C.hs)
+  * [BN254D](src/Data/Pairing/BN254D.hs)
+  * [BN462](src/Data/Pairing/BN462.hs)
 
-The tower of finite fields we work with is defined as follows:
+A more detailed documentation on their domain parameters can be found in our [elliptic curve library](https://github.com/adjoint-io/elliptic-curve).
 
- * F<sub>q</sub> is the prime field with characteristic `q`
- * F<sub>q<sup>2</sup></sub> := F<sub>q</sub>[u]/u<sup>2</sup> + 1
- * F<sub>q<sup>6</sup></sub> := F<sub>q<sup></sub>2</sup>[v]/v<sup>3</sup> - (9 + u)
- * F<sub>q<sup>12</sup></sub> := F<sub>q<sup>6</sup></sub>[w]/w<sup>2</sup> - v
-
-The groups' definitions are:
-
- * G<sub>1</sub> := E(F<sub>q</sub>), with equation y<sup>2</sup> = x<sup>3</sup> + 3
- * G<sub>2</sub> := E'(F<sub>q<sup>2</sup></sub>), with equation y<sup>2</sup> = x<sup>3</sup> + 3 / (9 + u)
- * G<sub>T</sub> := μ<sub>r</sub>, i.e. the `r`-th roots of unity subgroup of the multiplicative group of F<sub>q<sup>12</sup></sub>
-
-License
--------
+## License
 
 ```
 Copyright (c) 2018-2019 Adjoint Inc.
@@ -174,4 +157,3 @@ DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 OR OTHER DEALINGS IN THE SOFTWARE.
 ```
-
