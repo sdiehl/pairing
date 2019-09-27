@@ -79,10 +79,5 @@ benchmarks:
     dependencies:
       - criterion
       - pairing
-      - QuickCheck
-      - quickcheck-instances
-      - tasty
-      - tasty-hunit
-      - tasty-quickcheck
     source-dirs:
       - bench
