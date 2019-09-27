@@ -122,21 +122,6 @@ instance Pairing BLS12381 where
   finalStep = const $ const snd
   {-# INLINABLE finalStep #-}
 
-  lineFunction (A x y) (A x1 y1) (A x2 y2) f
-    | x1 /= x2         = (A x3 y3, (<>) f $ toU' [embed (-y), [x *^ l, y1 - l * x1]])
-    | y1 + y2 == 0     = (O, (<>) f $ toU' [embed x, embed (-x1)])
-    | otherwise        = (A x3' y3', (<>) f $ toU' [embed (-y), [x *^ l', y1 - l' * x1]])
-    where
-      l   = (y2 - y1) / (x2 - x1)
-      x3  = l * l - x1 - x2
-      y3  = l * (x1 - x3) - y1
-      x12 = x1 * x1
-      l'  = (x12 + x12 + x12) / (y1 + y1)
-      x3' = l' * l' - x1 - x2
-      y3' = l' * (x1 - x3') - y1
-  lineFunction _ _ _ _ = (O, mempty)
-  {-# INLINABLE lineFunction #-}
-
   pairing p q = finalExponentiationBLS12 parameterHex $
                 finalStep p q $ millerAlgorithm parameterBin p q
   {-# INLINABLE pairing #-}

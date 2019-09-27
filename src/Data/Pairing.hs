@@ -2,12 +2,16 @@ module Data.Pairing
   (
   -- * Pairings
     Pairing(..)
+  -- ** Pairing-friendly elliptic curves
+  , ECPairing
   ) where
 
 import Protolude
 
 import Control.Monad.Random (Random)
+import Data.Curve.Weierstrass (WACurve, WAPoint)
 import Data.Group (Group)
+import Data.Field.Galois (Extension, IrreducibleMonic, Prime, RootsOfUnity)
 import Test.Tasty.QuickCheck (Arbitrary)
 
 -------------------------------------------------------------------------------
@@ -22,7 +26,7 @@ class (Arbitrary (G1 e), Arbitrary (G2 e), Arbitrary (GT e),
        NFData    (G1 e), NFData    (G2 e), NFData    (GT e),
        Random    (G1 e), Random    (G2 e), Random    (GT e),
        Show      (G1 e), Show      (G2 e), Show      (GT e)) => Pairing e where
-  {-# MINIMAL finalStep, lineFunction, pairing #-}
+  {-# MINIMAL finalStep, pairing #-}
 
   -- | Left group @G1@.
   type family G1 e = (g :: *) | g -> e
@@ -36,8 +40,21 @@ class (Arbitrary (G1 e), Arbitrary (G2 e), Arbitrary (GT e),
   -- | Final step.
   finalStep :: G1 e -> G2 e -> (G2 e, GT e) -> GT e
 
-  -- | Line function.
-  lineFunction :: G1 e -> G2 e -> G2 e -> GT e -> (G2 e, GT e)
-
   -- | Computable non-degenerate bilinear map.
   pairing :: G1 e -> G2 e -> GT e
+
+-- | Pairings of a family of pairing-friendly elliptic curves.
+-- Weierstrass affine curves with twist isomorphism.
+type ECPairing e q r u v w
+  = ( Pairing e
+    , KnownNat q
+    , KnownNat r
+    , WACurve e (Prime q) (Prime r)
+    , G1 e ~ WAPoint e (Prime q) (Prime r)
+    , IrreducibleMonic u (Prime q)
+    , WACurve e (Extension u (Prime q)) (Prime r)
+    , G2 e ~ WAPoint e (Extension u (Prime q)) (Prime r)
+    , IrreducibleMonic v (Extension u (Prime q))
+    , IrreducibleMonic w (Extension v (Extension u (Prime q)))
+    , GT e ~ RootsOfUnity r (Extension w (Extension v (Extension u (Prime q))))
+    )

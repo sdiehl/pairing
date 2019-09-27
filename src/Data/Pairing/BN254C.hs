@@ -116,31 +116,16 @@ instance Pairing BN254C where
 
   type instance GT BN254C = GT'
 
-  finalStep p q = snd . uncurry (lineFunction p q2) . uncurry (lineFunction p q1)
-    where
-      q1            = frob' q
-      q2            = inv $ frob' q1
-      frob' (A x y) = A (F.frob x * x') (F.frob y * y')
-        where
-          x' = pow xi $ quot (F.char (witness :: Fq) - 1) 3
-          y' = pow xi $ shiftR (F.char (witness :: Fq)) 1
-      frob' _       = O
-  {-# INLINABLE finalStep #-}
-
-  lineFunction (A x y) (A x1 y1) (A x2 y2) f
-    | x1 /= x2         = (A x3 y3, f <> toU' [embed (-y), [x *^ l, y1 - l * x1]])
-    | y1 + y2 == 0     = (O, f <> toU' [embed x, embed (-x1)])
-    | otherwise        = (A x3' y3', f <> toU' [embed (-y), [x *^ l', y1 - l' * x1]])
-    where
-      l   = (y2 - y1) / (x2 - x1)
-      x3  = l * l - x1 - x2
-      y3  = l * (x1 - x3) - y1
-      x12 = x1 * x1
-      l'  = (x12 + x12 + x12) / (y1 + y1)
-      x3' = l' * l' - x1 - x2
-      y3' = l' * (x1 - x3') - y1
-  lineFunction _ _ _ _ = (O, mempty)
-  {-# INLINABLE lineFunction #-}
+  -- finalStep p q = snd . uncurry (lineFunction p q2) . uncurry (lineFunction p q1)
+  --   where
+  --     q1            = frob' q
+  --     q2            = inv $ frob' q1
+  --     frob' (A x y) = A (F.frob x * x') (F.frob y * y')
+  --       where
+  --         x' = pow xi $ quot (F.char (witness :: Fq) - 1) 3
+  --         y' = pow xi $ shiftR (F.char (witness :: Fq)) 1
+  --     frob' _       = O
+  -- {-# INLINABLE finalStep #-}
 
   pairing p q = finalExponentiationBN parameterHex $
                 finalStep p q $ millerAlgorithm parameterBin p q

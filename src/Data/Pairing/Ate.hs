@@ -1,30 +1,32 @@
 module Data.Pairing.Ate
   ( finalExponentiationBLS12
-  , finalExponentiationBLS48
   , finalExponentiationBN
+  , lineFunction
   , millerAlgorithm
   ) where
 
 import Protolude
 
+import Data.Curve.Weierstrass (Point(..))
 import Data.Field.Galois as F
 import Data.Group (invert)
-import Data.List ((!!))
 
-import Data.Pairing (Pairing(..))
+import Data.Pairing (Pairing(..), ECPairing)
 
 -------------------------------------------------------------------------------
 -- Miller algorithm
 -------------------------------------------------------------------------------
 
 -- Miller algorithm.
-millerAlgorithm :: Pairing e => [Int8] -> G1 e -> G2 e -> (G2 e, GT e)
+millerAlgorithm :: ECPairing e q r u v w
+  => [Int8] -> G1 e -> G2 e -> (G2 e, GT e)
 millerAlgorithm (x:xs) p q = millerLoop p q xs (if x > 0 then q else invert q, mempty)
 millerAlgorithm _ _ _      = mempty
 {-# INLINABLE millerAlgorithm #-}
 
--- Line 2 to line 10
-millerLoop :: Pairing e => G1 e -> G2 e -> [Int8] -> (G2 e, GT e) -> (G2 e, GT e)
+-- Line 2 to line 10.
+millerLoop :: ECPairing e q r u v w
+  => G1 e -> G2 e -> [Int8] -> (G2 e, GT e) -> (G2 e, GT e)
 millerLoop p q = millerLoop'
   where
     millerLoop' []     tf = tf
@@ -35,15 +37,35 @@ millerLoop p q = millerLoop'
         | otherwise -> millerLoop' xs $ additionStep p (invert q) tf2
 {-# INLINABLE millerLoop #-}
 
--- Line 4
-doublingStep :: Pairing e => G1 e -> (G2 e, GT e) -> (G2 e, GT e)
-doublingStep p (t, f) = (<>) f <$> lineFunction p t t f
+-- Line 4.
+doublingStep :: ECPairing e q r u v w
+  => G1 e -> (G2 e, GT e) -> (G2 e, GT e)
+doublingStep p (t, f) = (<>) f . (<>) f <$> lineFunction p t t
 {-# INLINABLE doublingStep #-}
 
--- Line 6 and line 8
-additionStep :: Pairing e => G1 e -> G2 e -> (G2 e, GT e) -> (G2 e, GT e)
-additionStep p q (t, f) = lineFunction p q t f
+-- Line 6 and line 8.
+additionStep :: ECPairing e q r u v w
+  => G1 e -> G2 e -> (G2 e, GT e) -> (G2 e, GT e)
+additionStep p q (t, f) = (<>) f <$> lineFunction p q t
 {-# INLINABLE additionStep #-}
+
+-- Line function.
+lineFunction :: ECPairing e q r u v w
+  => G1 e -> G2 e -> G2 e -> (G2 e, GT e)
+lineFunction (A x y) (A x1 y1) (A x2 y2)
+  | x1 /= x2       = (A x3 y3, toU' [embed (-y), [x *^ l, y1 - l * x1]])
+  | y1 + y2 == 0   = (O, toU' [embed x, embed (-x1)])
+  | otherwise      = (A x3' y3', toU' [embed (-y), [x *^ l', y1 - l' * x1]])
+  where
+    l   = (y2 - y1) / (x2 - x1)
+    x3  = l * l - x1 - x2
+    y3  = l * (x1 - x3) - y1
+    x12 = x1 * x1
+    l'  = (x12 + x12 + x12) / (y1 + y1)
+    x3' = l' * l' - x1 - x2
+    y3' = l' * (x1 - x3') - y1
+lineFunction _ _ _ = (O, mempty)
+{-# INLINABLE lineFunction #-}
 
 -------------------------------------------------------------------------------
 -- Final exponentiation
@@ -51,81 +73,34 @@ additionStep p q (t, f) = lineFunction p q t f
 
 -- Final exponentiation for Barreto-Lynn-Scott degree 12 curves.
 -- (https://eprint.iacr.org/2016/130.pdf)
-finalExponentiationBLS12 :: forall e r p k .
-  (Pairing e, KnownNat r, IrreducibleMonic p k, GT e ~ RootsOfUnity r (Extension p k))
+finalExponentiationBLS12 :: ECPairing e q r u v w
   => Integer -> GT e -> GT e
 finalExponentiationBLS12 u = (<$>) $ hardPart . easyPart
   where
-    easyPart :: Extension p k -> Extension p k
     easyPart = p2 . p6
       where
-        p6 = (*) <$> conj <*> recip               -- f^(p^6 - 1)
-        p2 = (*) <$> identity <*> F.frob . F.frob -- f^(p^2 + 1)
-    hardPart :: Extension p k -> Extension p k
+        p6 = (*) <$> conj <*> recip                       -- f^(p^6 - 1)
+        p2 = (*) <$> identity <*> F.frob . F.frob         -- f^(p^2 + 1)
     hardPart f = p4
       where
-        f2 = f * f                                -- f^2
-        y3 = upow (upow f u * conj f2) u * f      -- f^(lambda_3)
-        y2 = upow y3 u                            -- f^(lambda_2)
-        y1 = upow y2 u * conj y3                  -- f^(lambda_1)
-        y0 = upow y1 u * f2 * f                   -- f^(lambda_0)
-        p4 = foldr' ((. F.frob) . (*)) 1 ys       -- f^((p^4 - p^2 + 1) / r)
-          where
-            ys :: [Extension p k]
-            ys = [y0, y1, y2, y3]
+        f2 = f * f                                        -- f^2
+        y3 = upow (upow f u * conj f2) u * f              -- f^(lambda_3)
+        y2 = upow y3 u                                    -- f^(lambda_2)
+        y1 = upow y2 u * conj y3                          -- f^(lambda_1)
+        y0 = upow y1 u * f2 * f                           -- f^(lambda_0)
+        p4 = y0 * F.frob (y1 * F.frob (y2 * (F.frob y3))) -- f^((p^4 - p^2 + 1) / r)
 {-# INLINABLE finalExponentiationBLS12 #-}
-
--- Final exponentiation for Barreto-Lynn-Scott degree 48 curves.
--- (http://www.comp.tmu.ac.jp/s-yokoyama/research/files/nonref16.pdf)
-finalExponentiationBLS48 :: forall e r p k .
-  (Pairing e, KnownNat r, IrreducibleMonic p k, GT e ~ RootsOfUnity r (Extension p k))
-  => Integer -> GT e -> GT e
-finalExponentiationBLS48 u = (<$>) $ hardPart . easyPart
-  where
-    easyPart :: Extension p k -> Extension p k
-    easyPart = p2 . p6
-      where
-        p6 = (*) <$> conj <*> recip                              -- f^(p^6 - 1)
-        p2 = (*) <$> identity <*> flip ((!!) . iterate F.frob) 8 -- f^(p^8 + 1)
-    hardPart :: Extension p k -> Extension p k
-    hardPart f = p4
-      where
-        f2  = f * f                                              -- f^2
-        y15 = upow (upow f u * conj f2) u * f                    -- f^(mu_15)
-        y14 = upow y15 u                                         -- f^(mu_14)
-        y13 = upow y14 u                                         -- f^(mu_13)
-        y12 = upow y13 u                                         -- f^(mu_12)
-        y11 = upow y12 u                                         -- f^(mu_11)
-        y10 = upow y11 u                                         -- f^(mu_10)
-        y9  = upow y10 u                                         -- f^(mu_9)
-        y8  = upow y9 u                                          -- f^(mu_8)
-        y7  = upow y8 u * conj y15                               -- f^(mu_7)
-        y6  = upow y7 u                                          -- f^(mu_6)
-        y5  = upow y6 u                                          -- f^(mu_5)
-        y4  = upow y5 u                                          -- f^(mu_4)
-        y3  = upow y4 u                                          -- f^(mu_3)
-        y2  = upow y3 u                                          -- f^(mu_2)
-        y1  = upow y2 u                                          -- f^(mu_1)
-        y0  = y1 * f2 * f                                        -- f^(mu_0)
-        p4  = foldr' ((. F.frob) . (*)) 1 ys                     -- f^((p^16 - p^4 + 1) / r)
-          where
-            ys :: [Extension p k]
-            ys = [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15]
-{-# INLINABLE finalExponentiationBLS48 #-}
 
 -- Final exponentiation for Barreto-Naehrig curves.
 -- (https://eprint.iacr.org/2008/490.pdf)
-finalExponentiationBN :: forall e r p k .
-  (Pairing e, KnownNat r, IrreducibleMonic p k, GT e ~ RootsOfUnity r (Extension p k))
+finalExponentiationBN :: ECPairing e q r u v w
   => Integer -> GT e -> GT e
 finalExponentiationBN u = (<$>) $ hardPart . easyPart
   where
-    easyPart :: Extension p k -> Extension p k
     easyPart = p2 . p6
       where
         p6 = (*) <$> conj <*> recip               -- f^(p^6 - 1)
         p2 = (*) <$> identity <*> F.frob . F.frob -- f^(p^2 + 1)
-    hardPart :: Extension p k -> Extension p k
     hardPart f = p4
       where
         fu  = upow f u                            -- f^u
