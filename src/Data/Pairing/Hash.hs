@@ -1,8 +1,8 @@
 module Data.Pairing.Hash
   ( module Data.Pairing
-  -- * Shallue-van de Woestijne encoding hashing to BLS12 curves
-  --, swEncBLS12
-  -- * Shallue-van de Woestijne encoding hashing to BN curves
+  -- * Shallue-van de Woestijne encoding to BLS12 curves
+  , swEncBLS12
+  -- * Shallue-van de Woestijne encoding to BN curves
   , swEncBN
   ) where
 
@@ -15,32 +15,32 @@ import Data.Curve.Weierstrass
 import Data.Field.Galois as F
 import Data.List ((!!))
 
-import Data.Pairing (Pairing(..), ECPairing)
+import Data.Pairing
 
 -------------------------------------------------------------------------------
 -- Shallue-van de Woestijne encoding
 -------------------------------------------------------------------------------
 
--- Conversion from bytestring to field.
-fromBytes :: (Bits k, Num k) => ByteString -> k
-fromBytes = B.foldl' f 0
-  where
-    f a b = shiftL a 8 .|. fromIntegral b
-{-# INLINABLE fromBytes #-}
-
 -- | Encodes a given byte string to a point on the BLS12 curve.
--- TODO: see Section 3 of https://eprint.iacr.org/2019/403.pdf.
--- swEncBLS12 :: forall e m q r u v w . (MonadRandom m, ECPairing e q r u v w)
---   => ByteString -> m (Maybe (G1 e))
--- swEncBLS12 = notImplemented
--- {-# INLINABLE swEncBLS12 #-}
+--
+-- The implementation uses the Shallue-van de Woestijne encoding to BLS12 curves
+-- as specified in Section 3 of [Fast and simple constant-time hashing to the
+-- BLS12-381 elliptic curve](https://eprint.iacr.org/2019/403.pdf).
+--
+-- This function is not implemented yet.
+swEncBLS12 :: forall e m q r u v w . (MonadRandom m, ECPairing e q r u v w)
+  => ByteString -> m (Maybe (G1 e))
+swEncBLS12 = panic "swEncBLS12: not implemented."
+{-# INLINABLE swEncBLS12 #-}
 
 -- | Encodes a given byte string to a point on the BN curve.
--- The implementation uses the Shallue-van de Woestijne encoding to BN curves as
--- specified in Section 6 of Indifferentiable Hashing to Barreto Naehrig Curves
--- by Pierre-Alain Fouque and Mehdi Tibouchi. This function evaluates an empty
--- bytestring or one that contains \NUL to zero, which according to Definition 2
--- of the paper is sent to an arbitrary point on the curve.
+--
+-- The implementation uses the Shallue-van de Woestijne encoding to BN curves
+-- as specified in Section 6 of [Indifferentiable Hashing to Barreto-Naehrig Curves]
+-- (https://www.di.ens.fr/~fouque/pub/latincrypt12.pdf).
+-- 
+-- This function evaluates an empty bytestring or one that contains \NUL
+-- to zero and is sent to an arbitrary point on the curve.
 swEncBN :: forall e m q r u v w . (MonadRandom m, ECPairing e q r u v w)
   => ByteString -> m (Maybe (G1 e))
 swEncBN bs = runMaybeT $ do
@@ -49,16 +49,16 @@ swEncBN bs = runMaybeT $ do
       s1 = (sqrt3 - 1) / 2
       b1 = 1 + b_ (witness :: G1 e)
   guard (b1 + t * t /= 0)
-  if t == 0 then -- arbitrary point on the curve
+  if t == 0 then                  -- arbitrary point on the curve
     if b1 == 3 then
-      return $ A (-1) 1
+      return $ A (-1) 1           -- 1^2 = (-1)^3 + 2
     else if b1 == 4 then
-      return $ A 1 2
+      return $ A 1 2              -- 2^2 = 1^3 + 3
     else if b1 == 6 then
-      return $ A (-1) 2
+      return $ A (-1) 2           -- 2^2 = (-1)^3 + 5
     else
-      A s1 <$> hoistMaybe (sr b1)
-  else do -- encoded point on the curve
+      A s1 <$> hoistMaybe (sr b1) -- definition 2 assuming 1 + b is a quadratic residue
+  else do
     let w  = sqrt3 * t / (b1 + t * t)
         x1 = s1 - t * w
         x2 = -1 - x1
@@ -76,3 +76,14 @@ swEncBN bs = runMaybeT $ do
   where
     ch x = if x == 0 then 0 else if qr x then 1 else -1 :: Int
 {-# INLINABLE swEncBN #-}
+
+-------------------------------------------------------------------------------
+-- Auxiliary functions
+-------------------------------------------------------------------------------
+
+-- Conversion from bytestring to field.
+fromBytes :: (Bits k, Num k) => ByteString -> k
+fromBytes = B.foldl' f 0
+  where
+    f a b = shiftL a 8 .|. fromIntegral b
+{-# INLINABLE fromBytes #-}

@@ -2,6 +2,7 @@
 
 module Data.Pairing.BLS12381
   ( module Data.Pairing
+  , module Data.Pairing.Ate
   -- * BLS12381 curve
   , BLS12381
   , parameterBin
@@ -26,14 +27,14 @@ import Data.Curve.Weierstrass.BLS12381 as G1
 import Data.Curve.Weierstrass.BLS12381T as G2
 import Data.Field.Galois as F
 
-import Data.Pairing (Pairing(..))
-import Data.Pairing.Ate (finalExponentiationBLS12, millerAlgorithmBLS12)
+import Data.Pairing
+import Data.Pairing.Ate
 
 -------------------------------------------------------------------------------
 -- Fields
 -------------------------------------------------------------------------------
 
--- | Cubic nonresidue.
+-- Cubic nonresidue in @Fq2@.
 xi :: Fq2
 xi =
   [ 0xd0088f51cbff34d258dd3db21a5d66bb23ba5c279c2895fb39869507b587b120f55ffff58a9ffffdcff7fffffffd556
@@ -41,14 +42,14 @@ xi =
   ]
 {-# INLINABLE xi #-}
 
--- | @Fq6@.
+-- | Field of points of BLS12381 curve over @Fq6@.
 type Fq6 = Extension V Fq2
 data V
 instance IrreducibleMonic V Fq2 where
   poly _ = [-xi, 0, 0, 1]
   {-# INLINABLE poly #-}
 
--- | @Fq12@.
+-- | Field of points of BLS12381 curve over @Fq12@.
 type Fq12 = Extension W Fq6
 data W
 instance IrreducibleMonic W Fq6 where
@@ -59,13 +60,13 @@ instance IrreducibleMonic W Fq6 where
 -- Curves
 -------------------------------------------------------------------------------
 
--- | @G1@.
+-- | BLS12381 curve left group @G1 = E(Fq)@.
 type G1' = G1.PA
 
--- | @G2@.
+-- | BLS12381 curve right group @G2 = E'(Fq2)@.
 type G2' = G2.PA
 
--- | @GT@.
+-- | @Fq12@ multiplicative target group @GT@.
 type GT' = RootsOfUnity R Fq12
 instance CyclicSubgroup (RootsOfUnity R Fq12) where
   gen = toU'
@@ -96,7 +97,7 @@ instance CyclicSubgroup (RootsOfUnity R Fq12) where
 -- Pairings
 -------------------------------------------------------------------------------
 
--- | Parameter in signed binary.
+-- | BLS12381 curve parameter @s = t@ in signed binary.
 parameterBin :: [Int8]
 parameterBin = [-1,-1, 0,-1, 0, 0,-1, 0, 0, 0, 0, 0, 0, 0, 0,-1, 0
                   , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -105,7 +106,7 @@ parameterBin = [-1,-1, 0,-1, 0, 0,-1, 0, 0, 0, 0, 0, 0, 0, 0,-1, 0
                ]
 {-# INLINABLE parameterBin #-}
 
--- | Parameter in hexadecimal.
+-- | BLS12381 curve parameter @t@ in hexadecimal.
 parameterHex :: Integer
 parameterHex = -0xd201000000010000
 {-# INLINABLE parameterHex #-}
@@ -127,7 +128,7 @@ instance Pairing BLS12381 where
 -- Roots of unity
 -------------------------------------------------------------------------------
 
--- | Precompute primitive roots of unity for binary powers that divide _r - 1.
+-- | Precompute primitive roots of unity for binary powers that divide @r - 1@.
 getRootOfUnity :: Int -> Fr
 getRootOfUnity 0  = 1
 getRootOfUnity 1  = 52435875175126190479447740508185965837690552500527637822603658699938581184512

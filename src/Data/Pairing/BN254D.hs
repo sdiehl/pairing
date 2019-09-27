@@ -2,6 +2,7 @@
 
 module Data.Pairing.BN254D
   ( module Data.Pairing
+  , module Data.Pairing.Ate
   -- * BN254D curve
   , BN254D
   , parameterBin
@@ -26,26 +27,26 @@ import Data.Curve.Weierstrass.BN254D as G1
 import Data.Curve.Weierstrass.BN254DT as G2
 import Data.Field.Galois as F
 
-import Data.Pairing (Pairing(..))
-import Data.Pairing.Ate (finalExponentiationBN, millerAlgorithmBN)
+import Data.Pairing
+import Data.Pairing.Ate
 
 -------------------------------------------------------------------------------
 -- Fields
 -------------------------------------------------------------------------------
 
--- | Cubic nonresidue.
+-- Cubic nonresidue in @Fq2@.
 xi :: Fq2
 xi = [1, 1]
 {-# INLINABLE xi #-}
 
--- | @Fq6@.
+-- | Field of points of BN254D curve over @Fq6@.
 type Fq6 = Extension V Fq2
 data V
 instance IrreducibleMonic V Fq2 where
   poly _ = [-xi, 0, 0, 1]
   {-# INLINABLE poly #-}
 
--- | @Fq12@.
+-- | Field of points of BN254D curve over @Fq12@.
 type Fq12 = Extension W Fq6
 data W
 instance IrreducibleMonic W Fq6 where
@@ -56,13 +57,13 @@ instance IrreducibleMonic W Fq6 where
 -- Curves
 -------------------------------------------------------------------------------
 
--- | @G1@.
+-- | BN254D curve left group @G1 = E(Fq)@.
 type G1' = G1.PA
 
--- | @G2@.
+-- | BN254D curve right group @G2 = E'(Fq2)@.
 type G2' = G2.PA
 
--- | @GT@.
+-- | @Fq12@ multiplicative target group @GT@.
 type GT' = RootsOfUnity R Fq12
 instance CyclicSubgroup (RootsOfUnity R Fq12) where
   gen = toU'
@@ -93,7 +94,7 @@ instance CyclicSubgroup (RootsOfUnity R Fq12) where
 -- Pairings
 -------------------------------------------------------------------------------
 
--- | Parameter in signed binary.
+-- | BN254D curve parameter @s = 6t + 2@ in signed binary.
 parameterBin :: [Int8]
 parameterBin = [-1,-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                   , 0, 0, 0, 0,-1,-1, 0, 0, 0, 0, 0, 0, 0,-1,-1, 0
@@ -102,7 +103,7 @@ parameterBin = [-1,-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
                ]
 {-# INLINABLE parameterBin #-}
 
--- | Parameter in hexadecimal.
+-- | BN254D curve parameter @t@ in hexadecimal.
 parameterHex :: Integer
 parameterHex = -0x4000020100608205
 {-# INLINABLE parameterHex #-}
@@ -124,7 +125,7 @@ instance Pairing BN254D where
 -- Roots of unity
 -------------------------------------------------------------------------------
 
--- | Precompute primitive roots of unity for binary powers that divide _r - 1.
+-- | Precompute primitive roots of unity for binary powers that divide @r - 1@.
 getRootOfUnity :: Int -> Fr
 getRootOfUnity 0 = 1
 getRootOfUnity 1 = 1
