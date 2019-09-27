@@ -2,7 +2,7 @@ module Test.Field where
 
 import Protolude
 
-import Data.Field.Galois as F
+import Data.Field.Galois as F hiding (recip)
 import Data.Group
 import Test.Tasty
 import Test.Tasty.HUnit

@@ -12,7 +12,7 @@ import Control.Error (hoistMaybe, runMaybeT)
 import Control.Monad.Random (MonadRandom)
 import qualified Data.ByteString as B (foldl')
 import Data.Curve.Weierstrass
-import Data.Field.Galois as F
+import Data.Field.Galois as F hiding ((/))
 import Data.List ((!!))
 
 import Data.Pairing
