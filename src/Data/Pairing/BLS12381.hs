@@ -27,7 +27,7 @@ import Data.Curve.Weierstrass.BLS12381T as G2
 import Data.Field.Galois as F
 
 import Data.Pairing (Pairing(..))
-import Data.Pairing.Ate (finalExponentiationBLS12, millerAlgorithm)
+import Data.Pairing.Ate (finalExponentiationBLS12, millerAlgorithmBLS12)
 
 -------------------------------------------------------------------------------
 -- Fields
@@ -119,11 +119,8 @@ instance Pairing BLS12381 where
 
   type instance GT BLS12381 = GT'
 
-  finalStep = const $ const snd
-  {-# INLINABLE finalStep #-}
-
-  pairing p q = finalExponentiationBLS12 parameterHex $
-                finalStep p q $ millerAlgorithm parameterBin p q
+  pairing = (.) (finalExponentiationBLS12 parameterHex)
+             .       millerAlgorithmBLS12 parameterBin
   {-# INLINABLE pairing #-}
 
 -------------------------------------------------------------------------------

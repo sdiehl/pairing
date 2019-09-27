@@ -26,7 +26,7 @@ class (Arbitrary (G1 e), Arbitrary (G2 e), Arbitrary (GT e),
        NFData    (G1 e), NFData    (G2 e), NFData    (GT e),
        Random    (G1 e), Random    (G2 e), Random    (GT e),
        Show      (G1 e), Show      (G2 e), Show      (GT e)) => Pairing e where
-  {-# MINIMAL finalStep, pairing #-}
+  {-# MINIMAL pairing #-}
 
   -- | Left group @G1@.
   type family G1 e = (g :: *) | g -> e
@@ -36,9 +36,6 @@ class (Arbitrary (G1 e), Arbitrary (G2 e), Arbitrary (GT e),
 
   -- | Target group @GT@.
   type family GT e = (g :: *) | g -> e
-
-  -- | Final step.
-  finalStep :: G1 e -> G2 e -> (G2 e, GT e) -> GT e
 
   -- | Computable non-degenerate bilinear map.
   pairing :: G1 e -> G2 e -> GT e

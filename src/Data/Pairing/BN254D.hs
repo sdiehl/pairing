@@ -27,7 +27,7 @@ import Data.Curve.Weierstrass.BN254DT as G2
 import Data.Field.Galois as F
 
 import Data.Pairing (Pairing(..))
-import Data.Pairing.Ate (finalExponentiationBN, millerAlgorithm)
+import Data.Pairing.Ate (finalExponentiationBN, millerAlgorithmBN)
 
 -------------------------------------------------------------------------------
 -- Fields
@@ -116,19 +116,8 @@ instance Pairing BN254D where
 
   type instance GT BN254D = GT'
 
-  -- finalStep p q = snd . uncurry (lineFunction p q2) . uncurry (lineFunction p q1)
-  --   where
-  --     q1            = frob' q
-  --     q2            = inv $ frob' q1
-  --     frob' (A x y) = A (F.frob x * x') (F.frob y * y')
-  --       where
-  --         x' = pow xi $ quot (F.char (witness :: Fq) - 1) 3
-  --         y' = pow xi $ shiftR (F.char (witness :: Fq)) 1
-  --     frob' _       = O
-  -- {-# INLINABLE finalStep #-}
-
-  pairing p q = finalExponentiationBN parameterHex $
-                finalStep p q $ millerAlgorithm parameterBin p q
+  pairing = (.) (finalExponentiationBN parameterHex)
+             .    millerAlgorithmBN xi parameterBin
   {-# INLINABLE pairing #-}
 
 -------------------------------------------------------------------------------

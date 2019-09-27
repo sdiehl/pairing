@@ -1,9 +1,9 @@
 module Data.Pairing.Hash
   ( module Data.Pairing
-  -- * Shallue-van de Woestijne encoding hashing to BN curves
-  , swEncBN
   -- * Shallue-van de Woestijne encoding hashing to BLS curves
   --, swEncBLS
+  -- * Shallue-van de Woestijne encoding hashing to BN curves
+  , swEncBN
   ) where
 
 import Protolude
