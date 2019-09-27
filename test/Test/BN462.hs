@@ -2,19 +2,29 @@ module Test.BN462 where
 
 import Protolude
 
-import Data.Curve.Weierstrass
-import Data.Field.Galois
+import Data.Curve.Weierstrass as C
+import Data.Field.Galois as F
 import Data.Pairing.BN462
 import Test.Tasty
 import Test.Tasty.HUnit
 
+import Test.Curve
+import Test.Field
 import Test.Pairing
 
 testBN462 :: TestTree
 testBN462 = testGroup "BN462"
-  [ testPairing (witness :: BN462)
-  , testHashBN (witness :: BN462)
+  [ testField "Fq" (witness :: Fq)
+  , testField "Fq2" (witness :: Fq2)
+  , testField "Fq6" (witness :: Fq6)
+  , testField "Fq12" (witness :: Fq12)
+  , testField "Fr" (witness :: Fr)
+  , testCurve "G1" (C.gen :: G1')
+  , testCurve "G2" (C.gen :: G2')
+  , testUnity "GT" (F.gen :: GT')
+  , testPairing (witness :: BN462)
   , testCase "Test vector" $ pairing g1 g2 @?= gt
+  , testHashBN (witness :: BN462)
   ]
 
 g1 :: G1 BN462

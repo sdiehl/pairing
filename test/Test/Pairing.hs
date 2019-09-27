@@ -34,9 +34,9 @@ testHashBN _ = testProperty "Encoding well-defined" $ \bs -> monadicIO $ do
   let curve' = fromMaybe (panic "unreachable.") curve
   assert $ def curve'
 
--- testHashBLS12 :: forall e q r u v w . ECPairing e q r u v w => e -> TestTree
--- testHashBLS12 _ = testProperty "Encoding well-defined" $ \bs -> monadicIO $ do
---   curve :: Maybe (G1 e) <- run $ swEncBLS12 bs
---   assert $ isJust curve
---   let curve' = fromMaybe (panic "unreachable.") curve
---   assert $ def curve'
+testHashBLS12 :: forall e q r u v w . ECPairing e q r u v w => e -> TestTree
+testHashBLS12 _ = testProperty "Encoding well-defined" $ \bs -> monadicIO $ do
+  curve :: Maybe (G1 e) <- run $ swEncBLS12 bs
+  assert $ isJust curve
+  let curve' = fromMaybe (panic "unreachable.") curve
+  assert $ def curve'
