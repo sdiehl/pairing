@@ -134,6 +134,11 @@ We have implemented a polymorphic optimal ate pairing over the following pairing
 
 A more detailed documentation on their domain parameters can be found in our [elliptic curve library](https://github.com/adjoint-io/elliptic-curve).
 
+## Disclaimer
+
+This is experimental code meant for research-grade projects only. Please do not
+use this code in production until it has matured significantly.
+
 ## License
 
 ```
