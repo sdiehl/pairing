@@ -29,11 +29,11 @@ The non-degeneracy property guarantees non-trivial pairings for non-trivial argu
 * $\forall g \neq 1, \exists h_i \in \mathbb{G}_2$ such that $e(g,h_i) \neq 1$
 * $\forall h \neq 1, \exists g_i \in \mathbb{G}_1$ such that $e(g_i,h) \neq 1$
 
-An example of a pairing would be the scalar product on euclidean space $\langle\ . \rangle : \mathbb{R}^n \times \mathbb{R}^n \rightarrow \mathbb{R}$.
+An example of a pairing would be the scalar product on euclidean space $\langle . \rangle : \mathbb{R}^n \times \mathbb{R}^n \rightarrow \mathbb{R}$.
 
 ## Example Usage
 
-A simple example of calculating the optimal ate pairing given two points in $\mathbb{G}_1$ and  $\mathbb{G}_2$.
+A simple example of calculating the optimal ate pairing given two points in $\mathbb{G}_1$ and $\mathbb{G}_2$.
 
 ```haskell
 import Protolude
@@ -79,16 +79,17 @@ Pairings are used in encryption algorithms, such as identity-based encryption (I
 
 ## Admissible Pairings
 
-A pairing `e` is called admissible pairing if it is efficiently computable. The only admissible pairings that are suitable for cryptography are the Weil and Tate pairings on algebraic curves and their variants. Let `r` be the order of a group and E[r] be the entire group of points of order `r` on E(F<sub>q</sub>). E[r] is called the r-torsion and is defined as E[r] = { P ∈ E(F<sub>q</sub>) | rP = O }. Both Weil and Tate pairings require that `P` and `Q` come from disjoint cyclic subgroups of the same prime order `r`. Lagrange's theorem states that for any finite group `G`, the order (number of elements) of every subgroup `H` of `G` divides the order of `G`. Therefore, r | #E(F<sub>q</sub>).
+A pairing $e$ is called admissible pairing if it is efficiently computable. The only admissible pairings that are suitable for cryptography are the Weil and Tate pairings on algebraic curves and their variants. Let $r$ be the order of a group and $E[r]$ be the entire group of points of order $r$ on $E(\mathbb{F}_q)$. $E[r]$ is called the r-torsion and is defined as $E[r] = \{ P \in E(\mathbb{F}_q) | rP = O \}$. Both Weil and Tate pairings require that $P$ and $Q$ come from disjoint cyclic subgroups of the same prime order $r$. Lagrange's theorem states that for any finite group $\mathbb{G}$, the order (number of elements) of every subgroup $\mathbb{H}$ of $\mathbb{G}$ divides the order of $\mathbb{G}$. Therefore, $r | #E(\mathbb{F}_q)$.
 
-G<sub>1</sub> and G<sub>2</sub> are subgroups of a group defined in an elliptic curve over an extension of a finite field F<sub>q</sub>, namely E(F<sub>q<sup>k</sup></sub>), where `q` is the characteristic of the field and `k` is a positive integer called embedding degree.
+$\mathbb{G}_1$ and $\mathbb{G}_2$ are subgroups of a group defined in an elliptic curve over an extension of a finite field $\mathbb{F}_q$, namely $E(\mathbb{F}_{q^k})$, where $q$ is the characteristic of the field and $k$ is a positive integer called embedding degree.
 
-The embedding degree `k` plays a crucial role in pairing cryptography:
-- It's the value that makes  F<sub>q<sup>k</sup></sub> be the smallest extension of F<sub>q</sub> such that E(F<sub>q<sup>k</sup></sub>) captures more points of order `r`.
-- It's the minimal value that holds r | (q<sup>k</sup> - 1).
-- It's the smallest positive integer such that E[r] ⊂ E(F<sub>q<sup>k</sup></sub>)
+The embedding degree $k$ plays a crucial role in pairing cryptography:
 
-There are subtle but relevant differences in G<sub>1</sub> and G<sub>2</sub> subgroups depending on the type of pairing. Nowadays, all of the state-of-the-art implementations of pairings take place on ordinary curves and assume a type of pairing (Type 3) where G<sub>1</sub> = E[r] ∩ Ker(π - [1]) and G<sub>2</sub> = E[r] ∩ Ker(π - [q]) and there is no non-trivial map φ: G<sub>2</sub> → G<sub>1</sub>.
+- It's the value that makes $\mathbb{F}_{q^k}$ be the smallest extension of $\mathbb{F}_q$ such that $E($\mathbb{F}_{q^k}$)$ captures more points of order $r$.
+- It's the minimal value that holds $r | (q^k - 1)$.
+- It's the smallest positive integer such that $E[r] \subset $E($\mathbb{F}_{q^k}$)$.
+
+There are subtle but relevant differences in $\mathbb{G}_1$ and $\mathbb{G}_2$ subgroups depending on the type of pairing. Nowadays, all of the state-of-the-art implementations of pairings take place on ordinary curves and assume a type of pairing (Type 3) where  $\mathbb{G}_1 = E[r] \cap \text{Ker}(\pi - [1])$ and  $\mathbb{G}_2 = E[r] \cap \text{Ker}(\pi - [q])$ and there is no non-trivial map $\Phi: \mathbb{G}_2 \rightarrow \mathbb{G}_1$.
 
 ## Tate Pairing
 
