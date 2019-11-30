@@ -8,9 +8,9 @@
 
 Implementation of the Barreto-Naehrig (BN) curve construction from
 [[BCTV2015]](https://eprint.iacr.org/2013/879.pdf) to provide two cyclic groups
-<img src="/tex/0e0fff175b21e36dc5c4cae2cb36897c.svg?invert_in_darkmode&sanitize=true" align=middle width=19.477190699999987pt height=22.465723500000017pt/> and <img src="/tex/2251a9d3343a83c0576a5089480d43eb.svg?invert_in_darkmode&sanitize=true" align=middle width=19.477190699999987pt height=22.465723500000017pt/>, with an efficient bilinear pairing:
+<img src="/tex/8409cecadf19745123272729a965e4d7.svg?invert_in_darkmode&sanitize=true" align=middle width=19.33798019999999pt height=22.648391699999998pt/> and <img src="/tex/baaccbfbf8339cdf5809bac3564ee664.svg?invert_in_darkmode&sanitize=true" align=middle width=19.33798019999999pt height=22.648391699999998pt/>, with an efficient bilinear pairing:
 
-<p align="center"><img src="/tex/607aa17062a31ff61e3cc1c93cc1c54c.svg?invert_in_darkmode&sanitize=true" align=middle width=130.07092065pt height=13.698590399999999pt/></p>
+<p align="center"><img src="/tex/b753af639cc1277ae30e8a4e3b25343e.svg?invert_in_darkmode&sanitize=true" align=middle width=129.65328915pt height=13.7899245pt/></p>
 
 # Pairing
 
@@ -86,7 +86,7 @@ There are subtle but relevant differences in G<sub>1</sub> and G<sub>2</sub> sub
 
 The Tate pairing is a map:
 
-tr : E(F<sub>q<sup>k</sup></sub>)[r] × E(F<sub>q<sup>k</sup></sub>) / rE(F<sub>q<sup>k</sup></sub>) → F<sup>&ast;</sup><sub>q<sup>k</sup></sub> / (F<sup>&ast;</sup><sub>q<sup>k</sup></sub>)<sup>r</sup>
+<p align="center"><img src="/tex/934aebfe0542c0b82cd08ffe1c7e4cc9.svg?invert_in_darkmode&sanitize=true" align=middle width=332.81155214999995pt height=19.40433495pt/></p>
 
 defined as:
 
