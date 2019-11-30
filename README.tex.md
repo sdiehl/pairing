@@ -8,9 +8,11 @@
 
 Implementation of the Barreto-Naehrig (BN) curve construction from
 [[BCTV2015]](https://eprint.iacr.org/2013/879.pdf) to provide two cyclic groups
-**G<sub>1</sub>** and **G<sub>2</sub>**, with an efficient bilinear pairing:
+$G_1$ and $G_2$, with an efficient bilinear pairing:
 
-*e: G<sub>1</sub> × G<sub>2</sub> → G<sub>T</sub>*
+$$
+e: G_1 \times G_2 \rightarrow G_T
+$$
 
 # Pairing
 
@@ -94,7 +96,9 @@ tr : E(F<sub>q<sup>k</sup></sub>)[r] × E(F<sub>q<sup>k</sup></sub>) / rE(F<sub>
 
 defined as:
 
-tr(P, Q) = f(Q)
+$$
+\text{tr}(P, Q) = f(Q)
+$$
 
 where P ∈ E(F<sub>q<sup>k</sup></sub>)[r], Q is any representative in a equivalence class in E(F<sub>q<sup>k</sup></sub>) / rE(F<sub>q<sup>k</sup></sub>) and F<sup>&ast;</sup><sub>q<sup>k</sup></sub> / (F<sup>&ast;</sup><sub>q<sup>k</sup></sub>)<sup>r</sup> is the set of equivalence classes of F<sup>&ast;</sup><sub>q<sup>k</sup></sub> under the equivalence relation a ≡ b iff a / b ∈ (F<sup>&ast;</sup><sub>q<sup>k</sup></sub>)<sup>r</sup>. The equivalence relation in the output of the Tate pairing is unfortunate. In cryptography, different parties must compute the same value under the bilinearity property.
 
@@ -116,7 +120,9 @@ It is possible to construct an extension of a field F<sub>q<sup>k</sup></sub> by
 
 Miller's algorithm in the Tate pairing iterates as far as the prime group order `r`, which is a large number in cryptography. The ate pairing comes up as an optimization of the Tate pairing by shortening Miller's loop. It achieves a much shorter loop of length T = t - 1 on an ordinary curve, where t is the trace of the Frobenius endomorphism. The ate pairing is defined as:
 
-$\text{at}(Q,P) = f_{r,Q}(P)^{(q^k-1)/r}$
+$$
+\text{at}(Q,P) = f_{r,Q}(P)^{(q^k-1)/r}
+$$
 
 ## Implementation
 
