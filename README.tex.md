@@ -116,7 +116,7 @@ It is possible to construct an extension of a field F<sub>q<sup>k</sup></sub> by
 
 Miller's algorithm in the Tate pairing iterates as far as the prime group order `r`, which is a large number in cryptography. The ate pairing comes up as an optimization of the Tate pairing by shortening Miller's loop. It achieves a much shorter loop of length T = t - 1 on an ordinary curve, where t is the trace of the Frobenius endomorphism. The ate pairing is defined as:
 
-at(Q,P) = f<sub>r,Q</sub>(P)<sup>(q<sup>k</sup> - 1) / r</sup>
+$\text{at}(Q,P) = f_{r,Q}(P)^{(q^k-1)/r}$
 
 ## Implementation
 
