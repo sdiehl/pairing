@@ -14,22 +14,24 @@ Implementation of the Barreto-Naehrig (BN) curve construction from
 
 # Pairing
 
-Let G<sub>1</sub>, G<sub>2</sub> and G<sub>T</sub> be abelian groups of prime order `q` and let `g` and `h` elements of G<sub>1</sub> and G<sub>2</sub> respectively . A pairing is a non-degenerate bilinear map e: G<sub>1</sub> × G<sub>2</sub> → G<sub>T</sub>.
+Let <img src="/tex/8409cecadf19745123272729a965e4d7.svg?invert_in_darkmode&sanitize=true" align=middle width=19.33798019999999pt height=22.648391699999998pt/>, <img src="/tex/baaccbfbf8339cdf5809bac3564ee664.svg?invert_in_darkmode&sanitize=true" align=middle width=19.33798019999999pt height=22.648391699999998pt/> and <img src="/tex/e7f497036b4c2ae6d2e022a8a456e8bd.svg?invert_in_darkmode&sanitize=true" align=middle width=22.31915234999999pt height=22.648391699999998pt/> be abelian groups of prime order <img src="/tex/d5c18a8ca1894fd3a7d25f242cbe8890.svg?invert_in_darkmode&sanitize=true" align=middle width=7.928106449999989pt height=14.15524440000002pt/> and let <img src="/tex/3cf4fbd05970446973fc3d9fa3fe3c41.svg?invert_in_darkmode&sanitize=true" align=middle width=8.430376349999989pt height=14.15524440000002pt/> and <img src="/tex/2ad9d098b937e46f9f58968551adac57.svg?invert_in_darkmode&sanitize=true" align=middle width=9.47111549999999pt height=22.831056599999986pt/> elements of <img src="/tex/8409cecadf19745123272729a965e4d7.svg?invert_in_darkmode&sanitize=true" align=middle width=19.33798019999999pt height=22.648391699999998pt/> and <img src="/tex/baaccbfbf8339cdf5809bac3564ee664.svg?invert_in_darkmode&sanitize=true" align=middle width=19.33798019999999pt height=22.648391699999998pt/> respectively . 
+A pairing is a non-degenerate bilinear map <img src="/tex/aa2189a333b8244a7ff28e979414838d.svg?invert_in_darkmode&sanitize=true" align=middle width=129.65328914999998pt height=22.648391699999998pt/>.
 
 This bilinearity property is what makes pairings such a powerful primitive in cryptography. It satisfies:
-- e(g<sub>1</sub> + g<sub>2</sub>, h) = e(g<sub>1</sub>, h) e(g<sub>2</sub>, h)
-- e(g, h<sub>1</sub> + h<sub>2</sub>) = e(g, h<sub>1</sub>) e(g, h<sub>2</sub>)
 
+* <img src="/tex/979bdabe617751b6bd174b74164006bc.svg?invert_in_darkmode&sanitize=true" align=middle width=214.51869779999996pt height=24.65753399999998pt/>
+* <img src="/tex/e85e4bd93fd59c6cc6f6459be9b6d02b.svg?invert_in_darkmode&sanitize=true" align=middle width=217.91855579999995pt height=24.65753399999998pt/>
 
 The non-degeneracy property guarantees non-trivial pairings for non-trivial arguments. In other words, being non-degenerate means that:
-- ∀ g ≠ 1, ∃ h<sub>i</sub> ∈ G<sub>2</sub> such that e(g, h<sub>i</sub>) ≠ 1
-- ∀ h ≠ 1, ∃ g<sub>i</sub> ∈ G<sub>1</sub> such that e(g<sub>i</sub>, h) ≠ 1
 
-An example of a pairing would be the scalar product on euclidean space <.> : R<sup>n</sup> × R<sup>n</sup> → R
+* <img src="/tex/67954e1aad57fcf338705441abb00abe.svg?invert_in_darkmode&sanitize=true" align=middle width=118.51100579999998pt height=22.831056599999986pt/> such that <img src="/tex/b5618eaa407bf223761d20cc793c9a92.svg?invert_in_darkmode&sanitize=true" align=middle width=81.2565633pt height=24.65753399999998pt/>
+* <img src="/tex/23b4158364c14544d3596342fa90ebd1.svg?invert_in_darkmode&sanitize=true" align=middle width=117.92123144999998pt height=22.831056599999986pt/> such that <img src="/tex/00f3d44f5d125d1ac151db5a18ec3176.svg?invert_in_darkmode&sanitize=true" align=middle width=80.66678895pt height=24.65753399999998pt/>
+
+An example of a pairing would be the scalar product on euclidean space <img src="/tex/f75236ae06b6ef3048a3da7bcc241f75.svg?invert_in_darkmode&sanitize=true" align=middle width=135.70372694999998pt height=24.65753399999998pt/>.
 
 ## Example Usage
 
-A simple example of calculating the optimal ate pairing given two points in G<sub>1</sub> and G<sub>2</sub>.
+A simple example of calculating the optimal ate pairing given two points in <img src="/tex/8409cecadf19745123272729a965e4d7.svg?invert_in_darkmode&sanitize=true" align=middle width=19.33798019999999pt height=22.648391699999998pt/> and  <img src="/tex/baaccbfbf8339cdf5809bac3564ee664.svg?invert_in_darkmode&sanitize=true" align=middle width=19.33798019999999pt height=22.648391699999998pt/>.
 
 ```haskell
 import Protolude
