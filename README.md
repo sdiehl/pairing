@@ -8,9 +8,9 @@
 
 Implementation of the Barreto-Naehrig (BN) curve construction from
 [[BCTV2015]](https://eprint.iacr.org/2013/879.pdf) to provide two cyclic groups
-**G<sub>1</sub>** and **G<sub>2</sub>**, with an efficient bilinear pairing:
+<img src="/tex/0e0fff175b21e36dc5c4cae2cb36897c.svg?invert_in_darkmode&sanitize=true" align=middle width=19.477190699999987pt height=22.465723500000017pt/> and <img src="/tex/2251a9d3343a83c0576a5089480d43eb.svg?invert_in_darkmode&sanitize=true" align=middle width=19.477190699999987pt height=22.465723500000017pt/>, with an efficient bilinear pairing:
 
-*e: G<sub>1</sub> × G<sub>2</sub> → G<sub>T</sub>*
+<p align="center"><img src="/tex/607aa17062a31ff61e3cc1c93cc1c54c.svg?invert_in_darkmode&sanitize=true" align=middle width=130.07092065pt height=13.698590399999999pt/></p>
 
 # Pairing
 
@@ -90,7 +90,7 @@ tr : E(F<sub>q<sup>k</sup></sub>)[r] × E(F<sub>q<sup>k</sup></sub>) / rE(F<sub>
 
 defined as:
 
-tr(P, Q) = f(Q)
+<p align="center"><img src="/tex/325959111b8ba6bc4eeca7eebcb4f069.svg?invert_in_darkmode&sanitize=true" align=middle width=114.44397855pt height=16.438356pt/></p>
 
 where P ∈ E(F<sub>q<sup>k</sup></sub>)[r], Q is any representative in a equivalence class in E(F<sub>q<sup>k</sup></sub>) / rE(F<sub>q<sup>k</sup></sub>) and F<sup>&ast;</sup><sub>q<sup>k</sup></sub> / (F<sup>&ast;</sup><sub>q<sup>k</sup></sub>)<sup>r</sup> is the set of equivalence classes of F<sup>&ast;</sup><sub>q<sup>k</sup></sub> under the equivalence relation a ≡ b iff a / b ∈ (F<sup>&ast;</sup><sub>q<sup>k</sup></sub>)<sup>r</sup>. The equivalence relation in the output of the Tate pairing is unfortunate. In cryptography, different parties must compute the same value under the bilinearity property.
 
@@ -112,7 +112,7 @@ It is possible to construct an extension of a field F<sub>q<sup>k</sup></sub> by
 
 Miller's algorithm in the Tate pairing iterates as far as the prime group order `r`, which is a large number in cryptography. The ate pairing comes up as an optimization of the Tate pairing by shortening Miller's loop. It achieves a much shorter loop of length T = t - 1 on an ordinary curve, where t is the trace of the Frobenius endomorphism. The ate pairing is defined as:
 
-<img src="/tex/dcc4adebc2e1ab07f184a615f1067ff2.svg?invert_in_darkmode&sanitize=true" align=middle width=190.86864059999996pt height=33.26775210000002pt/>
+<p align="center"><img src="/tex/fd4f50056fd1a09fd9fe4a27d0b0a084.svg?invert_in_darkmode&sanitize=true" align=middle width=190.8686406pt height=22.158967049999998pt/></p>
 
 ## Implementation
 
