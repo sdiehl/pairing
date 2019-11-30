@@ -16,22 +16,24 @@ $$
 
 # Pairing
 
-Let G<sub>1</sub>, G<sub>2</sub> and G<sub>T</sub> be abelian groups of prime order `q` and let `g` and `h` elements of G<sub>1</sub> and G<sub>2</sub> respectively . A pairing is a non-degenerate bilinear map e: G<sub>1</sub> × G<sub>2</sub> → G<sub>T</sub>.
+Let $\mathbb{G}_1$, $\mathbb{G}_2$ and $\mathbb{G}_T$ be abelian groups of prime order $q$ and let $g$ and $h$ elements of $\mathbb{G}_1$ and $\mathbb{G}_2$ respectively . 
+A pairing is a non-degenerate bilinear map $e: \mathbb{G}_1 \times \mathbb{G}_2 \rightarrow \mathbb{G}_T$.
 
 This bilinearity property is what makes pairings such a powerful primitive in cryptography. It satisfies:
-- e(g<sub>1</sub> + g<sub>2</sub>, h) = e(g<sub>1</sub>, h) e(g<sub>2</sub>, h)
-- e(g, h<sub>1</sub> + h<sub>2</sub>) = e(g, h<sub>1</sub>) e(g, h<sub>2</sub>)
 
+* $e(g_1+g_2,h) = e(g_1,h) e(g_2, h)$
+* $e(g,h_1+h_2) = e(g, h_1) e(g, h_2)$
 
 The non-degeneracy property guarantees non-trivial pairings for non-trivial arguments. In other words, being non-degenerate means that:
-- ∀ g ≠ 1, ∃ h<sub>i</sub> ∈ G<sub>2</sub> such that e(g, h<sub>i</sub>) ≠ 1
-- ∀ h ≠ 1, ∃ g<sub>i</sub> ∈ G<sub>1</sub> such that e(g<sub>i</sub>, h) ≠ 1
 
-An example of a pairing would be the scalar product on euclidean space <.> : R<sup>n</sup> × R<sup>n</sup> → R
+* $\forall g \neq 1, \exists h_i \in \mathbb{G}_2$ such that $e(g,h_i) \neq 1$
+* $\forall h \neq 1, \exists g_i \in \mathbb{G}_1$ such that $e(g_i,h) \neq 1$
+
+An example of a pairing would be the scalar product on euclidean space $\langle\ . \rangle : \mathbb{R}^n \times \mathbb{R}^n \rightarrow \mathbb{R}$.
 
 ## Example Usage
 
-A simple example of calculating the optimal ate pairing given two points in G<sub>1</sub> and G<sub>2</sub>.
+A simple example of calculating the optimal ate pairing given two points in $\mathbb{G}_1$ and  $\mathbb{G}_2$.
 
 ```haskell
 import Protolude
