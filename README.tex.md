@@ -87,7 +87,7 @@ The embedding degree $k$ plays a crucial role in pairing cryptography:
 
 - It's the value that makes $\mathbb{F}_{q^k}$ be the smallest extension of $\mathbb{F}_q$ such that $E(\mathbb{F}_{q^k})$ captures more points of order $r$.
 - It's the minimal value that holds $r | (q^k - 1)$.
-- It's the smallest positive integer such that $E[r] \subset $E(\mathbb{F}_{q^k})$.
+- It's the smallest positive integer such that $E[r] \subset E(\mathbb{F}_{q^k})$.
 
 There are subtle but relevant differences in $\mathbb{G}_1$ and $\mathbb{G}_2$ subgroups depending on the type of pairing. Nowadays, all of the state-of-the-art implementations of pairings take place on ordinary curves and assume a type of pairing (Type 3) where  $\mathbb{G}_1 = E[r] \cap \text{Ker}(\pi - [1])$ and  $\mathbb{G}_2 = E[r] \cap \text{Ker}(\pi - [q])$ and there is no non-trivial map $\Phi: \mathbb{G}_2 \rightarrow \mathbb{G}_1$.
 
