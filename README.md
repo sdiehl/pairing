@@ -57,9 +57,13 @@ q = A
 main :: IO ()
 main = do
   putText "P:"
-  print <img src="/tex/75a6f6cc0746242086a7f394fbd9297b.svg?invert_in_darkmode&sanitize=true" align=middle width=147.50402534999998pt height=22.831056599999986pt/> q
+  print p
+  putText "Q:"
+  print q
   putText "e(P, Q):"
-  print <img src="/tex/1731829083b505dd9e8bb76ad82713e9.svg?invert_in_darkmode&sanitize=true" align=middle width=319.70561039999996pt height=24.65753399999998pt/> pairing (mul' p a) (mul' q b) == pow (pairing p q) (a * b)
+  print (pairing p q)
+  putText "e(P, Q) is bilinear:"
+  print (pairing (mul' p a) (mul' q b) == pow (pairing p q) (a * b))
   where
     a = 2 :: Int
     b = 3 :: Int
