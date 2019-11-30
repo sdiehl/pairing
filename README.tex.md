@@ -8,10 +8,10 @@
 
 Implementation of the Barreto-Naehrig (BN) curve construction from
 [[BCTV2015]](https://eprint.iacr.org/2013/879.pdf) to provide two cyclic groups
-$G_1$ and $G_2$, with an efficient bilinear pairing:
+$\mathbb{G}_1$ and $\mathbb{G}_2$, with an efficient bilinear pairing:
 
 $$
-e: G_1 \times G_2 \rightarrow G_T
+e: \mathbb{G}_1 \times \mathbb{G}_2 \rightarrow \mathbb{G}_T
 $$
 
 # Pairing
@@ -92,7 +92,9 @@ There are subtle but relevant differences in G<sub>1</sub> and G<sub>2</sub> sub
 
 The Tate pairing is a map:
 
-tr : E(F<sub>q<sup>k</sup></sub>)[r] × E(F<sub>q<sup>k</sup></sub>) / rE(F<sub>q<sup>k</sup></sub>) → F<sup>&ast;</sup><sub>q<sup>k</sup></sub> / (F<sup>&ast;</sup><sub>q<sup>k</sup></sub>)<sup>r</sup>
+$$
+\text{tr} : E(\mathbb{F}_{q^k})[r] \times E(\mathbb{F}_{q^k}) / r E(\mathbb{F}_{q^k}) \rightarrow \mathbb{F}^{\star}_{q^k} / (\mathbb{F}^{\star}_{q^k})^r
+$$
 
 defined as:
 
