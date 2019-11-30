@@ -59,13 +59,13 @@ q = A
 main :: IO ()
 main = do
   putText "P:"
-  print $ p
+  print p
   putText "Q:"
-  print $ q
+  print q
   putText "e(P, Q):"
-  print $ pairing p q
+  print (pairing p q)
   putText "e(P, Q) is bilinear:"
-  print $ pairing (mul' p a) (mul' q b) == pow (pairing p q) (a * b)
+  print (pairing (mul' p a) (mul' q b) == pow (pairing p q) (a * b))
   where
     a = 2 :: Int
     b = 3 :: Int
