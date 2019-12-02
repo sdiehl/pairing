@@ -1,6 +1,6 @@
 # Base image for Google Cloud Build build steps.
 
-FROM fpco/stack-build:lts-13.19
+FROM fpco/stack-build:lts-14.16
 
 ENTRYPOINT []
 
@@ -8,13 +8,13 @@ ENTRYPOINT []
 ADD https://packages.cloud.google.com/apt/doc/apt-key.gpg google-apt-key.gpg
 RUN \
   echo "deb http://packages.cloud.google.com/apt cloud-sdk-stretch main" \
-    > /etc/apt/sources.list.d/google-cloud-sdk.list && \
+  > /etc/apt/sources.list.d/google-cloud-sdk.list && \
   apt-key add google-apt-key.gpg && \
   apt-get update -yqq && \
   apt-get -yq --no-install-recommends install \
-    build-essential zip unzip rpm \
-    openssh-client expat libexpat1-dev xz-utils \
-    google-cloud-sdk && \
+  build-essential zip unzip rpm \
+  openssh-client expat libexpat1-dev xz-utils \
+  google-cloud-sdk && \
   rm -rf /var/lib/apt/lists/*
 
 RUN stack upgrade
