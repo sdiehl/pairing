@@ -26,7 +26,7 @@ RUN \
   rm docker.tgz
 
 # Install go set GOPATH etc
-ADD https://storage.googleapis.com/golang/go1.8.linux-amd64.tar.gz go.tar.gz
+ADD https://storage.googleapis.com/golang/go1.13.linux-amd64.tar.gz go.tar.gz
 RUN \
   tar -xvf go.tar.gz && \
   mv go /usr/local/ && \
