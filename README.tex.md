@@ -114,9 +114,11 @@ different parties must compute the same value under the bilinearity property.
 
 The reduced Tate pairing solves this undesirable property by exponentiating elements in $\mathbb{F}_{q^k}^{\ast} / (\mathbb{F}_{q^k}^{\ast})^r$ to the power of $(q^k - 1) / r$. It maps all elements in an equivalence class to the same value. It is defined as:
 
-$\text{Tr}(P, Q) = \text{tr}(P, Q)^{\#\mathbb{F}_{q^k / r}} = f_{r,P}(D_Q)^{(q^k - 1) / r}$.
+$$
+\text{Tr}(P, Q) = \text{tr}(P, Q)^{\#\mathbb{F}_{q^k / r}} = f_{r,P}(D_Q)^{(q^k - 1) / r}
+$$
 
-When we say Tate pairing, we normally mean the reduced Tate pairing.
+When we say Tate pairing, we will mean the reduced Tate pairing.
 
 ## Pairing optimization
 
