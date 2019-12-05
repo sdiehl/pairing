@@ -73,6 +73,11 @@ tests:
     source-dirs:
       - test
 
+  example-tests:
+    main: Example.hs
+    dependencies:
+      - pairing
+
 benchmarks:
   pairing-benchmarks:
     main: Main
