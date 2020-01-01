@@ -26,15 +26,15 @@ default-extensions:
   - TypeFamilyDependencies
 
 dependencies:
-  - base >= 4.10 && < 5
-  - protolude >= 0.2 && < 0.3
-  - bytestring
-  - elliptic-curve >= 0.3 && < 0.4
-  - errors
-  - galois-field >= 1 && < 2
-  - groups
-  - MonadRandom
-  - tasty-quickcheck
+  - base             >= 4.10   && < 5
+  - protolude        >= 0.2    && < 0.3
+  - bytestring       >= 0.10.8 && < 0.11
+  - elliptic-curve   >= 0.3    && < 0.4
+  - errors           >= 2.3.0  && < 2.4
+  - galois-field     >= 1.0    && < 2.0
+  - groups           >= 0.4.1  && < 0.5
+  - MonadRandom      >= 0.5.1  && < 0.6
+  - tasty-quickcheck >= 0.10.1 && < 0.11
 
 extra-source-files:
   - README.md

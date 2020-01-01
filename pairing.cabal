@@ -1,137 +1,207 @@
-cabal-version: 1.12
+cabal-version:      1.12
 
 -- This file has been generated from package.yaml by hpack version 0.31.2.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: bcb759ffa2ebae4feda669bc7a59a73e53c13b049f25d2bfb130b0d6fc8706af
+-- hash: f0aed2a3cb698d9c2ebb29b6416000067931d46217501be35892c24a2ac3e56d
 
-name:           pairing
-version:        1.0.0
-synopsis:       Bilinear pairings
-description:    Bilinear pairings over elliptic curves
-category:       Cryptography
-homepage:       https://github.com/adjoint-io/pairing#readme
-bug-reports:    https://github.com/adjoint-io/pairing/issues
-maintainer:     Adjoint Inc (info@adjoint.io)
-license:        MIT
-license-file:   LICENSE
-build-type:     Simple
+name:               pairing
+version:            1.0.0
+synopsis:           Bilinear pairings
+description:        Bilinear pairings over elliptic curves
+category:           Cryptography
+homepage:           https://github.com/adjoint-io/pairing#readme
+bug-reports:        https://github.com/adjoint-io/pairing/issues
+maintainer:         Adjoint Inc (info@adjoint.io)
+license:            MIT
+license-file:       LICENSE
+build-type:         Simple
 extra-source-files:
-    README.md
-    ChangeLog.md
+  README.md
+  ChangeLog.md
 
 source-repository head
-  type: git
+  type:     git
   location: https://github.com/adjoint-io/pairing
 
 library
   exposed-modules:
-      Data.Pairing
-      Data.Pairing.Ate
-      Data.Pairing.BLS12381
-      Data.Pairing.BN254
-      Data.Pairing.BN254A
-      Data.Pairing.BN254B
-      Data.Pairing.BN254C
-      Data.Pairing.BN254D
-      Data.Pairing.BN462
-      Data.Pairing.Hash
-  other-modules:
-      Paths_pairing
-  hs-source-dirs:
-      src
-  default-extensions: LambdaCase RecordWildCards OverloadedStrings NoImplicitPrelude FlexibleInstances FlexibleContexts ScopedTypeVariables RankNTypes ConstraintKinds DataKinds DeriveGeneric GeneralizedNewtypeDeriving MultiParamTypeClasses OverloadedLists PatternSynonyms TypeFamilyDependencies
-  ghc-options: -freverse-errors -O2 -Wall
+    Data.Pairing
+    Data.Pairing.Ate
+    Data.Pairing.BLS12381
+    Data.Pairing.BN254
+    Data.Pairing.BN254A
+    Data.Pairing.BN254B
+    Data.Pairing.BN254C
+    Data.Pairing.BN254D
+    Data.Pairing.BN462
+    Data.Pairing.Hash
+
+  other-modules:      Paths_pairing
+  hs-source-dirs:     src
+  default-extensions:
+    NoImplicitPrelude
+    ConstraintKinds
+    DataKinds
+    DeriveGeneric
+    FlexibleContexts
+    FlexibleInstances
+    GeneralizedNewtypeDeriving
+    LambdaCase
+    MultiParamTypeClasses
+    OverloadedLists
+    OverloadedStrings
+    PatternSynonyms
+    RankNTypes
+    RecordWildCards
+    ScopedTypeVariables
+    TypeFamilyDependencies
+
+  ghc-options:        -freverse-errors -O2 -Wall
   build-depends:
-      MonadRandom
-    , base >=4.10 && <5
-    , bytestring
-    , elliptic-curve >=0.3 && <0.4
-    , errors
-    , galois-field >=1 && <2
-    , groups
-    , protolude >=0.2 && <0.3
-    , tasty-quickcheck
-  default-language: Haskell2010
+      base              >=4.10   && <5
+    , bytestring        >=0.10.8 && <0.11
+    , elliptic-curve    >=0.3    && <0.4
+    , errors            >=2.3.0  && <2.4
+    , galois-field      >=1.0    && <2.0
+    , groups            >=0.4.1  && <0.5
+    , MonadRandom       >=0.5.1  && <0.6
+    , protolude         >=0.2    && <0.3
+    , tasty-quickcheck  >=0.10.1 && <0.11
+
+  default-language:   Haskell2010
 
 test-suite example-tests
-  type: exitcode-stdio-1.0
-  main-is: Example.hs
-  other-modules:
-      Paths_pairing
-  default-extensions: LambdaCase RecordWildCards OverloadedStrings NoImplicitPrelude FlexibleInstances FlexibleContexts ScopedTypeVariables RankNTypes ConstraintKinds DataKinds DeriveGeneric GeneralizedNewtypeDeriving MultiParamTypeClasses OverloadedLists PatternSynonyms TypeFamilyDependencies
-  ghc-options: -freverse-errors -O2 -Wall
+  type:               exitcode-stdio-1.0
+  main-is:            Example.hs
+  other-modules:      Paths_pairing
+  default-extensions:
+    NoImplicitPrelude
+    ConstraintKinds
+    DataKinds
+    DeriveGeneric
+    FlexibleContexts
+    FlexibleInstances
+    GeneralizedNewtypeDeriving
+    LambdaCase
+    MultiParamTypeClasses
+    OverloadedLists
+    OverloadedStrings
+    PatternSynonyms
+    RankNTypes
+    RecordWildCards
+    ScopedTypeVariables
+    TypeFamilyDependencies
+
+  ghc-options:        -freverse-errors -O2 -Wall
   build-depends:
-      MonadRandom
-    , base >=4.10 && <5
-    , bytestring
-    , elliptic-curve >=0.3 && <0.4
-    , errors
-    , galois-field >=1 && <2
-    , groups
+      base              >=4.10   && <5
+    , bytestring        >=0.10.8 && <0.11
+    , elliptic-curve    >=0.3    && <0.4
+    , errors            >=2.3.0  && <2.4
+    , galois-field      >=1.0    && <2.0
+    , groups            >=0.4.1  && <0.5
+    , MonadRandom       >=0.5.1  && <0.6
     , pairing
-    , protolude >=0.2 && <0.3
-    , tasty-quickcheck
-  default-language: Haskell2010
+    , protolude         >=0.2    && <0.3
+    , tasty-quickcheck  >=0.10.1 && <0.11
+
+  default-language:   Haskell2010
 
 test-suite pairing-tests
-  type: exitcode-stdio-1.0
-  main-is: Main.hs
+  type:               exitcode-stdio-1.0
+  main-is:            Main.hs
   other-modules:
-      Test.BLS12381
-      Test.BN254
-      Test.BN254A
-      Test.BN254B
-      Test.BN254C
-      Test.BN254D
-      Test.BN462
-      Test.Curve
-      Test.Field
-      Test.Pairing
-      Paths_pairing
-  hs-source-dirs:
-      test
-  default-extensions: LambdaCase RecordWildCards OverloadedStrings NoImplicitPrelude FlexibleInstances FlexibleContexts ScopedTypeVariables RankNTypes ConstraintKinds DataKinds DeriveGeneric GeneralizedNewtypeDeriving MultiParamTypeClasses OverloadedLists PatternSynonyms TypeFamilyDependencies
-  ghc-options: -freverse-errors -O2 -Wall -main-is Main
+    Paths_pairing
+    Test.BLS12381
+    Test.BN254
+    Test.BN254A
+    Test.BN254B
+    Test.BN254C
+    Test.BN254D
+    Test.BN462
+    Test.Curve
+    Test.Field
+    Test.Pairing
+
+  hs-source-dirs:     test
+  default-extensions:
+    NoImplicitPrelude
+    ConstraintKinds
+    DataKinds
+    DeriveGeneric
+    FlexibleContexts
+    FlexibleInstances
+    GeneralizedNewtypeDeriving
+    LambdaCase
+    MultiParamTypeClasses
+    OverloadedLists
+    OverloadedStrings
+    PatternSynonyms
+    RankNTypes
+    RecordWildCards
+    ScopedTypeVariables
+    TypeFamilyDependencies
+
+  ghc-options:        -freverse-errors -O2 -Wall -main-is Main
   build-depends:
-      MonadRandom
-    , QuickCheck
-    , base >=4.10 && <5
-    , bytestring
-    , elliptic-curve >=0.3 && <0.4
-    , errors
-    , galois-field >=1 && <2
-    , groups
+      base                  >=4.10   && <5
+    , bytestring            >=0.10.8 && <0.11
+    , elliptic-curve        >=0.3    && <0.4
+    , errors                >=2.3.0  && <2.4
+    , galois-field          >=1.0    && <2.0
+    , groups                >=0.4.1  && <0.5
+    , MonadRandom           >=0.5.1  && <0.6
     , pairing
-    , protolude >=0.2 && <0.3
+    , protolude             >=0.2    && <0.3
+    , QuickCheck
     , quickcheck-instances
     , tasty
     , tasty-hunit
     , tasty-quickcheck
-  default-language: Haskell2010
+
+  default-language:   Haskell2010
 
 benchmark pairing-benchmarks
-  type: exitcode-stdio-1.0
-  main-is: Main.hs
+  type:               exitcode-stdio-1.0
+  main-is:            Main.hs
   other-modules:
-      Bench.Hash
-      Bench.Pairing
-      Paths_pairing
-  hs-source-dirs:
-      bench
-  default-extensions: LambdaCase RecordWildCards OverloadedStrings NoImplicitPrelude FlexibleInstances FlexibleContexts ScopedTypeVariables RankNTypes ConstraintKinds DataKinds DeriveGeneric GeneralizedNewtypeDeriving MultiParamTypeClasses OverloadedLists PatternSynonyms TypeFamilyDependencies
-  ghc-options: -freverse-errors -O2 -Wall -main-is Main
+    Bench.Hash
+    Bench.Pairing
+    Paths_pairing
+
+  hs-source-dirs:     bench
+  default-extensions:
+    NoImplicitPrelude
+    ConstraintKinds
+    DataKinds
+    DeriveGeneric
+    FlexibleContexts
+    FlexibleInstances
+    GeneralizedNewtypeDeriving
+    LambdaCase
+    MultiParamTypeClasses
+    OverloadedLists
+    OverloadedStrings
+    PatternSynonyms
+    RankNTypes
+    RecordWildCards
+    ScopedTypeVariables
+    TypeFamilyDependencies
+
+  ghc-options:        -freverse-errors -O2 -Wall -main-is Main
   build-depends:
-      MonadRandom
-    , base >=4.10 && <5
-    , bytestring
+      base              >=4.10   && <5
+    , bytestring        >=0.10.8 && <0.11
     , criterion
-    , elliptic-curve >=0.3 && <0.4
-    , errors
-    , galois-field >=1 && <2
-    , groups
+    , elliptic-curve    >=0.3    && <0.4
+    , errors            >=2.3.0  && <2.4
+    , galois-field      >=1.0    && <2.0
+    , groups            >=0.4.1  && <0.5
+    , MonadRandom       >=0.5.1  && <0.6
     , pairing
-    , protolude >=0.2 && <0.3
-    , tasty-quickcheck
-  default-language: Haskell2010
+    , protolude         >=0.2    && <0.3
+    , tasty-quickcheck  >=0.10.1 && <0.11
+
+  default-language:   Haskell2010
