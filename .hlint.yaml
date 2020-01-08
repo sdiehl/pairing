@@ -1,0 +1,4 @@
+- ignore: {name: Avoid lambda}
+- ignore: {name: Eta reduce}
+- ignore: {name: Use String}
+- ignore: {name: Redundant bracket}

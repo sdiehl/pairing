@@ -108,9 +108,9 @@ different parties must compute the same value under the bilinearity property.
 
 The reduced Tate pairing solves this undesirable property by exponentiating elements in <img src="/tex/82fe41333ac19f47e8ab380aef250c84.svg?invert_in_darkmode&sanitize=true" align=middle width=76.44519959999998pt height=24.65753399999998pt/> to the power of <img src="/tex/0582678783a97ba6dff05ad4614486ae.svg?invert_in_darkmode&sanitize=true" align=middle width=73.20403034999998pt height=27.91243950000002pt/>. It maps all elements in an equivalence class to the same value. It is defined as:
 
-<img src="/tex/18a9f2daec464974aa71a0bf68b65a69.svg?invert_in_darkmode&sanitize=true" align=middle width=326.1748875pt height=33.26775210000002pt/>.
+<p align="center"><img src="/tex/f35a3ddecd1dce2f2f71cf7dd515052f.svg?invert_in_darkmode&sanitize=true" align=middle width=326.17488749999995pt height=22.158967049999998pt/></p>
 
-When we say Tate pairing, we normally mean the reduced Tate pairing.
+When we say Tate pairing, we will mean the reduced Tate pairing.
 
 ## Pairing optimization
 
@@ -164,7 +164,7 @@ use this code in production until it has matured significantly.
 ## License
 
 ```
-Copyright (c) 2018-2019 Adjoint Inc.
+Copyright (c) 2018-2020 Adjoint Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
