@@ -18,7 +18,7 @@ license:            MIT
 license-file:       LICENSE
 build-type:         Simple
 extra-source-files:
-  README.md
+  README.notex.md
   ChangeLog.md
 
 source-repository head

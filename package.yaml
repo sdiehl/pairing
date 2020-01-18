@@ -37,7 +37,7 @@ dependencies:
   - tasty-quickcheck >= 0.10.1 && < 0.11
 
 extra-source-files:
-  - README.md
+  - README.notex.md
   - ChangeLog.md
 
 ghc-options:
