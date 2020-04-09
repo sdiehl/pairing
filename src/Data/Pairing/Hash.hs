@@ -38,14 +38,14 @@ swEncBLS12 = panic "swEncBLS12: not implemented."
 -- The implementation uses the Shallue-van de Woestijne encoding to BN curves
 -- as specified in Section 6 of [Indifferentiable Hashing to Barreto-Naehrig Curves]
 -- (https://www.di.ens.fr/~fouque/pub/latincrypt12.pdf).
--- 
+--
 -- This function evaluates an empty bytestring or one that contains \NUL
 -- to zero and is sent to an arbitrary point on the curve.
 swEncBN :: forall e m q r u v w . (MonadRandom m, ECPairing e q r u v w)
   => ByteString -> m (Maybe (G1 e))
 swEncBN bs = runMaybeT $ do
   sqrt3 <- hoistMaybe $ sr $ -3
-  let t  = fromBytes bs
+  let t  = fromInteger $ fromBytes bs
       s1 = (sqrt3 - 1) / 2
       b1 = 1 + b_ (witness :: G1 e)
   guard (b1 + t * t /= 0)
@@ -82,7 +82,7 @@ swEncBN bs = runMaybeT $ do
 -------------------------------------------------------------------------------
 
 -- Conversion from bytestring to field.
-fromBytes :: (Bits k, Num k) => ByteString -> k
+fromBytes :: ByteString -> Integer
 fromBytes = B.foldl' f 0
   where
     f a b = shiftL a 8 .|. fromIntegral b
