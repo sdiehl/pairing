@@ -1,7 +1,8 @@
 resolver: lts-14.16
 extra-deps:
   - elliptic-curve-0.3.0
-  - galois-field-1.0.0
-  - poly-0.3.2.0
-  - semirings-0.5.1
+  - galois-field-1.0.2
+  - poly-0.4.0.0
+  - semirings-0.5.3
   - vector-algorithms-0.8.0.3
+  - mod-0.1.1.0

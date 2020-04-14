@@ -1,5 +1,9 @@
 # Change log for pairing
 
+## 1.1.0
+
+* Bump bounds for galois-field and poly.
+
 ## 1.0.0
 
 * Refactor library structure from `Pairing.Pairing` to `Data.Pairing`.

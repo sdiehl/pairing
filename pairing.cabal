@@ -4,7 +4,7 @@ cabal-version:      1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: f0aed2a3cb698d9c2ebb29b6416000067931d46217501be35892c24a2ac3e56d
+-- hash: e3e44c2fec80fad5921b87cd94f86a40542d9bdc61796dea015144775b5ad058
 
 name:               pairing
 version:            1.0.0
@@ -64,7 +64,7 @@ library
     , bytestring        >=0.10.8 && <0.11
     , elliptic-curve    >=0.3    && <0.4
     , errors            >=2.3.0  && <2.4
-    , galois-field      >=1.0    && <2.0
+    , galois-field      >=1.0.2  && <2.0
     , groups            >=0.4.1  && <0.5
     , MonadRandom       >=0.5.1  && <0.6
     , protolude         >=0.2    && <0.3
@@ -100,7 +100,7 @@ test-suite example-tests
     , bytestring        >=0.10.8 && <0.11
     , elliptic-curve    >=0.3    && <0.4
     , errors            >=2.3.0  && <2.4
-    , galois-field      >=1.0    && <2.0
+    , galois-field      >=1.0.2  && <2.0
     , groups            >=0.4.1  && <0.5
     , MonadRandom       >=0.5.1  && <0.6
     , pairing
@@ -150,7 +150,7 @@ test-suite pairing-tests
     , bytestring            >=0.10.8 && <0.11
     , elliptic-curve        >=0.3    && <0.4
     , errors                >=2.3.0  && <2.4
-    , galois-field          >=1.0    && <2.0
+    , galois-field          >=1.0.2  && <2.0
     , groups                >=0.4.1  && <0.5
     , MonadRandom           >=0.5.1  && <0.6
     , pairing
@@ -197,7 +197,7 @@ benchmark pairing-benchmarks
     , criterion
     , elliptic-curve    >=0.3    && <0.4
     , errors            >=2.3.0  && <2.4
-    , galois-field      >=1.0    && <2.0
+    , galois-field      >=1.0.2  && <2.0
     , groups            >=0.4.1  && <0.5
     , MonadRandom       >=0.5.1  && <0.6
     , pairing
