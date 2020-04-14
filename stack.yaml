@@ -6,3 +6,5 @@ extra-deps:
   - semirings-0.5.3
   - vector-algorithms-0.8.0.3
   - mod-0.1.1.0
+  - bitvec-1.0.3.0
+  - QuickCheck-2.13.2
