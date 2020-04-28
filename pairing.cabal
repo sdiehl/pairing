@@ -4,7 +4,7 @@ cabal-version:      1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: f0737c857596bf304a755a35a010ab47b55eb69259a1c3a8519f7e28505f3fb8
+-- hash: 075b86ab510717df4b4541ad3c6652acc7d449010ebfe946f4f7c9d58205a186
 
 name:               pairing
 version:            1.1.0
@@ -18,7 +18,7 @@ license:            MIT
 license-file:       LICENSE
 build-type:         Simple
 extra-source-files:
-  README.notex.md
+  README_notex.md
   ChangeLog.md
 
 source-repository head
