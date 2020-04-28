@@ -11,7 +11,7 @@ module Data.Pairing.Ate
 import Protolude
 
 import Data.Curve.Weierstrass (Curve(..), Point(..))
-import Data.Field.Galois as F hiding (recip, (/))
+import Data.Field.Galois as F
 
 import Data.Pairing
 

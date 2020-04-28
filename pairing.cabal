@@ -4,10 +4,10 @@ cabal-version:      1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e3e44c2fec80fad5921b87cd94f86a40542d9bdc61796dea015144775b5ad058
+-- hash: f0737c857596bf304a755a35a010ab47b55eb69259a1c3a8519f7e28505f3fb8
 
 name:               pairing
-version:            1.0.0
+version:            1.1.0
 synopsis:           Bilinear pairings
 description:        Bilinear pairings over elliptic curves
 category:           Cryptography
