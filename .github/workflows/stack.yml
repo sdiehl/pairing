@@ -13,8 +13,9 @@ jobs:
       matrix:
         os: [ubuntu-latest, macOS-latest]
         plan:
-        - { build: stack, resolver: "lts-14"  }   # ghc-8.6.5
-        - { build: stack, resolver: "lts-15"  }   # ghc-8.8.2
+        - { build: stack, resolver: "lts-14"  }
+        - { build: stack, resolver: "lts-15"  }
+        - { build: stack, resolver: "lts-16"  }
         #- { build: stack, resolver: "nightly" }
         include: []
         exclude:

@@ -1,4 +1,4 @@
-resolver: lts-14.16
+resolver: lts-16.0
 extra-deps:
   - elliptic-curve-0.3.0
   - galois-field-1.0.2
