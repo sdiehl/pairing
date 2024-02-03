@@ -1,9 +1,3 @@
-<p align="center">
-<a href="https://www.adjoint.io">
-  <img width="250" src="./.assets/adjoint.png" alt="Adjoint Logo" />
-</a>
-</p>
-
 [![Hackage](https://img.shields.io/hackage/v/pairing.svg)](https://hackage.haskell.org/package/pairing)
 
 Implementation of the Barreto-Naehrig (BN) curve construction from
