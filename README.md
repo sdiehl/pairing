@@ -158,7 +158,7 @@ use this code in production until it has matured significantly.
 ## License
 
 ```
-Copyright (c) 2018-2020 Adjoint Inc.
+Copyright (c) 2018-2024 Stephen Diehl.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
